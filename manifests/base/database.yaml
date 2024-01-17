@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: reportsdb-pv
+spec:
+  capacity:
+    storage: 10Gi 
+  accessModes:
+  - ReadWriteOnce 
+  persistentVolumeReclaimPolicy: Retain 
+  gcePersistentDisk: 
+    pdName: reportsdb-disk
+    fsType: ext4 
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: reportsdb-pvc
+  namespace: kyverno
+spec:
+  accessModes:
+  - ReadWriteOnce 
+  resources:
+    requests:
+      storage: 10Gi 
+  storageClassName: "" 
+  volumeName: reportsdb-pv 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reportsdb 
+  namespace: kyverno
+  labels:
+    app: reportsdb
+spec:
+  selector:
+    app: reportsdb
+  ports:
+  - port: 5432 
+  # clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: reportsdb
+  namespace: kyverno
+spec:
+  serviceName: reportsdb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reportsdb
+  template:
+    metadata:
+      labels:
+        app: reportsdb
+    spec:
+      containers:
+      - name: reportsdb
+        image: postgres:13
+        env:
+          - name: POSTGRES_USER 
+            value: postgres
+          - name: POSTGRES_PASSWORD
+            value: password
+          - name: POSTGRES_DB
+            value: reportsdb
+            # valueFrom:
+            #   secretKeyRef:
+            #     name: postgres-secret
+            #     key: password
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+        ports:
+        - containerPort: 5432
+          name: reportsdb
+        volumeMounts:
+        - name: reportsdb-pv-claim
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: reportsdb-pv-claim
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
