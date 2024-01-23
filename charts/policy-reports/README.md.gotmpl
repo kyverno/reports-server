@@ -1,0 +1,31 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.badgesSection" . }}
+
+TODO
+
+## Installing the Chart
+
+Add `policy-reports` Helm repository:
+
+```shell
+helm repo add policy-reports https://kyverno.github.io/policy-reports/
+```
+
+Install `policy-reports` Helm chart:
+
+```shell
+helm install policy-reports --namespace policy-reports --create-namespace policy-reports/policy-reports
+```
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

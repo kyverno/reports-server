@@ -80,6 +80,27 @@ ko-build: $(KO) ## Build image (with ko)
 	@LDFLAGS=$(LD_FLAGS) KOCACHE=$(KO_CACHE) KO_DOCKER_REPO=$(KO_REGISTRY) \
 		$(KO) build . --preserve-import-paths --tags=$(KO_TAGS) --platform=$(LOCAL_PLATFORM)
 
+###########
+# CODEGEN #
+###########
+
+.PHONY: codegen-helm-docs
+codegen-helm-docs: ## Generate helm docs
+	@echo Generate helm docs... >&2
+	@docker run -v ${PWD}/charts:/work -w /work jnorwood/helm-docs:v1.11.0 -s file
+
+.PHONY: codegen
+codegen: ## Rebuild all generated code and docs
+codegen: codegen-helm-docs
+
+.PHONY: verify-codegen
+verify-codegen: codegen ## Verify all generated code and docs are up to date
+	@echo Checking codegen is up to date... >&2
+	@git --no-pager diff -- .
+	@echo 'If this test fails, it is because the git diff is non-empty after running "make codegen".' >&2
+	@echo 'To correct this, locally run "make codegen", commit the changes, and re-run tests.' >&2
+	@git diff --quiet --exit-code -- .
+
 ########
 # KIND #
 ########
