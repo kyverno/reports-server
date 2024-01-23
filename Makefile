@@ -334,3 +334,43 @@ test-version: test-image-all
 .PHONY: clean
 clean:
 	rm -rf $(OUTPUT_DIR)
+
+#########
+# TOOLS #
+#########
+
+TOOLS_DIR                          := $(PWD)/.tools
+KIND                               := $(TOOLS_DIR)/kind
+KIND_VERSION                       := v0.20.0
+TOOLS                              := $(KIND)
+
+$(KIND):
+	@echo Install kind... >&2
+	@GOBIN=$(TOOLS_DIR) go install sigs.k8s.io/kind@$(KIND_VERSION)
+
+.PHONY: install-tools
+install-tools: $(TOOLS) ## Install tools
+
+.PHONY: clean-tools
+clean-tools: ## Remove installed tools
+	@echo Clean tools... >&2
+	@rm -rf $(TOOLS_DIR)
+
+########
+# KIND #
+########
+
+KIND_IMAGE     ?= kindest/node:v1.28.0
+
+.PHONY: kind-cluster
+kind-cluster: $(KIND) ## Create kind cluster
+	@echo Create kind cluster... >&2
+	@$(KIND) create cluster --image $(KIND_IMAGE) --wait 1m
+
+########
+# HELP #
+########
+
+.PHONY: help
+help: ## Shows the available commands
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-40s\033[0m %s\n", $$1, $$2}'
