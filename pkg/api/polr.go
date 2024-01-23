@@ -128,7 +128,9 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 		if err != nil {
 			return &v1alpha2.PolicyReport{}, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
 		}
-		p.broadcaster.Action(watch.Added, obj)
+		if err := p.broadcaster.Action(watch.Added, obj); err != nil {
+			klog.ErrorS(err, "failed to broadcast event")
+		}
 	}
 
 	return obj, nil
@@ -142,8 +144,12 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		oldObj, _ := p.getPolr(name, namespace)
 		updatedObject, _ := objInfo.UpdatedObject(ctx, oldObj)
 		polr := updatedObject.(*v1alpha2.PolicyReport)
-		p.updatePolr(polr, true)
-		p.broadcaster.Action(watch.Added, updatedObject)
+		if err := p.updatePolr(polr, true); err != nil {
+			klog.ErrorS(err, "failed to update resource")
+		}
+		if err := p.broadcaster.Action(watch.Added, updatedObject); err != nil {
+			klog.ErrorS(err, "failed to broadcast event")
+		}
 		return updatedObject, true, nil
 	}
 
@@ -184,7 +190,9 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		if err != nil {
 			return &v1alpha2.PolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
 		}
-		p.broadcaster.Action(watch.Modified, updatedObject)
+		if err := p.broadcaster.Action(watch.Modified, updatedObject); err != nil {
+			klog.ErrorS(err, "failed to broadcast event")
+		}
 	}
 
 	return updatedObject, true, nil
@@ -212,7 +220,9 @@ func (p *polrStore) Delete(ctx context.Context, name string, deleteValidation re
 			klog.ErrorS(err, "failed to delete polr", "name", name, "namespace", klog.KRef("", namespace))
 			return &v1alpha2.PolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("failed to delete policyreport: %s", err.Error()))
 		}
-		p.broadcaster.Action(watch.Deleted, polr)
+		if err := p.broadcaster.Action(watch.Deleted, polr); err != nil {
+			klog.ErrorS(err, "failed to broadcast event")
+		}
 	}
 
 	return polr, true, nil // TODO: Add protobuf in wgpolicygroup
@@ -241,7 +251,9 @@ func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 				klog.ErrorS(err, "Failed to delete polr", "name", polr.GetName(), "namespace", klog.KRef("", namespace))
 				return &v1alpha2.PolicyReportList{}, errors.NewBadRequest(fmt.Sprintf("Failed to delete policy report: %s/%s", polr.Namespace, polr.GetName()))
 			}
-			p.broadcaster.Action(watch.Deleted, obj)
+			if err := p.broadcaster.Action(watch.Deleted, obj); err != nil {
+				klog.ErrorS(err, "failed to broadcast event")
+			}
 		}
 	}
 	return polrList, nil
