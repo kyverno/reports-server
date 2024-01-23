@@ -1,0 +1,123 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Release
+
+# permissions: {}
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  goreleaser:
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+      pull-requests: write
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
+      image: ${{ steps.digest.outputs.image }}
+      digest: ${{ steps.digest.outputs.digest }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: false
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+      - name: Fetch all tags
+        run: |
+          set -e
+          git fetch --force --tags
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@5ecf649a417b8ae17dc8383dc32d46c03f2312df # v0.15.1
+      - name: Install Ko
+        uses: ko-build/setup-ko@ace48d793556083a76f1e3e6068850c1f4a369aa # v0.6
+      - name: Run GoReleaser
+        id: goreleaser
+        uses: goreleaser/goreleaser-action@7ec5c2b0c6cdda6e8bbb49444bc797dd33d74dd8 # v5.0.0
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --timeout 90m
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload artifacts.json
+        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # 2.7.0
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/artifacts.json
+          asset_name: artifacts.json
+          tag: ${{ github.ref }}
+      - name: Upload metadata.json
+        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # 2.7.0
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/metadata.json
+          asset_name: metadata.json
+          tag: ${{ github.ref }}
+      - name: Generate subject
+        id: hash
+        env:
+          ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
+        run: |
+          set -euo pipefail
+          checksum_file=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Checksum") | .path')
+          hashes=$(cat $checksum_file | base64 -w0)
+          echo "hashes=$hashes" >> $GITHUB_OUTPUT
+      - name: Image digest
+        id: digest
+        env:
+          ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
+        run: |
+          set -euo pipefail
+          image_and_digest=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Docker Manifest") | .path')
+          image=$(echo "${image_and_digest}" | cut -d'@' -f1 | cut -d':' -f1)
+          digest=$(echo "${image_and_digest}" | cut -d'@' -f2)
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+  # provenance:
+  #   needs:
+  #     - goreleaser
+  #   permissions:
+  #     actions: read
+  #     id-token: write
+  #     contents: write
+  #   uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
+  #   with:
+  #     base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
+  #     upload-assets: true
+
+  # image-provenance:
+  #   needs:
+  #     - goreleaser
+  #   permissions:
+  #     actions: read
+  #     id-token: write
+  #     packages: write
+  #   uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.9.0
+  #   with:
+  #     image: ${{ needs.goreleaser.outputs.image }}
+  #     digest: ${{ needs.goreleaser.outputs.digest }}
+  #     registry-username: ${{ github.actor }}
+  #   secrets:
+  #     registry-password: ${{ secrets.GITHUB_TOKEN }}
