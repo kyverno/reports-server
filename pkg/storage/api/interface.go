@@ -11,6 +11,7 @@ type Storage interface {
 	PolicyReports() PolicyReportsInterface
 	ClusterPolicyReports() ClusterPolicyReportsInterface
 }
+
 type PolicyReportsInterface interface {
 	Get(ctx context.Context, name, namespace string) (v1alpha2.PolicyReport, error)
 	List(ctx context.Context, namespace string) ([]v1alpha2.PolicyReport, error)
