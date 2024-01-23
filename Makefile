@@ -11,6 +11,7 @@ GOOS                               ?= $(shell go env GOOS)
 GOARCH                             ?= $(shell go env GOARCH)
 REGISTRY                           ?= ghcr.io
 REPO                               ?= policy-reports
+BUILD_DATE                         := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
 #########
 # TOOLS #
@@ -49,13 +50,15 @@ clean-tools: ## Remove installed tools
 # BUILD #
 #########
 
-CGO_ENABLED    ?= 0
-LD_FLAGS       := "-s -w"
-LOCAL_PLATFORM := linux/$(GOARCH)
-KO_REGISTRY    := ko.local
-KO_TAGS        := $(GIT_SHA)
-KO_CACHE       ?= /tmp/ko-cache
-BIN            := policy-reports
+CGO_ENABLED     ?= 0
+CLIENT_GO_PKG   := k8s.io/client-go/pkg
+VERSION_LDFLAGS := -X $(CLIENT_GO_PKG)/version.gitVersion=$(GIT_TAG) -X $(CLIENT_GO_PKG)/version.gitCommit=$(GIT_SHA) -X $(CLIENT_GO_PKG)/version.buildDate=$(BUILD_DATE)
+LD_FLAGS        := -s -w $(VERSION_LDFLAGS)
+LOCAL_PLATFORM  := linux/$(GOARCH)
+KO_REGISTRY     := ko.local
+KO_TAGS         := $(GIT_SHA)
+KO_CACHE        ?= /tmp/ko-cache
+BIN             := policy-reports
 
 .PHONY: fmt
 fmt: ## Run go fmt
@@ -69,7 +72,7 @@ vet: ## Run go vet
 
 $(BIN): fmt vet
 	@echo Build cli binary... >&2
-	@CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) go build -o ./$(BIN) -ldflags=$(LD_FLAGS) .
+	@CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) go build -o ./$(BIN) -ldflags="$(LD_FLAGS)" .
 
 .PHONY: build
 build: $(BIN) ## Build
@@ -77,12 +80,98 @@ build: $(BIN) ## Build
 .PHONY: ko-build
 ko-build: $(KO) ## Build image (with ko)
 	@echo Build image with ko... >&2
-	@LDFLAGS=$(LD_FLAGS) KOCACHE=$(KO_CACHE) KO_DOCKER_REPO=$(KO_REGISTRY) \
+	@LDFLAGS="$(LD_FLAGS)" KOCACHE=$(KO_CACHE) KO_DOCKER_REPO=$(KO_REGISTRY) \
 		$(KO) build . --preserve-import-paths --tags=$(KO_TAGS) --platform=$(LOCAL_PLATFORM)
+
+#########
+# TEMPO #
+#########
+
+.PHONY: verify
+verify: verify-licenses
+# verify: verify-lint
+# verify: verify-toc
+# verify: verify-deps
+# verify: verify-scripts-deps
+# verify: verify-generated
+# verify: verify-structured-logging
+
+.PHONY: update
+update: update-licenses
+# update: update-lint
+# update: update-toc
+# update: update-deps
+# update: update-generated
+
+.PHONY: verify-structured-logging
+verify-structured-logging: logcheck
+	$(TOOLS_DIR)/logcheck ./... || (echo 'Fix structured logging' && exit 1)
+
+HAS_LOGCHECK := $(shell command -v logcheck)
+
+.PHONY: logcheck
+logcheck:
+ifndef HAS_LOGCHECK
+	@GOBIN=$(TOOLS_DIR) go install -mod=readonly -modfile=scripts/go.mod sigs.k8s.io/logtools/logcheck
+endif
+
+.PHONY: update-deps
+update-deps:
+	go mod tidy
+	cd scripts && go mod tidy
+
+.PHONY: verify-deps
+verify-deps:
+	go mod verify
+	go mod tidy
+	@git diff --exit-code -- go.mod go.sum
+
+.PHONY: verify-scripts-deps
+verify-scripts-deps:
+	make -C scripts -f ../Makefile verify-deps
+
+############
+# LICENSES #
+############
+
+HAS_ADDLICENSE := $(shell command -v addlicense)
+
+.PHONY: verify-licenses
+verify-licenses: addlicense
+	find -type f -name "*.go" ! -path "*/vendor/*" | xargs $(GOPATH)/bin/addlicense -check || (echo 'Run "make update"' && exit 1)
+
+.PHONY: update-licenses
+update-licenses: addlicense
+	find -type f -name "*.go" ! -path "*/vendor/*" | xargs $(GOPATH)/bin/addlicense -c "The Kubernetes Authors."
+
+.PHONY: addlicense
+addlicense:
+ifndef HAS_ADDLICENSE
+	go install -mod=readonly -modfile=scripts/go.mod github.com/google/addlicense
+endif
 
 ###########
 # CODEGEN #
 ###########
+
+REPO_DIR        := $(shell pwd)
+generated_files  = pkg/api/generated/openapi/zz_generated.openapi.go
+
+.PHONY: verify-generated
+verify-generated: update-generated
+	@git diff --exit-code -- $(generated_files)
+
+.PHONY: update-generated
+update-generated:
+	# pkg/api/generated/openapi/zz_generated.openapi.go
+	@GOBIN=$(TOOLS_DIR) go install -mod=readonly -modfile=scripts/go.mod k8s.io/kube-openapi/cmd/openapi-gen
+	$(TOOLS_DIR)/openapi-gen \
+		-i sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2,k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/version,k8s.io/api/core/v1.ObjectReference \
+		-p pkg/api/generated/openapi \
+		-O zz_generated.openapi \
+		-o $(REPO_DIR) \
+		-h $(REPO_DIR)/scripts/boilerplate.go.txt \
+		-r /dev/null
 
 .PHONY: codegen-helm-docs
 codegen-helm-docs: ## Generate helm docs
