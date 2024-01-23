@@ -18,16 +18,14 @@ import (
 	"k8s.io/component-base/metrics"
 )
 
-var (
-	pointsStored = metrics.NewGaugeVec(
-		&metrics.GaugeOpts{
-			Namespace: "reports_server",
-			Subsystem: "storage",
-			Name:      "policy_reports_database",
-			Help:      "Database of policy reports",
-		},
-		[]string{"type"},
-	)
+var pointsStored = metrics.NewGaugeVec(
+	&metrics.GaugeOpts{
+		Namespace: "reports_server",
+		Subsystem: "storage",
+		Name:      "policy_reports_database",
+		Help:      "Database of policy reports",
+	},
+	[]string{"type"},
 )
 
 // RegisterStorageMetrics registers a gauge metric for the number of metrics

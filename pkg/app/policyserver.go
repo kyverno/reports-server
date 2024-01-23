@@ -54,23 +54,17 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 		fmt.Println(version.Get().GitVersion)
 		os.Exit(0)
 	}
-
 	errors := o.Validate()
 	if len(errors) > 0 {
 		return errors[0]
 	}
-
 	config, err := o.ServerConfig()
-
 	if err != nil {
 		return err
 	}
-
 	s, err := config.Complete()
-
 	if err != nil {
 		return err
 	}
-
 	return s.RunUntil(stopCh)
 }
