@@ -12,11 +12,9 @@ import (
 func main() {
 	logs.InitLogs()
 	defer logs.FlushLogs()
-
 	if len(os.Getenv("GOMAXPROCS")) == 0 {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
-
 	cmd := app.NewPolicyServer(genericapiserver.SetupSignalHandler())
 	if err := cmd.Execute(); err != nil {
 		panic(err)

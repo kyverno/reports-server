@@ -116,11 +116,12 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 	}
 
 	if !isDryRun {
-		err := c.createCpolr(cpolr)
-		if err != nil {
+		if err := c.createCpolr(cpolr); err != nil {
 			return &v1alpha2.ClusterPolicyReport{}, errors.NewBadRequest(fmt.Sprintf("cannot create cluster policy report: %s", err.Error()))
 		}
-		c.broadcaster.Action(watch.Added, obj)
+		if err := c.broadcaster.Action(watch.Added, obj); err != nil {
+			klog.ErrorS(err, "failed to broadcast event")
+		}
 	}
 
 	return obj, nil
@@ -133,8 +134,12 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		oldObj, _ := c.getCpolr(name)
 		updatedObject, _ := objInfo.UpdatedObject(ctx, oldObj)
 		cpolr := updatedObject.(*v1alpha2.ClusterPolicyReport)
-		c.updatePolr(cpolr, true)
-		c.broadcaster.Action(watch.Added, updatedObject)
+		if err := c.updatePolr(cpolr, true); err != nil {
+			klog.ErrorS(err, "failed to update resource")
+		}
+		if err := c.broadcaster.Action(watch.Added, updatedObject); err != nil {
+			klog.ErrorS(err, "failed to broadcast event")
+		}
 		return updatedObject, true, nil
 	}
 
@@ -167,11 +172,12 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 	}
 
 	if !isDryRun {
-		err := c.createCpolr(cpolr)
-		if err != nil {
+		if err := c.createCpolr(cpolr); err != nil {
 			return &v1alpha2.ClusterPolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("cannot create cluster policy report: %s", err.Error()))
 		}
-		c.broadcaster.Action(watch.Modified, updatedObject)
+		if err := c.broadcaster.Action(watch.Modified, updatedObject); err != nil {
+			klog.ErrorS(err, "failed to broadcast event")
+		}
 	}
 
 	return updatedObject, true, nil
@@ -193,12 +199,13 @@ func (c *cpolrStore) Delete(ctx context.Context, name string, deleteValidation r
 	}
 
 	if !isDryRun {
-		err = c.deletePolr(cpolr)
-		if err != nil {
+		if err = c.deletePolr(cpolr); err != nil {
 			klog.ErrorS(err, "failed to delete cpolr", "name", name)
 			return &v1alpha2.ClusterPolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("failed to delete clusterpolicyreport: %s", err.Error()))
 		}
-		c.broadcaster.Action(watch.Deleted, cpolr)
+		if err := c.broadcaster.Action(watch.Deleted, cpolr); err != nil {
+			klog.ErrorS(err, "failed to broadcast event")
+		}
 	}
 
 	return cpolr, true, nil // TODO: Add protobuf in wgpolicygroup
@@ -226,7 +233,9 @@ func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 				klog.ErrorS(err, "Failed to delete cpolr", "name", cpolr.GetName())
 				return &v1alpha2.ClusterPolicyReportList{}, errors.NewBadRequest(fmt.Sprintf("Failed to delete cluster policy report: %s", cpolr.GetName()))
 			}
-			c.broadcaster.Action(watch.Deleted, obj)
+			if err := c.broadcaster.Action(watch.Deleted, obj); err != nil {
+				klog.ErrorS(err, "failed to broadcast event")
+			}
 		}
 	}
 	return cpolrList, nil
