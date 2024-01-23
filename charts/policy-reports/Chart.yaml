@@ -1,0 +1,21 @@
+apiVersion: v2
+name: policy-reports
+type: application
+version: 0.0.1
+appVersion: v0.0.1
+keywords:
+  - kubernetes
+  - policy reports storage
+  - postgresql
+sources:
+  - https://github.com/kyverno/policy-reports
+maintainers:
+  - name: Nirmata
+    url: https://kyverno.io/
+    email: cncf-kyverno-maintainers@lists.cncf.io
+kubeVersion: ">=1.16.0-0"
+dependencies:
+- condition: postgresql.enabled
+  name: postgresql
+  version: 13.4.1
+  repository: oci://registry-1.docker.io/bitnamicharts
