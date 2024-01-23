@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kyverno/policy-reports/cmd/app/opts"
+	"github.com/kyverno/policy-reports/pkg/app/opts"
 	"github.com/spf13/cobra"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/logs"
@@ -54,23 +54,17 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 		fmt.Println(version.Get().GitVersion)
 		os.Exit(0)
 	}
-
 	errors := o.Validate()
 	if len(errors) > 0 {
 		return errors[0]
 	}
-
 	config, err := o.ServerConfig()
-
 	if err != nil {
 		return err
 	}
-
 	s, err := config.Complete()
-
 	if err != nil {
 		return err
 	}
-
 	return s.RunUntil(stopCh)
 }

@@ -5,11 +5,10 @@ import (
 	"net/http"
 
 	"github.com/kyverno/policy-reports/pkg/storage"
-	"k8s.io/component-base/metrics"
-	"k8s.io/klog/v2"
-
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/apiserver/pkg/server/healthz"
+	"k8s.io/component-base/metrics"
+	"k8s.io/klog/v2"
 )
 
 func RegisterServerMetrics(registrationFunc func(metrics.Registerable) error) error {
