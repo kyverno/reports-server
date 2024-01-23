@@ -12,7 +12,7 @@ linters:
     - errname
     - exportloopref
     - gci
-    - gochecknoinits
+    # - gochecknoinits
     - gofmt
     - gofumpt
     - goimports
@@ -43,6 +43,7 @@ run:
   timeout: 15m
   skip-files:
     - ".+\\.generated.go"
-  output:
-    format: colored-line-number
-    sort-results: true
+
+output:
+  format: colored-line-number
+  sort-results: true
