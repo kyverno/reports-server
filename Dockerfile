@@ -14,7 +14,7 @@ COPY . ./
 # ARG ARCH
 # ARG GIT_COMMIT
 # ARG GIT_TAG
-RUN GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-w -s" -o policy-reports ./cmd/main.go
+RUN GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-w -s" -o policy-reports ./main.go
 
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
