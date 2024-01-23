@@ -4,7 +4,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/kyverno/policy-reports/cmd/app"
+	"github.com/kyverno/policy-reports/pkg/app"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/component-base/logs"
 )
