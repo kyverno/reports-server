@@ -13,8 +13,8 @@ builds:
     binary: policy-reports
     flags:
       - -trimpath
-    # ldflags:
-    #   - -s -w -X github.com/kyverno/policy-reports/pkg/version.BuildVersion={{ .Version }}
+    ldflags:
+      - -s -w
 
 kos:
   - build: policy-reports

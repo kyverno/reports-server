@@ -1,0 +1,35 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+metadata:
+  name: {{ include "policy-reports.fullname" . }}
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: 'true'
+    rbac.authorization.k8s.io/aggregate-to-edit: 'true'
+    rbac.authorization.k8s.io/aggregate-to-view: 'true'
+    {{- include "policy-reports.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - wgpolicyk8s.io
+  resources:
+  - policyreports
+  - clusterpolicyreports
+  verbs:
+  - get
+  - list
+  - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "policy-reports.fullname" . }}
+  labels:
+    {{- include "policy-reports.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "policy-reports.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "policy-reports.serviceAccountName" $ }}
+  namespace: {{ $.Release.Namespace }}

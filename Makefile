@@ -1,339 +1,16 @@
-# Common User-Settable Flags
-# --------------------------
-REGISTRY?=ghcr.io/vishal-chdhry/policy-reports
-ARCH?=a64
-OS?=linux
-BINARY_NAME?=policy-reports-$(OS)-$(ARCH)
-
-ifeq ($(OS),windows)
-BINARY_NAME:=$(BINARY_NAME).exe
-endif
-
-OUTPUT_DIR?=_output
-
-# Release variables
-# ------------------
-GIT_COMMIT?=$(shell git rev-parse "HEAD^{commit}" 2>/dev/null)
-GIT_TAG?=$(shell git describe --abbrev=0 --tags 2>/dev/null)
-BUILD_DATE:=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
-
-# Consts
-# ------
-ALL_ARCHITECTURES=amd64 arm arm64 ppc64le s390x
-export DOCKER_CLI_EXPERIMENTAL=enabled
-
-ALL_BINARIES_PLATFORMS= $(addprefix linux/,$(ALL_ARCHITECTURES)) \
-						darwin/amd64 \
-						darwin/arm64 \
-						windows/amd64 \
-						windows/arm64
-
-# Tools versions
-# --------------
-GOLANGCI_VERSION:=1.55.2
-
-# Computed variables
-# ------------------
-GOPATH:=$(shell go env GOPATH)
-REPO_DIR:=$(shell pwd)
-
-.PHONY: all
-all: policy-reports
-
-# Build Rules
-# -----------
-
-SRC_DEPS=$(shell find pkg cmd -type f -name "*.go") go.mod go.sum
-CHECKSUM=$(shell md5sum $(SRC_DEPS) | md5sum | awk '{print $$1}')
-PKG:=k8s.io/client-go/pkg
-VERSION_LDFLAGS:=-X $(PKG)/version.gitVersion=$(GIT_TAG) -X $(PKG)/version.gitCommit=$(GIT_COMMIT) -X $(PKG)/version.buildDate=$(BUILD_DATE)
-LDFLAGS:=-w $(VERSION_LDFLAGS)
-
-policy-reports:
-	OUTPUT_DIR=. BINARY_NAME=$@ $(MAKE) build
-
-.PHONY: build
-build: $(SRC_DEPS)
-	@mkdir -p $(OUTPUT_DIR)
-	GOARCH=$(ARCH) GOOS=$(OS) CGO_ENABLED=0 go build -mod=readonly -trimpath -ldflags "$(LDFLAGS)" -o "$(OUTPUT_DIR)/$(BINARY_NAME)" .
-
-.PHONY: build-all
-build-all:
-	@for platform in $(ALL_BINARIES_PLATFORMS); do \
-		OS="$${platform%/*}" ARCH="$${platform#*/}" $(MAKE) build; \
-	done
-
-# Image Rules
-# -----------
-
-CONTAINER_ARCH_TARGETS=$(addprefix container-,$(ALL_ARCHITECTURES))
-
-.PHONY: container
-container:
-	# Pull base image explicitly. Keep in sync with Dockerfile, otherwise
-	# GCB builds will start failing.
-	docker pull golang:1.21.4
-	docker build -t $(REGISTRY)/policy-reports-$(ARCH):$(CHECKSUM) --build-arg ARCH=$(ARCH) --build-arg GIT_TAG=$(GIT_TAG) --build-arg GIT_COMMIT=$(GIT_COMMIT) .
-
-.PHONY: container-all
-container-all: $(CONTAINER_ARCH_TARGETS);
-
-.PHONY: $(CONTAINER_ARCH_TARGETS)
-$(CONTAINER_ARCH_TARGETS): container-%:
-	ARCH=$* $(MAKE) container
-
-# Official Container Push Rules
-# -----------------------------
-
-PUSH_ARCH_TARGETS=$(addprefix push-,$(ALL_ARCHITECTURES))
-
-.PHONY: push
-push: container
-	docker tag $(REGISTRY)/policy-reports-$(ARCH):$(CHECKSUM) $(REGISTRY)/policy-reports-$(ARCH):$(GIT_TAG)
-	docker push $(REGISTRY)/policy-reports-$(ARCH):$(GIT_TAG)
-
-.PHONY: push-all
-push-all: $(PUSH_ARCH_TARGETS) push-multi-arch;
-
-.PHONY: $(PUSH_ARCH_TARGETS)
-$(PUSH_ARCH_TARGETS): push-%:
-	ARCH=$* $(MAKE) push
-
-.PHONY: push-multi-arch
-push-multi-arch:
-	docker manifest create --amend $(REGISTRY)/policy-reports:$(GIT_TAG) $(shell echo $(ALL_ARCHITECTURES) | sed -e "s~[^ ]*~$(REGISTRY)/policy-reports\-&:$(GIT_TAG)~g")
-	@for arch in $(ALL_ARCHITECTURES); do docker manifest annotate --arch $${arch} $(REGISTRY)/policy-reports:$(GIT_TAG) $(REGISTRY)/policy-reports-$${arch}:${GIT_TAG}; done
-	docker manifest push --purge $(REGISTRY)/policy-reports:$(GIT_TAG)
-
-# Release rules
-# -------------
-
-.PHONY: release-tag
-release-tag:
-	git tag $(GIT_TAG)
-	git push origin $(GIT_TAG)
-
-.PHONY: release-manifests
-release-manifests:
-	mkdir -p $(OUTPUT_DIR)
-	kubectl kustomize manifests/overlays/release > $(OUTPUT_DIR)/components.yaml
-	kubectl kustomize manifests/overlays/release-ha > $(OUTPUT_DIR)/high-availability.yaml
-	kubectl kustomize manifests/overlays/release-ha-1.21+ > $(OUTPUT_DIR)/high-availability-1.21+.yaml
-
-
-# fuzz tests
-# ----------
-
-.PHONY: test-fuzz
-test-fuzz:
-	GO111MODULE=on GOARCH=$(ARCH) go test --test.short -race -fuzz=Fuzz_decodeBatchPrometheusFormat -fuzztime 900s -timeout 10s ./pkg/scraper/client/resource/
-	GO111MODULE=on GOARCH=$(ARCH) go test --test.short -race -fuzz=Fuzz_decodeBatchRandom -fuzztime 900s -timeout 10s ./pkg/scraper/client/resource/
-# Unit tests
-# ----------
-.PHONY: test-unit
-test-unit:
-	GO111MODULE=on GOARCH=$(ARCH) go test --test.short -race ./pkg/... ./cmd/...
-
-# Benchmarks
-# ----------
-
-HAS_BENCH_STORAGE=$(wildcard ./$(OUTPUT_DIR)/bench_storage.txt)
-
-.PHONY: bench-storage
-bench-storage: benchstat
-	@mkdir -p $(OUTPUT_DIR)
-ifneq ("$(HAS_BENCH_STORAGE)","")
-	@mv $(OUTPUT_DIR)/bench_storage.txt $(OUTPUT_DIR)/bench_storage.old.txt
-endif
-	@go test ./pkg/storage/ -bench=. -run=^$ -benchmem -count 5 -timeout 1h | tee $(OUTPUT_DIR)/bench_storage.txt
-ifeq ("$(HAS_BENCH_STORAGE)","")
-	@cp $(OUTPUT_DIR)/bench_storage.txt $(OUTPUT_DIR)/bench_storage.old.txt
-endif
-	@echo
-	@echo 'Comparing versus previous run. When optimizing copy everything below this line and include in PR description.'
-	@echo
-	@benchstat $(OUTPUT_DIR)/bench_storage.old.txt $(OUTPUT_DIR)/bench_storage.txt
-
-HAS_BENCHSTAT:=$(shell command -v benchstat)
-.PHONY: benchstat
-benchstat:
-ifndef HAS_BENCHSTAT
-	@go install -mod=readonly -modfile=scripts/go.mod golang.org/x/perf/cmd/benchstat
-endif
-
-# Image tests
-# ------------
-
-.PHONY: test-image
-test-image: container
-	IMAGE=$(REGISTRY)/policy-reports-$(ARCH):$(CHECKSUM) EXPECTED_ARCH=$(ARCH) EXPECTED_VERSION=$(GIT_TAG) ./test/test-image.sh
-
-.PHONY: test-image-all
-test-image-all:
-	@for arch in $(ALL_ARCHITECTURES); do ARCH=$${arch} $(MAKE) test-image; done
-
-# E2e tests
-# -----------
-
-.PHONY: test-e2e
-test-e2e: test-e2e-1.28
-
-.PHONY: test-e2e-all
-test-e2e-all: test-e2e-1.28 test-e2e-1.27 test-e2e-1.26
-
-.PHONY: test-e2e-1.28
-test-e2e-1.28:
-	NODE_IMAGE=kindest/node:v1.28.0@sha256:b7a4cad12c197af3ba43202d3efe03246b3f0793f162afb40a33c923952d5b31 KIND_CONFIG="${PWD}/test/kind-config-with-sidecar-containers.yaml" ./test/test-e2e.sh
-
-.PHONY: test-e2e-1.27
-test-e2e-1.27:
-	NODE_IMAGE=kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72 ./test/test-e2e.sh
-
-.PHONY: test-e2e-1.26
-test-e2e-1.26:
-	NODE_IMAGE=kindest/node:v1.26.6@sha256:6e2d8b28a5b601defe327b98bd1c2d1930b49e5d8c512e1895099e4504007adb ./test/test-e2e.sh
-
-.PHONY: test-e2e-ha
-test-e2e-ha:
-	SKAFFOLD_PROFILE="test-ha" $(MAKE) test-e2e
-
-.PHONY: test-e2e-ha-all
-test-e2e-ha-all:
-	SKAFFOLD_PROFILE="test-ha" $(MAKE) test-e2e-all
-
-.PHONY: test-e2e-helm
-test-e2e-helm:
-	SKAFFOLD_PROFILE="helm" $(MAKE) test-e2e
-
-.PHONY: test-e2e-helm-all
-test-e2e-helm-all:
-	SKAFFOLD_PROFILE="helm" $(MAKE) test-e2e-all
-
-# Static analysis
-# ---------------
-
-.PHONY: verify
-verify: verify-licenses verify-lint verify-toc verify-deps verify-scripts-deps verify-generated verify-structured-logging
-
-.PHONY: update
-update: update-licenses update-lint update-toc update-deps update-generated
-
-# License
-# -------
-
-HAS_ADDLICENSE:=$(shell command -v addlicense)
-.PHONY: verify-licenses
-verify-licenses:addlicense
-	find -type f -name "*.go" ! -path "*/vendor/*" | xargs $(GOPATH)/bin/addlicense -check || (echo 'Run "make update"' && exit 1)
-
-.PHONY: update-licenses
-update-licenses: addlicense
-	find -type f -name "*.go" ! -path "*/vendor/*" | xargs $(GOPATH)/bin/addlicense -c "The Kubernetes Authors."
-
-.PHONY: addlicense
-addlicense:
-ifndef HAS_ADDLICENSE
-	go install -mod=readonly -modfile=scripts/go.mod github.com/google/addlicense
-endif
-
-# Lint
-# ----
-
-.PHONY: verify-lint
-verify-lint: golangci
-	$(GOPATH)/bin/golangci-lint run --timeout 10m || (echo 'Run "make update"' && exit 1)
-
-.PHONY: update-lint
-update-lint: golangci
-	$(GOPATH)/bin/golangci-lint run --fix
-
-HAS_GOLANGCI_VERSION:=$(shell $(GOPATH)/bin/golangci-lint version --format=short > /dev/null 2>&1)
-.PHONY: golangci
-golangci:
-ifneq ($(HAS_GOLANGCI_VERSION), $(GOLANGCI_VERSION))
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v$(GOLANGCI_VERSION)
-endif
-
-# Table of Contents
-# -----------------
-
-docs_with_toc=FAQ.md KNOWN_ISSUES.md
-
-.PHONY: verify-toc
-verify-toc: mdtoc $(docs_with_toc)
-	$(GOPATH)/bin/mdtoc --inplace --dryrun $(docs_with_toc)
-
-.PHONY: update-toc
-update-toc: mdtoc $(docs_with_toc)
-	$(GOPATH)/bin/mdtoc --inplace $(docs_with_toc)
-
-HAS_MDTOC:=$(shell command -v mdtoc)
-.PHONY: mdtoc
-mdtoc:
-ifndef HAS_MDTOC
-	go install -mod=readonly -modfile=scripts/go.mod sigs.k8s.io/mdtoc
-endif
-
-# Structured Logging
-# -----------------
-
-.PHONY: verify-structured-logging
-verify-structured-logging: logcheck
-	$(GOPATH)/bin/logcheck ./... || (echo 'Fix structured logging' && exit 1)
-
-HAS_LOGCHECK:=$(shell command -v logcheck)
-.PHONY: logcheck
-logcheck:
-ifndef HAS_LOGCHECK
-	go install -mod=readonly -modfile=scripts/go.mod sigs.k8s.io/logtools/logcheck
-endif
-
-# Dependencies
-# ------------
-
-.PHONY: update-deps
-update-deps:
-	go mod tidy
-	cd scripts && go mod tidy
-
-.PHONY: verify-deps
-verify-deps:
-	go mod verify
-	go mod tidy
-	@git diff --exit-code -- go.mod go.sum
-
-.PHONY: verify-scripts-deps
-verify-scripts-deps:
-	make -C scripts -f ../Makefile verify-deps
-
-# Generated
-# ---------
-
-generated_files=pkg/api/generated/openapi/zz_generated.openapi.go
-
-.PHONY: verify-generated
-verify-generated: update-generated
-	@git diff --exit-code -- $(generated_files)
-
-.PHONY: update-generated
-update-generated:
-	# pkg/api/generated/openapi/zz_generated.openapi.go
-	go install -mod=readonly -modfile=scripts/go.mod k8s.io/kube-openapi/cmd/openapi-gen
-	$(GOPATH)/bin/openapi-gen -i sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2,k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/version,k8s.io/api/core/v1.ObjectReference -p pkg/api/generated/openapi/ -O zz_generated.openapi -o $(REPO_DIR) -h $(REPO_DIR)/scripts/boilerplate.go.txt -r /dev/null
-
-# Deprecated
-# ----------
-
-# Remove when CI is migrated
-lint: verify
-test-version: test-image-all
-
-# Clean
-# -----
-
-.PHONY: clean
-clean:
-	rm -rf $(OUTPUT_DIR)
+.DEFAULT_GOAL := build
+
+##########
+# CONFIG #
+##########
+
+ORG                                ?= kyverno
+PACKAGE                            ?= github.com/$(ORG)/policy-reports
+GIT_SHA                            := $(shell git rev-parse HEAD)
+GOOS                               ?= $(shell go env GOOS)
+GOARCH                             ?= $(shell go env GOARCH)
+REGISTRY                           ?= ghcr.io
+REPO                               ?= policy-reports
 
 #########
 # TOOLS #
@@ -342,11 +19,23 @@ clean:
 TOOLS_DIR                          := $(PWD)/.tools
 KIND                               := $(TOOLS_DIR)/kind
 KIND_VERSION                       := v0.20.0
-TOOLS                              := $(KIND)
+KO                                 := $(TOOLS_DIR)/ko
+KO_VERSION                         := v0.14.1
+HELM                               := $(TOOLS_DIR)/helm
+HELM_VERSION                       := v3.10.1
+TOOLS                              := $(KIND) $(KO) $(HELM)
 
 $(KIND):
 	@echo Install kind... >&2
 	@GOBIN=$(TOOLS_DIR) go install sigs.k8s.io/kind@$(KIND_VERSION)
+
+$(KO):
+	@echo Install ko... >&2
+	@GOBIN=$(TOOLS_DIR) go install github.com/google/ko@$(KO_VERSION)
+
+$(HELM):
+	@echo Install helm... >&2
+	@GOBIN=$(TOOLS_DIR) go install helm.sh/helm/v3/cmd/helm@$(HELM_VERSION)
 
 .PHONY: install-tools
 install-tools: $(TOOLS) ## Install tools
@@ -356,16 +45,70 @@ clean-tools: ## Remove installed tools
 	@echo Clean tools... >&2
 	@rm -rf $(TOOLS_DIR)
 
+#########
+# BUILD #
+#########
+
+CGO_ENABLED    ?= 0
+LD_FLAGS       := "-s -w"
+LOCAL_PLATFORM := linux/$(GOARCH)
+KO_REGISTRY    := ko.local
+KO_TAGS        := $(GIT_SHA)
+KO_CACHE       ?= /tmp/ko-cache
+BIN            := policy-reports
+
+.PHONY: fmt
+fmt: ## Run go fmt
+	@echo Go fmt... >&2
+	@go fmt ./...
+
+.PHONY: vet
+vet: ## Run go vet
+	@echo Go vet... >&2
+	@go vet ./...
+
+$(BIN): fmt vet
+	@echo Build cli binary... >&2
+	@CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) go build -o ./$(BIN) -ldflags=$(LD_FLAGS) .
+
+.PHONY: build
+build: $(BIN) ## Build
+
+.PHONY: ko-build
+ko-build: $(KO) ## Build image (with ko)
+	@echo Build image with ko... >&2
+	@LDFLAGS=$(LD_FLAGS) KOCACHE=$(KO_CACHE) KO_DOCKER_REPO=$(KO_REGISTRY) \
+		$(KO) build . --preserve-import-paths --tags=$(KO_TAGS) --platform=$(LOCAL_PLATFORM)
+
 ########
 # KIND #
 ########
 
 KIND_IMAGE     ?= kindest/node:v1.28.0
+KIND_NAME      ?= kind
 
-.PHONY: kind-cluster
-kind-cluster: $(KIND) ## Create kind cluster
+.PHONY: kind-create
+kind-create: $(KIND) ## Create kind cluster
 	@echo Create kind cluster... >&2
-	@$(KIND) create cluster --image $(KIND_IMAGE) --wait 1m
+	@$(KIND) create cluster --name $(KIND_NAME) --image $(KIND_IMAGE) --wait 1m
+
+.PHONY: kind-delete
+kind-delete: $(KIND) ## Delete kind cluster
+	@echo Delete kind cluster... >&2
+	@$(KIND) delete cluster --name $(KIND_NAME)
+
+.PHONY: kind-load
+kind-load: $(KIND) ko-build ## Build image and load in kind cluster
+	@echo Load image... >&2
+	@$(KIND) load docker-image --name $(KIND_NAME) $(KO_REGISTRY)/$(PACKAGE):$(GIT_SHA)
+
+.PHONY: kind-install
+kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
+	@echo Install chart... >&2
+	@$(HELM) upgrade --install policy-reports --namespace policy-reports --create-namespace --wait ./charts/policy-reports \
+		--set image.registry=$(KO_REGISTRY) \
+		--set image.repository=$(PACKAGE) \
+		--set image.tag=$(GIT_SHA)
 
 ########
 # HELP #
