@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: gomod
-    directory: /scripts
+    directory: /tools
     schedule:
       interval: daily
   - package-ecosystem: github-actions
