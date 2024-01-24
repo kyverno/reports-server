@@ -17,13 +17,24 @@ REPO                               ?= policy-reports
 #########
 
 TOOLS_DIR                          := $(PWD)/.tools
+REGISTER_GEN                       := $(TOOLS_DIR)/register-gen
+OPENAPI_GEN                        := $(TOOLS_DIR)/openapi-gen
+CODE_GEN_VERSION                   := v0.28.0
 KIND                               := $(TOOLS_DIR)/kind
 KIND_VERSION                       := v0.20.0
 KO                                 := $(TOOLS_DIR)/ko
 KO_VERSION                         := v0.14.1
 HELM                               := $(TOOLS_DIR)/helm
 HELM_VERSION                       := v3.10.1
-TOOLS                              := $(KIND) $(KO) $(HELM)
+TOOLS                              := $(REGISTER_GEN) $(OPENAPI_GEN) $(KIND) $(KO) $(HELM)
+
+$(REGISTER_GEN):
+	@echo Install register-gen... >&2
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/register-gen@$(CODE_GEN_VERSION)
+
+$(OPENAPI_GEN):
+	@echo Install openapi-gen... >&2
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/openapi-gen@$(CODE_GEN_VERSION)
 
 $(KIND):
 	@echo Install kind... >&2
@@ -84,6 +95,33 @@ ko-build: $(KO) ## Build image (with ko)
 # CODEGEN #
 ###########
 
+GOPATH_SHIM     := ${PWD}/.gopath
+PACKAGE_SHIM    := $(GOPATH_SHIM)/src/$(PACKAGE)
+
+$(GOPATH_SHIM):
+	@echo Create gopath shim... >&2
+	@mkdir -p $(GOPATH_SHIM)
+
+.INTERMEDIATE: $(PACKAGE_SHIM)
+$(PACKAGE_SHIM): $(GOPATH_SHIM)
+	@echo Create package shim... >&2
+	@mkdir -p $(GOPATH_SHIM)/src/github.com/$(ORG) && ln -s -f ${PWD} $(PACKAGE_SHIM)
+
+.PHONY: codegen-openapi
+codegen-openapi: $(PACKAGE_SHIM) $(OPENAPI_GEN) ## Generate openapi
+	@echo Generate openapi... >&2
+	@$(OPENAPI_GEN) \
+		-i k8s.io/apimachinery/pkg/api/resource \
+		-i k8s.io/apimachinery/pkg/apis/meta/v1 \
+		-i k8s.io/apimachinery/pkg/version \
+		-i k8s.io/apimachinery/pkg/runtime \
+		-i k8s.io/apimachinery/pkg/types \
+		-i k8s.io/api/core/v1 \
+		-i sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2 \
+		-p ./pkg/api/generated/openapi \
+		-O zz_generated.openapi \
+		-h ./.hack/boilerplate.go.txt
+
 .PHONY: codegen-helm-docs
 codegen-helm-docs: ## Generate helm docs
 	@echo Generate helm docs... >&2
@@ -92,6 +130,7 @@ codegen-helm-docs: ## Generate helm docs
 .PHONY: codegen
 codegen: ## Rebuild all generated code and docs
 codegen: codegen-helm-docs
+codegen: codegen-openapi
 
 .PHONY: verify-codegen
 verify-codegen: codegen ## Verify all generated code and docs are up to date
