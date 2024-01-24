@@ -4,7 +4,7 @@
 // Copyright The Kubernetes Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
+// You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
@@ -30,67 +30,66 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"k8s.io/apimachinery/pkg/api/resource.Quantity":                                                            schema_apimachinery_pkg_api_resource_Quantity(ref),
-		"k8s.io/apimachinery/pkg/api/resource.int64Amount":                                                         schema_apimachinery_pkg_api_resource_int64Amount(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.APIGroup":                                                            schema_pkg_apis_meta_v1_APIGroup(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.APIGroupList":                                                        schema_pkg_apis_meta_v1_APIGroupList(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.APIResource":                                                         schema_pkg_apis_meta_v1_APIResource(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.APIResourceList":                                                     schema_pkg_apis_meta_v1_APIResourceList(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.APIVersions":                                                         schema_pkg_apis_meta_v1_APIVersions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ApplyOptions":                                                        schema_pkg_apis_meta_v1_ApplyOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Condition":                                                           schema_pkg_apis_meta_v1_Condition(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.CreateOptions":                                                       schema_pkg_apis_meta_v1_CreateOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.DeleteOptions":                                                       schema_pkg_apis_meta_v1_DeleteOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Duration":                                                            schema_pkg_apis_meta_v1_Duration(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.FieldsV1":                                                            schema_pkg_apis_meta_v1_FieldsV1(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GetOptions":                                                          schema_pkg_apis_meta_v1_GetOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupKind":                                                           schema_pkg_apis_meta_v1_GroupKind(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupResource":                                                       schema_pkg_apis_meta_v1_GroupResource(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersion":                                                        schema_pkg_apis_meta_v1_GroupVersion(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionForDiscovery":                                            schema_pkg_apis_meta_v1_GroupVersionForDiscovery(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionKind":                                                    schema_pkg_apis_meta_v1_GroupVersionKind(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionResource":                                                schema_pkg_apis_meta_v1_GroupVersionResource(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.InternalEvent":                                                       schema_pkg_apis_meta_v1_InternalEvent(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector":                                                       schema_pkg_apis_meta_v1_LabelSelector(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelectorRequirement":                                            schema_pkg_apis_meta_v1_LabelSelectorRequirement(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.List":                                                                schema_pkg_apis_meta_v1_List(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta":                                                            schema_pkg_apis_meta_v1_ListMeta(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ListOptions":                                                         schema_pkg_apis_meta_v1_ListOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ManagedFieldsEntry":                                                  schema_pkg_apis_meta_v1_ManagedFieldsEntry(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime":                                                           schema_pkg_apis_meta_v1_MicroTime(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta":                                                          schema_pkg_apis_meta_v1_ObjectMeta(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference":                                                      schema_pkg_apis_meta_v1_OwnerReference(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.PartialObjectMetadata":                                               schema_pkg_apis_meta_v1_PartialObjectMetadata(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.PartialObjectMetadataList":                                           schema_pkg_apis_meta_v1_PartialObjectMetadataList(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Patch":                                                               schema_pkg_apis_meta_v1_Patch(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.PatchOptions":                                                        schema_pkg_apis_meta_v1_PatchOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Preconditions":                                                       schema_pkg_apis_meta_v1_Preconditions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.RootPaths":                                                           schema_pkg_apis_meta_v1_RootPaths(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.ServerAddressByClientCIDR":                                           schema_pkg_apis_meta_v1_ServerAddressByClientCIDR(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Status":                                                              schema_pkg_apis_meta_v1_Status(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.StatusCause":                                                         schema_pkg_apis_meta_v1_StatusCause(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.StatusDetails":                                                       schema_pkg_apis_meta_v1_StatusDetails(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Table":                                                               schema_pkg_apis_meta_v1_Table(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.TableColumnDefinition":                                               schema_pkg_apis_meta_v1_TableColumnDefinition(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.TableOptions":                                                        schema_pkg_apis_meta_v1_TableOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.TableRow":                                                            schema_pkg_apis_meta_v1_TableRow(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.TableRowCondition":                                                   schema_pkg_apis_meta_v1_TableRowCondition(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Time":                                                                schema_pkg_apis_meta_v1_Time(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.Timestamp":                                                           schema_pkg_apis_meta_v1_Timestamp(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.TypeMeta":                                                            schema_pkg_apis_meta_v1_TypeMeta(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.UpdateOptions":                                                       schema_pkg_apis_meta_v1_UpdateOptions(ref),
-		"k8s.io/apimachinery/pkg/apis/meta/v1.WatchEvent":                                                          schema_pkg_apis_meta_v1_WatchEvent(ref),
-		"k8s.io/apimachinery/pkg/version.Info":                                                                     schema_k8sio_apimachinery_pkg_version_Info(ref),
-		"k8s.io/apimachinery/pkg/runtime.RawExtension":                                                             schema_k8sio_apimachinery_pkg_runtime_RawExtension(ref),
-		"k8s.io/api/core/v1.ObjectReference":                                                                       schema_k8sio_api_core_v1_ObjectReference(ref),
-		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.ClusterPolicyReport":       schema__ClusterPolicyReport(ref),
-		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.ClusterPolicyReportList":   schema__ClusterPolicyReportList(ref),
-		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.Limits":                    schema__Limits(ref),
-		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReport":              schema__PolicyReport(ref),
-		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportConfiguration": schema__PolicyReportConfiguration(ref),
-		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportList":          schema__PolicyReportList(ref),
-		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportResult":        schema__PolicyReportResult(ref),
-		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportSummary":       schema__PolicyReportSummary(ref),
+		"k8s.io/apimachinery/pkg/api/resource.Quantity":                                                          schema_apimachinery_pkg_api_resource_Quantity(ref),
+		"k8s.io/apimachinery/pkg/api/resource.int64Amount":                                                       schema_apimachinery_pkg_api_resource_int64Amount(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.APIGroup":                                                          schema_pkg_apis_meta_v1_APIGroup(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.APIGroupList":                                                      schema_pkg_apis_meta_v1_APIGroupList(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.APIResource":                                                       schema_pkg_apis_meta_v1_APIResource(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.APIResourceList":                                                   schema_pkg_apis_meta_v1_APIResourceList(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.APIVersions":                                                       schema_pkg_apis_meta_v1_APIVersions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ApplyOptions":                                                      schema_pkg_apis_meta_v1_ApplyOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Condition":                                                         schema_pkg_apis_meta_v1_Condition(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.CreateOptions":                                                     schema_pkg_apis_meta_v1_CreateOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.DeleteOptions":                                                     schema_pkg_apis_meta_v1_DeleteOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Duration":                                                          schema_pkg_apis_meta_v1_Duration(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.FieldsV1":                                                          schema_pkg_apis_meta_v1_FieldsV1(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GetOptions":                                                        schema_pkg_apis_meta_v1_GetOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupKind":                                                         schema_pkg_apis_meta_v1_GroupKind(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupResource":                                                     schema_pkg_apis_meta_v1_GroupResource(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersion":                                                      schema_pkg_apis_meta_v1_GroupVersion(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionForDiscovery":                                          schema_pkg_apis_meta_v1_GroupVersionForDiscovery(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionKind":                                                  schema_pkg_apis_meta_v1_GroupVersionKind(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionResource":                                              schema_pkg_apis_meta_v1_GroupVersionResource(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.InternalEvent":                                                     schema_pkg_apis_meta_v1_InternalEvent(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector":                                                     schema_pkg_apis_meta_v1_LabelSelector(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelectorRequirement":                                          schema_pkg_apis_meta_v1_LabelSelectorRequirement(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.List":                                                              schema_pkg_apis_meta_v1_List(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta":                                                          schema_pkg_apis_meta_v1_ListMeta(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ListOptions":                                                       schema_pkg_apis_meta_v1_ListOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ManagedFieldsEntry":                                                schema_pkg_apis_meta_v1_ManagedFieldsEntry(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime":                                                         schema_pkg_apis_meta_v1_MicroTime(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta":                                                        schema_pkg_apis_meta_v1_ObjectMeta(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference":                                                    schema_pkg_apis_meta_v1_OwnerReference(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.PartialObjectMetadata":                                             schema_pkg_apis_meta_v1_PartialObjectMetadata(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.PartialObjectMetadataList":                                         schema_pkg_apis_meta_v1_PartialObjectMetadataList(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Patch":                                                             schema_pkg_apis_meta_v1_Patch(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.PatchOptions":                                                      schema_pkg_apis_meta_v1_PatchOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Preconditions":                                                     schema_pkg_apis_meta_v1_Preconditions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.RootPaths":                                                         schema_pkg_apis_meta_v1_RootPaths(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.ServerAddressByClientCIDR":                                         schema_pkg_apis_meta_v1_ServerAddressByClientCIDR(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Status":                                                            schema_pkg_apis_meta_v1_Status(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.StatusCause":                                                       schema_pkg_apis_meta_v1_StatusCause(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.StatusDetails":                                                     schema_pkg_apis_meta_v1_StatusDetails(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Table":                                                             schema_pkg_apis_meta_v1_Table(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.TableColumnDefinition":                                             schema_pkg_apis_meta_v1_TableColumnDefinition(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.TableOptions":                                                      schema_pkg_apis_meta_v1_TableOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.TableRow":                                                          schema_pkg_apis_meta_v1_TableRow(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.TableRowCondition":                                                 schema_pkg_apis_meta_v1_TableRowCondition(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Time":                                                              schema_pkg_apis_meta_v1_Time(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.Timestamp":                                                         schema_pkg_apis_meta_v1_Timestamp(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.TypeMeta":                                                          schema_pkg_apis_meta_v1_TypeMeta(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.UpdateOptions":                                                     schema_pkg_apis_meta_v1_UpdateOptions(ref),
+		"k8s.io/apimachinery/pkg/apis/meta/v1.WatchEvent":                                                        schema_pkg_apis_meta_v1_WatchEvent(ref),
+		"k8s.io/apimachinery/pkg/runtime.RawExtension":                                                           schema_k8sio_apimachinery_pkg_runtime_RawExtension(ref),
+		"k8s.io/apimachinery/pkg/runtime.TypeMeta":                                                               schema_k8sio_apimachinery_pkg_runtime_TypeMeta(ref),
+		"k8s.io/apimachinery/pkg/runtime.Unknown":                                                                schema_k8sio_apimachinery_pkg_runtime_Unknown(ref),
+		"k8s.io/apimachinery/pkg/version.Info":                                                                   schema_k8sio_apimachinery_pkg_version_Info(ref),
+		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.ClusterPolicyReport":     schema_pkg_api_wgpolicyk8sio_v1alpha2_ClusterPolicyReport(ref),
+		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.ClusterPolicyReportList": schema_pkg_api_wgpolicyk8sio_v1alpha2_ClusterPolicyReportList(ref),
+		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReport":            schema_pkg_api_wgpolicyk8sio_v1alpha2_PolicyReport(ref),
+		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportList":        schema_pkg_api_wgpolicyk8sio_v1alpha2_PolicyReportList(ref),
+		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportResult":      schema_pkg_api_wgpolicyk8sio_v1alpha2_PolicyReportResult(ref),
+		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportSummary":     schema_pkg_api_wgpolicyk8sio_v1alpha2_PolicyReportSummary(ref),
 	}
 }
 
@@ -2411,6 +2410,84 @@ func schema_pkg_apis_meta_v1_WatchEvent(ref common.ReferenceCallback) common.Ope
 	}
 }
 
+func schema_k8sio_apimachinery_pkg_runtime_RawExtension(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "RawExtension is used to hold extensions in external versions.\n\nTo use this, make a field which has RawExtension as its type in your external, versioned struct, and Object in your internal struct. You also need to register your various plugin types.\n\n// Internal package:\n\n\ttype MyAPIObject struct {\n\t\truntime.TypeMeta `json:\",inline\"`\n\t\tMyPlugin runtime.Object `json:\"myPlugin\"`\n\t}\n\n\ttype PluginA struct {\n\t\tAOption string `json:\"aOption\"`\n\t}\n\n// External package:\n\n\ttype MyAPIObject struct {\n\t\truntime.TypeMeta `json:\",inline\"`\n\t\tMyPlugin runtime.RawExtension `json:\"myPlugin\"`\n\t}\n\n\ttype PluginA struct {\n\t\tAOption string `json:\"aOption\"`\n\t}\n\n// On the wire, the JSON will look something like this:\n\n\t{\n\t\t\"kind\":\"MyAPIObject\",\n\t\t\"apiVersion\":\"v1\",\n\t\t\"myPlugin\": {\n\t\t\t\"kind\":\"PluginA\",\n\t\t\t\"aOption\":\"foo\",\n\t\t},\n\t}\n\nSo what happens? Decode first uses json or yaml to unmarshal the serialized data into your external MyAPIObject. That causes the raw JSON to be stored, but not unpacked. The next step is to copy (using pkg/conversion) into the internal struct. The runtime package's DefaultScheme has conversion functions installed which will unpack the JSON stored in RawExtension, turning it into the correct object type, and storing it in the Object. (TODO: In the case where the object is of an unknown type, a runtime.Unknown object will be created and stored.)",
+				Type:        []string{"object"},
+			},
+		},
+	}
+}
+
+func schema_k8sio_apimachinery_pkg_runtime_TypeMeta(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TypeMeta is shared by all top level objects. The proper way to use it is to inline it in your type, like this:\n\n\ttype MyAwesomeAPIObject struct {\n\t     runtime.TypeMeta    `json:\",inline\"`\n\t     ... // other fields\n\t}\n\nfunc (obj *MyAwesomeAPIObject) SetGroupVersionKind(gvk *metav1.GroupVersionKind) { metav1.UpdateTypeMeta(obj,gvk) }; GroupVersionKind() *GroupVersionKind\n\nTypeMeta is provided here for convenience. You may use it directly from this package or define your own with the same fields.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_k8sio_apimachinery_pkg_runtime_Unknown(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Unknown allows api objects with unknown types to be passed-through. This can be used to deal with the API objects from a plug-in. Unknown objects still have functioning TypeMeta features-- kind, version, etc. metadata and field mutatation.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"ContentEncoding": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ContentEncoding is encoding used to encode 'Raw' data. Unspecified means no encoding.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"ContentType": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ContentType  is serialization method used to serialize 'Raw'. Unspecified means ContentTypeJSON.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"ContentEncoding", "ContentType"},
+			},
+		},
+	}
+}
+
 func schema_k8sio_apimachinery_pkg_version_Info(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -2488,85 +2565,7 @@ func schema_k8sio_apimachinery_pkg_version_Info(ref common.ReferenceCallback) co
 	}
 }
 
-func schema_k8sio_apimachinery_pkg_runtime_RawExtension(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "RawExtension is used to hold extensions in external versions.\n\nTo use this, make a field which has RawExtension as its type in your external, versioned struct, and Object in your internal struct. You also need to register your various plugin types.\n\n// Internal package:\n\n\ttype MyAPIObject struct {\n\t\truntime.TypeMeta `json:\",inline\"`\n\t\tMyPlugin runtime.Object `json:\"myPlugin\"`\n\t}\n\n\ttype PluginA struct {\n\t\tAOption string `json:\"aOption\"`\n\t}\n\n// External package:\n\n\ttype MyAPIObject struct {\n\t\truntime.TypeMeta `json:\",inline\"`\n\t\tMyPlugin runtime.RawExtension `json:\"myPlugin\"`\n\t}\n\n\ttype PluginA struct {\n\t\tAOption string `json:\"aOption\"`\n\t}\n\n// On the wire, the JSON will look something like this:\n\n\t{\n\t\t\"kind\":\"MyAPIObject\",\n\t\t\"apiVersion\":\"v1\",\n\t\t\"myPlugin\": {\n\t\t\t\"kind\":\"PluginA\",\n\t\t\t\"aOption\":\"foo\",\n\t\t},\n\t}\n\nSo what happens? Decode first uses json or yaml to unmarshal the serialized data into your external MyAPIObject. That causes the raw JSON to be stored, but not unpacked. The next step is to copy (using pkg/conversion) into the internal struct. The runtime package's DefaultScheme has conversion functions installed which will unpack the JSON stored in RawExtension, turning it into the correct object type, and storing it in the Object. (TODO: In the case where the object is of an unknown type, a runtime.Unknown object will be created and stored.)",
-				Type:        []string{"object"},
-			},
-		},
-	}
-}
-
-func schema_k8sio_api_core_v1_ObjectReference(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ObjectReference contains enough information to let you inspect or modify the referred object.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"uid": {
-						SchemaProps: spec.SchemaProps{
-							Description: "UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "API version of the referent.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"resourceVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Specific resourceVersion to which this reference is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"fieldPath": {
-						SchemaProps: spec.SchemaProps{
-							Description: "If referring to a piece of an object instead of an entire object, this string should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2]. For example, if the object reference is to a container within a pod, this would take on a value like: \"spec.containers{name}\" (where \"name\" refers to the name of the container that triggered the event) or if no container name is specified \"spec.containers[2]\" (container with index 2 in this pod). This syntax is chosen only to have some well-defined way of referencing a part of an object.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-			},
-			VendorExtensible: spec.VendorExtensible{
-				Extensions: spec.Extensions{
-					"x-kubernetes-map-type": "atomic",
-				},
-			},
-		},
-	}
-}
-
-func schema__ClusterPolicyReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_api_wgpolicyk8sio_v1alpha2_ClusterPolicyReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -2593,14 +2592,6 @@ func schema__ClusterPolicyReport(ref common.ReferenceCallback) common.OpenAPIDef
 							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
 						},
 					},
-					"source": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Source is an identifier for the source e.g. a policy engine that manages this report. Use this field if all the results are produced by a single policy engine. If the results are produced by multiple sources e.g. different engines or scanners, then use the Source field at the PolicyReportResult level.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"scope": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Scope is an optional reference to the report scope (e.g. a Deployment, Namespace, or Node)",
@@ -2611,12 +2602,6 @@ func schema__ClusterPolicyReport(ref common.ReferenceCallback) common.OpenAPIDef
 						SchemaProps: spec.SchemaProps{
 							Description: "ScopeSelector is an optional selector for multiple scopes (e.g. Pods). Either one of, or none of, but not both of, Scope or ScopeSelector should be specified.",
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"),
-						},
-					},
-					"configuration": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Configuration is an optional field which can be used to specify a contract between PolicyReport generators and consumers",
-							Ref:         ref("sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportConfiguration"),
 						},
 					},
 					"summary": {
@@ -2643,11 +2628,11 @@ func schema__ClusterPolicyReport(ref common.ReferenceCallback) common.OpenAPIDef
 			},
 		},
 		Dependencies: []string{
-			"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportConfiguration", "sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportResult", "sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportSummary", "k8s.io/api/core/v1.ObjectReference", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"k8s.io/api/core/v1.ObjectReference", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportResult", "sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportSummary"},
 	}
 }
 
-func schema__ClusterPolicyReportList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_api_wgpolicyk8sio_v1alpha2_ClusterPolicyReportList(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -2692,45 +2677,11 @@ func schema__ClusterPolicyReportList(ref common.ReferenceCallback) common.OpenAP
 			},
 		},
 		Dependencies: []string{
-			"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.ClusterPolicyReport", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.ClusterPolicyReport"},
 	}
 }
 
-func schema__Limits(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"maxResults": {
-						SchemaProps: spec.SchemaProps{
-							Description: "MaxResults is the maximum number of results contained in the report",
-							Default:     0,
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-					"statusFilter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "StatusFilter indicates that the PolicyReport contains only those reports with statuses specified in this list",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
-func schema__PolicyReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_api_wgpolicyk8sio_v1alpha2_PolicyReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -2757,14 +2708,6 @@ func schema__PolicyReport(ref common.ReferenceCallback) common.OpenAPIDefinition
 							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
 						},
 					},
-					"source": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Source is an identifier for the source e.g. a policy engine that manages this report. Use this field if all the results are produced by a single policy engine. If the results are produced by multiple sources e.g. different engines or scanners, then use the Source field at the PolicyReportResult level.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"scope": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Scope is an optional reference to the report scope (e.g. a Deployment, Namespace, or Node)",
@@ -2775,12 +2718,6 @@ func schema__PolicyReport(ref common.ReferenceCallback) common.OpenAPIDefinition
 						SchemaProps: spec.SchemaProps{
 							Description: "ScopeSelector is an optional selector for multiple scopes (e.g. Pods). Either one of, or none of, but not both of, Scope or ScopeSelector should be specified.",
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"),
-						},
-					},
-					"configuration": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Configuration is an optional field which can be used to specify a contract between PolicyReport generators and consumers",
-							Ref:         ref("sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportConfiguration"),
 						},
 					},
 					"summary": {
@@ -2807,32 +2744,11 @@ func schema__PolicyReport(ref common.ReferenceCallback) common.OpenAPIDefinition
 			},
 		},
 		Dependencies: []string{
-			"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportConfiguration", "sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportResult", "sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportSummary", "k8s.io/api/core/v1.ObjectReference", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"k8s.io/api/core/v1.ObjectReference", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportResult", "sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportSummary"},
 	}
 }
 
-func schema__PolicyReportConfiguration(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"limits": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.Limits"),
-						},
-					},
-				},
-				Required: []string{"limits"},
-			},
-		},
-		Dependencies: []string{
-			"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.Limits"},
-	}
-}
-
-func schema__PolicyReportList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_api_wgpolicyk8sio_v1alpha2_PolicyReportList(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -2877,11 +2793,11 @@ func schema__PolicyReportList(ref common.ReferenceCallback) common.OpenAPIDefini
 			},
 		},
 		Dependencies: []string{
-			"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReport", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReport"},
 	}
 }
 
-func schema__PolicyReportResult(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_api_wgpolicyk8sio_v1alpha2_PolicyReportResult(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -2890,7 +2806,7 @@ func schema__PolicyReportResult(ref common.ReferenceCallback) common.OpenAPIDefi
 				Properties: map[string]spec.Schema{
 					"source": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Source is an identifier for the policy engine that manages this report If the Source is specified at this level, it will override the Source field set at the PolicyReport level",
+							Description: "Source is an identifier for the policy engine that manages this report",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -2961,7 +2877,7 @@ func schema__PolicyReportResult(ref common.ReferenceCallback) common.OpenAPIDefi
 					},
 					"resourceSelector": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ResourceSelector is an optional label selector for checked Kubernetes resources. For example, a policy result may apply to all pods that match a label. Either a Subject or a ResourceSelector can be specified. If neither are provided, the result is assumed to be for the policy report scope.",
+							Description: "SubjectSelector is an optional label selector for checked Kubernetes resources. For example, a policy result may apply to all pods that match a label. Either a Subject or a SubjectSelector can be specified. If neither are provided, the result is assumed to be for the policy report scope.",
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"),
 						},
 					},
@@ -2997,7 +2913,7 @@ func schema__PolicyReportResult(ref common.ReferenceCallback) common.OpenAPIDefi
 	}
 }
 
-func schema__PolicyReportSummary(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_api_wgpolicyk8sio_v1alpha2_PolicyReportSummary(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
