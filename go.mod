@@ -1,4 +1,4 @@
-module github.com/kyverno/policy-reports
+module github.com/kyverno/reports-server
 
 go 1.21
 

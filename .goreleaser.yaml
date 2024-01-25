@@ -3,22 +3,22 @@ before:
     - go mod tidy
 
 builds:
-  - id: policy-reports
+  - id: reports-server
     env:
       - CGO_ENABLED=0
     goos:
       - linux
       - windows
       - darwin
-    binary: policy-reports
+    binary: reports-server
     flags:
       - -trimpath
     ldflags:
       - -s -w
 
 kos:
-  - build: policy-reports
-    repository: ghcr.io/kyverno/policy-reports
+  - build: reports-server
+    repository: ghcr.io/kyverno/reports-server
     tags:
       - '{{.Tag}}'
       - '{{ if not .Prerelease }}latest{{ end }}' 
@@ -50,17 +50,17 @@ docker_signs:
       - --yes
 
 # brews:
-#   - homepage: https://kyverno.github.io/policy-reports
+#   - homepage: https://kyverno.github.io/reports-server
 #     description: Declarative Kubernetes end-to-end testing.
 #     repository:
 #       owner: kyverno
-#       name: policy-reports
+#       name: reports-server
 #       branch: brew-{{.Version}}
 #       pull_request:
 #         enabled: true
 #         base:
 #           owner: kyverno
-#           name: policy-reports
+#           name: reports-server
 #           branch: main
 
 archives:

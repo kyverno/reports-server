@@ -1,15 +1,15 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "policy-reports.fullname" . }}
+  name: {{ include "reports-server.fullname" . }}
   namespace: kube-system
   labels:
-    {{- include "policy-reports.labels" . | nindent 4 }}
+    {{- include "reports-server.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: extension-apiserver-authentication-reader
 subjects:
 - kind: ServiceAccount
-  name: {{ include "policy-reports.serviceAccountName" $ }}
+  name: {{ include "reports-server.serviceAccountName" $ }}
   namespace: {{ $.Release.Namespace }}
