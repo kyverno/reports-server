@@ -5,12 +5,12 @@
 ##########
 
 ORG                                ?= kyverno
-PACKAGE                            ?= github.com/$(ORG)/policy-reports
+PACKAGE                            ?= github.com/$(ORG)/reports-server
 GIT_SHA                            := $(shell git rev-parse HEAD)
 GOOS                               ?= $(shell go env GOOS)
 GOARCH                             ?= $(shell go env GOARCH)
 REGISTRY                           ?= ghcr.io
-REPO                               ?= policy-reports
+REPO                               ?= reports-server
 
 #########
 # TOOLS #
@@ -66,7 +66,7 @@ LOCAL_PLATFORM := linux/$(GOARCH)
 KO_REGISTRY    := ko.local
 KO_TAGS        := $(GIT_SHA)
 KO_CACHE       ?= /tmp/ko-cache
-BIN            := policy-reports
+BIN            := reports-server
 
 .PHONY: fmt
 fmt: ## Run go fmt
@@ -165,7 +165,7 @@ kind-load: $(KIND) ko-build ## Build image and load in kind cluster
 .PHONY: kind-install
 kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
 	@echo Install chart... >&2
-	@$(HELM) upgrade --install policy-reports --namespace policy-reports --create-namespace --wait ./charts/policy-reports \
+	@$(HELM) upgrade --install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
 		--set image.registry=$(KO_REGISTRY) \
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA)

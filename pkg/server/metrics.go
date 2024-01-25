@@ -3,8 +3,8 @@ package server
 import (
 	"fmt"
 
-	"github.com/kyverno/policy-reports/pkg/api"
-	"github.com/kyverno/policy-reports/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/api"
+	"github.com/kyverno/reports-server/pkg/storage"
 	"k8s.io/component-base/metrics"
 )
 

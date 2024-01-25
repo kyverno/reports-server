@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/kyverno/policy-reports/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/storage"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"

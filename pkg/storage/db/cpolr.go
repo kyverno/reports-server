@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/kyverno/policy-reports/pkg/storage/api"
+	"github.com/kyverno/reports-server/pkg/storage/api"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )

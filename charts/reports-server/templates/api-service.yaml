@@ -4,13 +4,13 @@ metadata:
   name: v1alpha2.wgpolicyk8s.io
   namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "policy-reports.labels" . | nindent 4 }}
+    {{- include "reports-server.labels" . | nindent 4 }}
 spec:
   group: wgpolicyk8s.io
   groupPriorityMinimum: 100
   insecureSkipTLSVerify: true
   service:
-    name: {{ include "policy-reports.fullname" . }}
+    name: {{ include "reports-server.fullname" . }}
     namespace: {{ $.Release.Namespace }}
   version: v1alpha2
   versionPriority: 100
