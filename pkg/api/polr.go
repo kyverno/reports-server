@@ -65,7 +65,7 @@ func (p *polrStore) List(ctx context.Context, options *metainternalversion.ListO
 	namespace := genericapirequest.NamespaceValue(ctx)
 	list, err := p.listPolr(namespace)
 	if err != nil {
-		return &v1alpha2.PolicyReportList{}, errors.NewBadRequest("failed to list resource policyreport")
+		return nil, errors.NewBadRequest("failed to list resource policyreport")
 	}
 
 	// if labelSelector == labels.Everything() {
@@ -91,7 +91,7 @@ func (p *polrStore) Get(ctx context.Context, name string, options *metav1.GetOpt
 	namespace := genericapirequest.NamespaceValue(ctx)
 	report, err := p.getPolr(name, namespace)
 	if err != nil || report == nil {
-		return &v1alpha2.PolicyReport{}, errors.NewNotFound(v1alpha2.Resource("policyreports"), name)
+		return nil, errors.NewNotFound(v1alpha2.Resource("policyreports"), name)
 	}
 	return report, nil
 }
@@ -109,13 +109,13 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 			// 	Warnings: []string{err.Error()},
 			// }, nil
 		case "Strict":
-			return &v1alpha2.PolicyReport{}, err
+			return nil, err
 		}
 	}
 
 	polr, ok := obj.(*v1alpha2.PolicyReport)
 	if !ok {
-		return &v1alpha2.PolicyReport{}, errors.NewBadRequest("failed to validate policy report")
+		return nil, errors.NewBadRequest("failed to validate policy report")
 	}
 
 	namespace := genericapirequest.NamespaceValue(ctx)
@@ -126,7 +126,7 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 	if !isDryRun {
 		err := p.createPolr(polr)
 		if err != nil {
-			return &v1alpha2.PolicyReport{}, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
+			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
 		}
 		if err := p.broadcaster.Action(watch.Added, obj); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
@@ -155,12 +155,12 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 
 	oldObj, err := p.getPolr(name, namespace)
 	if err != nil {
-		return &v1alpha2.PolicyReport{}, false, err
+		return nil, false, err
 	}
 
 	updatedObject, err := objInfo.UpdatedObject(ctx, oldObj)
 	if err != nil {
-		return &v1alpha2.PolicyReport{}, false, err
+		return nil, false, err
 	}
 	err = updateValidation(ctx, updatedObject, oldObj)
 	if err != nil {
@@ -172,13 +172,13 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 			// 	Warnings: []string{err.Error()},
 			// }, nil
 		case "Strict":
-			return &v1alpha2.PolicyReport{}, false, err
+			return nil, false, err
 		}
 	}
 
 	polr, ok := updatedObject.(*v1alpha2.PolicyReport)
 	if !ok {
-		return &v1alpha2.PolicyReport{}, false, errors.NewBadRequest("failed to validate policy report")
+		return nil, false, errors.NewBadRequest("failed to validate policy report")
 	}
 
 	if len(polr.Namespace) == 0 {
@@ -188,7 +188,7 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 	if !isDryRun {
 		err := p.updatePolr(polr, false)
 		if err != nil {
-			return &v1alpha2.PolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
+			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
 		}
 		if err := p.broadcaster.Action(watch.Modified, updatedObject); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
@@ -205,20 +205,20 @@ func (p *polrStore) Delete(ctx context.Context, name string, deleteValidation re
 	polr, err := p.getPolr(name, namespace)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find polrs", "name", name, "namespace", klog.KRef("", namespace))
-		return &v1alpha2.PolicyReport{}, false, errors.NewNotFound(v1alpha2.Resource("policyreports"), name)
+		return nil, false, errors.NewNotFound(v1alpha2.Resource("policyreports"), name)
 	}
 
 	err = deleteValidation(ctx, polr)
 	if err != nil {
 		klog.ErrorS(err, "invalid resource", "name", name, "namespace", klog.KRef("", namespace))
-		return &v1alpha2.PolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("invalid resource: %s", err.Error()))
+		return nil, false, errors.NewBadRequest(fmt.Sprintf("invalid resource: %s", err.Error()))
 	}
 
 	if !isDryRun {
 		err = p.deletePolr(polr)
 		if err != nil {
 			klog.ErrorS(err, "failed to delete polr", "name", name, "namespace", klog.KRef("", namespace))
-			return &v1alpha2.PolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("failed to delete policyreport: %s", err.Error()))
+			return nil, false, errors.NewBadRequest(fmt.Sprintf("failed to delete policyreport: %s", err.Error()))
 		}
 		if err := p.broadcaster.Action(watch.Deleted, polr); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
@@ -235,13 +235,13 @@ func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 	obj, err := p.List(ctx, listOptions)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find polrs", "namespace", klog.KRef("", namespace))
-		return &v1alpha2.PolicyReportList{}, errors.NewBadRequest("Failed to find policy reports")
+		return nil, errors.NewBadRequest("Failed to find policy reports")
 	}
 
 	polrList, ok := obj.(*v1alpha2.PolicyReportList)
 	if !ok {
 		klog.ErrorS(err, "Failed to parse polrs", "namespace", klog.KRef("", namespace))
-		return &v1alpha2.PolicyReportList{}, errors.NewBadRequest("Failed to parse policy reports")
+		return nil, errors.NewBadRequest("Failed to parse policy reports")
 	}
 
 	if !isDryRun {
@@ -249,7 +249,7 @@ func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 			obj, isDeleted, err := p.Delete(ctx, polr.GetName(), deleteValidation, options)
 			if !isDeleted {
 				klog.ErrorS(err, "Failed to delete polr", "name", polr.GetName(), "namespace", klog.KRef("", namespace))
-				return &v1alpha2.PolicyReportList{}, errors.NewBadRequest(fmt.Sprintf("Failed to delete policy report: %s/%s", polr.Namespace, polr.GetName()))
+				return nil, errors.NewBadRequest(fmt.Sprintf("Failed to delete policy report: %s/%s", polr.Namespace, polr.GetName()))
 			}
 			if err := p.broadcaster.Action(watch.Deleted, obj); err != nil {
 				klog.ErrorS(err, "failed to broadcast event")
