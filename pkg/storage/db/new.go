@@ -70,15 +70,19 @@ func (p *postgresstore) Ready() bool {
 }
 
 type PostgresConfig struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	DBname   string
+	Host        string
+	Port        int
+	User        string
+	Password    string
+	DBname      string
+	SSLMode     string
+	SSLRootCert string
+	SSLKey      string
+	SSLCert     string
 }
 
 func (p PostgresConfig) String() string {
 	return fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		p.Host, p.Port, p.User, p.Password, p.DBname)
+		"password=%s dbname=%s sslmode=%s sslrootcert=%s sslkey=%s sslcert=%s",
+		p.Host, p.Port, p.User, p.Password, p.DBname, p.SSLMode, p.SSLRootCert, p.SSLKey, p.SSLCert)
 }
