@@ -63,7 +63,7 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 	}
 	list, err := c.listCpolr()
 	if err != nil {
-		return &v1alpha2.ClusterPolicyReportList{}, errors.NewBadRequest("failed to list resource clusterpolicyreport")
+		return nil, errors.NewBadRequest("failed to list resource clusterpolicyreport")
 	}
 
 	// if labelSelector.String() == labels.Everything().String() {
@@ -88,7 +88,7 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 func (c *cpolrStore) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
 	report, err := c.getCpolr(name)
 	if err != nil || report == nil {
-		return &v1alpha2.ClusterPolicyReport{}, errors.NewNotFound(v1alpha2.Resource("clusterpolicyreports"), name)
+		return nil, errors.NewNotFound(v1alpha2.Resource("clusterpolicyreports"), name)
 	}
 	return report, nil
 }
@@ -106,18 +106,18 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 			// 	Warnings: []string{err.Error()},
 			// }, nil
 		case "Strict":
-			return &v1alpha2.ClusterPolicyReport{}, err
+			return nil, err
 		}
 	}
 
 	cpolr, ok := obj.(*v1alpha2.ClusterPolicyReport)
 	if !ok {
-		return &v1alpha2.ClusterPolicyReport{}, errors.NewBadRequest("failed to validate cluster policy report")
+		return nil, errors.NewBadRequest("failed to validate cluster policy report")
 	}
 
 	if !isDryRun {
 		if err := c.createCpolr(cpolr); err != nil {
-			return &v1alpha2.ClusterPolicyReport{}, errors.NewBadRequest(fmt.Sprintf("cannot create cluster policy report: %s", err.Error()))
+			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create cluster policy report: %s", err.Error()))
 		}
 		if err := c.broadcaster.Action(watch.Added, obj); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
@@ -145,12 +145,12 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 
 	oldObj, err := c.getCpolr(name)
 	if err != nil {
-		return &v1alpha2.ClusterPolicyReport{}, false, err
+		return nil, false, err
 	}
 
 	updatedObject, err := objInfo.UpdatedObject(ctx, oldObj)
 	if err != nil {
-		return &v1alpha2.ClusterPolicyReport{}, false, err
+		return nil, false, err
 	}
 	err = updateValidation(ctx, updatedObject, oldObj)
 	if err != nil {
@@ -162,18 +162,18 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 			// 	Warnings: []string{err.Error()},
 			// }, nil
 		case "Strict":
-			return &v1alpha2.ClusterPolicyReport{}, false, err
+			return nil, false, err
 		}
 	}
 
 	cpolr, ok := updatedObject.(*v1alpha2.ClusterPolicyReport)
 	if !ok {
-		return &v1alpha2.ClusterPolicyReport{}, false, errors.NewBadRequest("failed to validate cluster policy report")
+		return nil, false, errors.NewBadRequest("failed to validate cluster policy report")
 	}
 
 	if !isDryRun {
 		if err := c.createCpolr(cpolr); err != nil {
-			return &v1alpha2.ClusterPolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("cannot create cluster policy report: %s", err.Error()))
+			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create cluster policy report: %s", err.Error()))
 		}
 		if err := c.broadcaster.Action(watch.Modified, updatedObject); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
@@ -189,19 +189,19 @@ func (c *cpolrStore) Delete(ctx context.Context, name string, deleteValidation r
 	cpolr, err := c.getCpolr(name)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find cpolrs", "name", name)
-		return &v1alpha2.ClusterPolicyReport{}, false, errors.NewNotFound(v1alpha2.Resource("clusterpolicyreports"), name)
+		return nil, false, errors.NewNotFound(v1alpha2.Resource("clusterpolicyreports"), name)
 	}
 
 	err = deleteValidation(ctx, cpolr)
 	if err != nil {
 		klog.ErrorS(err, "invalid resource", "name", name)
-		return &v1alpha2.ClusterPolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("invalid resource: %s", err.Error()))
+		return nil, false, errors.NewBadRequest(fmt.Sprintf("invalid resource: %s", err.Error()))
 	}
 
 	if !isDryRun {
 		if err = c.deletePolr(cpolr); err != nil {
 			klog.ErrorS(err, "failed to delete cpolr", "name", name)
-			return &v1alpha2.ClusterPolicyReport{}, false, errors.NewBadRequest(fmt.Sprintf("failed to delete clusterpolicyreport: %s", err.Error()))
+			return nil, false, errors.NewBadRequest(fmt.Sprintf("failed to delete clusterpolicyreport: %s", err.Error()))
 		}
 		if err := c.broadcaster.Action(watch.Deleted, cpolr); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
@@ -217,13 +217,13 @@ func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 	obj, err := c.List(ctx, listOptions)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find cpolrs")
-		return &v1alpha2.ClusterPolicyReportList{}, errors.NewBadRequest("Failed to find cluster policy reports")
+		return nil, errors.NewBadRequest("Failed to find cluster policy reports")
 	}
 
 	cpolrList, ok := obj.(*v1alpha2.ClusterPolicyReportList)
 	if !ok {
 		klog.ErrorS(err, "Failed to parse cpolrs")
-		return &v1alpha2.ClusterPolicyReportList{}, errors.NewBadRequest("Failed to parse cluster policy reports")
+		return nil, errors.NewBadRequest("Failed to parse cluster policy reports")
 	}
 
 	if !isDryRun {
@@ -231,7 +231,7 @@ func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 			obj, isDeleted, err := c.Delete(ctx, cpolr.GetName(), deleteValidation, options)
 			if !isDeleted {
 				klog.ErrorS(err, "Failed to delete cpolr", "name", cpolr.GetName())
-				return &v1alpha2.ClusterPolicyReportList{}, errors.NewBadRequest(fmt.Sprintf("Failed to delete cluster policy report: %s", cpolr.GetName()))
+				return nil, errors.NewBadRequest(fmt.Sprintf("Failed to delete cluster policy report: %s", cpolr.GetName()))
 			}
 			if err := c.broadcaster.Action(watch.Deleted, obj); err != nil {
 				klog.ErrorS(err, "failed to broadcast event")
