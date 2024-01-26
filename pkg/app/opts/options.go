@@ -33,11 +33,17 @@ type Options struct {
 	ShowVersion bool
 	Debug       bool
 	Kubeconfig  string
-	DBHost      string
-	DBPort      int
-	DBUser      string
-	DBPassword  string
-	DBName      string
+
+	// dbopts
+	DBHost        string
+	DBPort        int
+	DBUser        string
+	DBPassword    string
+	DBName        string
+	DBSSLMode     string
+	DBSSLRootCert string
+	DBSSLKey      string
+	DBSSLCert     string
 
 	// Only to be used to for testing
 	DisableAuthForTesting bool
@@ -67,6 +73,10 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.StringVar(&o.DBUser, "dbuser", "postgres", "Username to login into postgres")
 	msfs.StringVar(&o.DBPassword, "dbpassword", "password", "Password to login into postgres")
 	msfs.StringVar(&o.DBName, "dbname", "reportsdb", "Name of the database to store policy reports in")
+	msfs.StringVar(&o.DBSSLMode, "dbsslmode", "disable", "SSL mode of the postgres database.")
+	msfs.StringVar(&o.DBSSLRootCert, "dbsslrootcert", "", "Path to database root cert.")
+	msfs.StringVar(&o.DBSSLKey, "dbsslkey", "", "Path to database ssl key.")
+	msfs.StringVar(&o.DBSSLCert, "dbsslcert", "", "Path to database ssl cert.")
 
 	o.SecureServing.AddFlags(fs.FlagSet("apiserver secure serving"))
 	o.Authentication.AddFlags(fs.FlagSet("apiserver authentication"))
@@ -101,11 +111,15 @@ func (o Options) ServerConfig() (*server.Config, error) {
 	}
 
 	dbconfig := &db.PostgresConfig{
-		Host:     o.DBHost,
-		Port:     o.DBPort,
-		User:     o.DBUser,
-		Password: o.DBPassword,
-		DBname:   o.DBName,
+		Host:        o.DBHost,
+		Port:        o.DBPort,
+		User:        o.DBUser,
+		Password:    o.DBPassword,
+		DBname:      o.DBName,
+		SSLMode:     o.DBSSLMode,
+		SSLRootCert: o.DBSSLRootCert,
+		SSLKey:      o.DBSSLKey,
+		SSLCert:     o.DBSSLCert,
 	}
 
 	return &server.Config{

@@ -149,3 +149,15 @@ config:
 
     # -- Database password
     password: reports
+
+    # -- Database SSL
+    sslmode: disable
+
+    # -- Database SSL root cert
+    sslrootcert: ""
+
+    # -- Database SSL key
+    sslkey: ""
+
+    # -- Database SSL cert
+    sslcert: ""

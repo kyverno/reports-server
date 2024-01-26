@@ -43,6 +43,10 @@ spec:
             - --dbname={{ .Values.config.db.name }}
             - --dbuser={{ .Values.config.db.user }}
             - --dbpassword={{ .Values.config.db.password }}
+            - --dbsslmode={{ .Values.config.db.sslmode }}
+            - --dbsslrootcert={{ .Values.config.db.sslrootcert }}
+            - --dbsslkey={{ .Values.config.db.sslkey }}
+            - --dbsslcert={{ .Values.config.db.sslcert }}
             {{- end }}
             - --cert-dir=/tmp
             - --secure-port=4443
