@@ -59,6 +59,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.name | string | `"reportsdb"` | Database name |
 | config.db.user | string | `"postgres"` | Database user |
 | config.db.password | string | `"reports"` | Database password |
+| config.db.sslmode | string | `"disable"` | Database SSL |
+| config.db.sslrootcert | string | `""` | Database SSL root cert |
+| config.db.sslkey | string | `""` | Database SSL key |
+| config.db.sslcert | string | `""` | Database SSL cert |
 
 ## Source Code
 
