@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "policy-reports.fullname" . }}
+  name: {{ include "reports-server.fullname" . }}
   labels:
-    {{- include "policy-reports.labels" . | nindent 4 }}
+    {{- include "reports-server.labels" . | nindent 4 }}
 spec:
   strategy:
     rollingUpdate:
@@ -13,7 +13,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "policy-reports.selectorLabels" . | nindent 6 }}
+      {{- include "reports-server.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -21,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "policy-reports.selectorLabels" . | nindent 8 }}
+        {{- include "reports-server.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
@@ -30,7 +30,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "policy-reports.serviceAccountName" . }}
+      serviceAccountName: {{ include "reports-server.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:

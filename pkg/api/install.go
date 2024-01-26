@@ -15,7 +15,7 @@
 package api
 
 import (
-	"github.com/kyverno/policy-reports/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/storage"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -51,7 +51,7 @@ func Build(polr, cpolr rest.Storage) genericapiserver.APIGroupInfo {
 	return apiGroupInfo
 }
 
-// Install builds the metrics for the wgpolicyk8s.io API, and then installs it into the given API policy-reports.
+// Install builds the metrics for the wgpolicyk8s.io API, and then installs it into the given API reports-server.
 func Install(store storage.Interface, server *genericapiserver.GenericAPIServer) error {
 	polr := PolicyReportStore(store)
 	cpolr := ClusterPolicyReportStore(store)

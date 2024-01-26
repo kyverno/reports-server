@@ -3,9 +3,9 @@ package server
 import (
 	"net/http"
 
-	"github.com/kyverno/policy-reports/pkg/api"
-	"github.com/kyverno/policy-reports/pkg/storage"
-	"github.com/kyverno/policy-reports/pkg/storage/db"
+	"github.com/kyverno/reports-server/pkg/api"
+	"github.com/kyverno/reports-server/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/storage/db"
 	apimetrics "k8s.io/apiserver/pkg/endpoints/metrics"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/client-go/rest"
@@ -28,7 +28,7 @@ func (c Config) Complete() (*server, error) {
 	if err != nil {
 		return nil, err
 	}
-	genericServer, err := c.Apiserver.Complete(nil).New("policy-reports", genericapiserver.NewEmptyDelegate())
+	genericServer, err := c.Apiserver.Complete(nil).New("reports-server", genericapiserver.NewEmptyDelegate())
 	if err != nil {
 		return nil, err
 	}

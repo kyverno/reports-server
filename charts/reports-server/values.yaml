@@ -22,7 +22,7 @@ image:
   # -- Image registry
   registry: ghcr.io
   # -- Image repository
-  repository: kyverno/policy-reports
+  repository: kyverno/reports-server
   # -- Image pull policy
   pullPolicy: IfNotPresent
   # -- Image tag (will default to app version if not set)
@@ -139,7 +139,7 @@ config:
   db:
 
     # -- Database host
-    host: policy-reports-postgresql
+    host: reports-server-postgresql
 
     # -- Database name
     name: reportsdb

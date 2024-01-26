@@ -5,10 +5,10 @@ import (
 	"net"
 	"strings"
 
-	"github.com/kyverno/policy-reports/pkg/api"
-	generatedopenapi "github.com/kyverno/policy-reports/pkg/api/generated/openapi"
-	"github.com/kyverno/policy-reports/pkg/server"
-	"github.com/kyverno/policy-reports/pkg/storage/db"
+	"github.com/kyverno/reports-server/pkg/api"
+	generatedopenapi "github.com/kyverno/reports-server/pkg/api/generated/openapi"
+	"github.com/kyverno/reports-server/pkg/server"
+	"github.com/kyverno/reports-server/pkg/storage/db"
 	openapinamer "k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
@@ -88,7 +88,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	return fs
 }
 
-// NewOptions constructs a new set of default options for policy-reports.
+// NewOptions constructs a new set of default options for reports-server.
 func NewOptions() *Options {
 	return &Options{
 		SecureServing:  genericoptions.NewSecureServingOptions().WithLoopback(),
@@ -158,8 +158,8 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	// enable OpenAPI schemas
 	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(generatedopenapi.GetOpenAPIDefinitions, openapinamer.NewDefinitionNamer(api.Scheme))
 	serverConfig.OpenAPIV3Config = genericapiserver.DefaultOpenAPIV3Config(generatedopenapi.GetOpenAPIDefinitions, openapinamer.NewDefinitionNamer(api.Scheme))
-	serverConfig.OpenAPIConfig.Info.Title = "policy-reports"
-	serverConfig.OpenAPIV3Config.Info.Title = "policy-reports"
+	serverConfig.OpenAPIConfig.Info.Title = "reports-server"
+	serverConfig.OpenAPIV3Config.Info.Title = "reports-server"
 	serverConfig.OpenAPIConfig.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0] // TODO(directxman12): remove this once autosetting this doesn't require security definitions
 	serverConfig.OpenAPIV3Config.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0]
 

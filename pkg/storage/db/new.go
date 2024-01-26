@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/kyverno/policy-reports/pkg/storage/api"
+	"github.com/kyverno/reports-server/pkg/storage/api"
 	_ "github.com/lib/pq"
 	"k8s.io/klog/v2"
 )

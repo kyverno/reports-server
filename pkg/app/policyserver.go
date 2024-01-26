@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kyverno/policy-reports/pkg/app/opts"
+	"github.com/kyverno/reports-server/pkg/app/opts"
 	"github.com/spf13/cobra"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/logs"
@@ -16,8 +16,8 @@ import (
 func NewPolicyServer(stopCh <-chan struct{}) *cobra.Command {
 	opts := opts.NewOptions()
 	cmd := &cobra.Command{
-		Short: "Launch policy-reports",
-		Long:  "Launch policy-reports",
+		Short: "Launch reports-server",
+		Long:  "Launch reports-server",
 		RunE: func(c *cobra.Command, args []string) error {
 			if err := runCommand(opts, stopCh); err != nil {
 				return err
