@@ -134,7 +134,7 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		oldObj, _ := c.getCpolr(name)
 		updatedObject, _ := objInfo.UpdatedObject(ctx, oldObj)
 		cpolr := updatedObject.(*v1alpha2.ClusterPolicyReport)
-		if err := c.updatePolr(cpolr, true); err != nil {
+		if err := c.updateCpolr(cpolr, true); err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
 		if err := c.broadcaster.Action(watch.Added, updatedObject); err != nil {
@@ -199,7 +199,7 @@ func (c *cpolrStore) Delete(ctx context.Context, name string, deleteValidation r
 	}
 
 	if !isDryRun {
-		if err = c.deletePolr(cpolr); err != nil {
+		if err = c.deleteCpolr(cpolr); err != nil {
 			klog.ErrorS(err, "failed to delete cpolr", "name", name)
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("failed to delete clusterpolicyreport: %s", err.Error()))
 		}
@@ -307,7 +307,7 @@ func (c *cpolrStore) createCpolr(report *v1alpha2.ClusterPolicyReport) error {
 	return c.store.ClusterPolicyReports().Create(context.TODO(), *report)
 }
 
-func (c *cpolrStore) updatePolr(report *v1alpha2.ClusterPolicyReport, force bool) error {
+func (c *cpolrStore) updateCpolr(report *v1alpha2.ClusterPolicyReport, force bool) error {
 	if !force {
 		oldReport, err := c.getCpolr(report.GetName())
 		if err != nil {
@@ -326,6 +326,6 @@ func (c *cpolrStore) updatePolr(report *v1alpha2.ClusterPolicyReport, force bool
 	return c.store.ClusterPolicyReports().Update(context.TODO(), *report)
 }
 
-func (c *cpolrStore) deletePolr(report *v1alpha2.ClusterPolicyReport) error {
+func (c *cpolrStore) deleteCpolr(report *v1alpha2.ClusterPolicyReport) error {
 	return c.store.ClusterPolicyReports().Delete(context.TODO(), report.Name)
 }

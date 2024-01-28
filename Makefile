@@ -118,6 +118,7 @@ codegen-openapi: $(PACKAGE_SHIM) $(OPENAPI_GEN) ## Generate openapi
 		-i k8s.io/apimachinery/pkg/types \
 		-i k8s.io/api/core/v1 \
 		-i sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2 \
+		-i github.com/kyverno/kyverno/api/reports/v1 \
 		-p ./pkg/api/generated/openapi \
 		-O zz_generated.openapi \
 		-h ./.hack/boilerplate.go.txt

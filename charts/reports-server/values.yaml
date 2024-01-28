@@ -9,6 +9,11 @@ postgresql:
 
     database: reportsdb
 
+ephemeralReportsStorage:
+
+  # -- Store ephemeral reports in reports-server
+  enabled: true
+
 # -- Name override
 nameOverride: ""
 

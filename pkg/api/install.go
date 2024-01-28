@@ -15,6 +15,7 @@
 package api
 
 import (
+	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/storage"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -37,24 +38,54 @@ func init() {
 	utilruntime.Must(v1alpha2.AddToScheme(Scheme))
 	utilruntime.Must(Scheme.SetVersionPriority(v1alpha2.SchemeGroupVersion))
 	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
+
+	utilruntime.Must(reportsv1.Install(Scheme))
+	utilruntime.Must(Scheme.SetVersionPriority(reportsv1.SchemeGroupVersion))
 }
 
-// Build constructs APIGroupInfo the wgpolicyk8s.io API group using the given getters.
-func Build(polr, cpolr rest.Storage) genericapiserver.APIGroupInfo {
+// BuildPolicyReports constructs APIGroupInfo the wgpolicyk8s.io API group using the given getters.
+func BuildPolicyReports(polr, cpolr rest.Storage) genericapiserver.APIGroupInfo {
 	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(v1alpha2.SchemeGroupVersion.Group, Scheme, metav1.ParameterCodec, Codecs)
-	policyServerResources := map[string]rest.Storage{
+	policyReportsResources := map[string]rest.Storage{
 		"policyreports":        polr,
 		"clusterpolicyreports": cpolr,
 	}
-	apiGroupInfo.VersionedResourcesStorageMap[v1alpha2.SchemeGroupVersion.Version] = policyServerResources
+	apiGroupInfo.VersionedResourcesStorageMap[v1alpha2.SchemeGroupVersion.Version] = policyReportsResources
 
 	return apiGroupInfo
 }
 
-// Install builds the metrics for the wgpolicyk8s.io API, and then installs it into the given API reports-server.
+// BuildEphemeralReports constructs APIGroupInfo the reports.kyverno.io API group using the given getters.
+func BuildEphemeralReports(ephr, cephr rest.Storage) genericapiserver.APIGroupInfo {
+	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(reportsv1.SchemeGroupVersion.Group, Scheme, metav1.ParameterCodec, Codecs)
+	ephemeralReportsResources := map[string]rest.Storage{
+		"ephemeralreports":        ephr,
+		"clusterephemeralreports": cephr,
+	}
+	apiGroupInfo.VersionedResourcesStorageMap[reportsv1.SchemeGroupVersion.Version] = ephemeralReportsResources
+
+	return apiGroupInfo
+}
+
+// Install builds the reports for the wgpolicyk8s.io and reports.kyverno.io API, and then installs it into the given API reports-server.
 func Install(store storage.Interface, server *genericapiserver.GenericAPIServer) error {
 	polr := PolicyReportStore(store)
 	cpolr := ClusterPolicyReportStore(store)
-	info := Build(polr, cpolr)
-	return server.InstallAPIGroup(&info)
+
+	polrInfo := BuildPolicyReports(polr, cpolr)
+	err := server.InstallAPIGroup(&polrInfo)
+	if err != nil {
+		return err
+	}
+
+	ephr := EphemeralReportStore(store)
+	cephr := ClusterEphemeralReportStore(store)
+
+	ephrInfo := BuildEphemeralReports(ephr, cephr)
+	err = server.InstallAPIGroup(&ephrInfo)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
