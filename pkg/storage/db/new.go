@@ -39,11 +39,25 @@ func New(config *PostgresConfig) (api.Storage, error) {
 		return nil, err
 	}
 
+	ephrstore, err := NewEphemeralReportStore(db)
+	if err != nil {
+		klog.Error("failed to start policy report store", err.Error())
+		return nil, err
+	}
+
+	cephrstore, err := NewClusterEphemeralReportStore(db)
+	if err != nil {
+		klog.Error("failed to start cluster policy report store", err.Error())
+		return nil, err
+	}
+
 	klog.Info("successfully setup storage")
 	return &postgresstore{
 		db:         db,
 		polrstore:  polrstore,
 		cpolrstore: cpolrstore,
+		ephrstore:  ephrstore,
+		cephrstore: cephrstore,
 	}, nil
 }
 
@@ -51,6 +65,8 @@ type postgresstore struct {
 	db         *sql.DB
 	polrstore  api.PolicyReportsInterface
 	cpolrstore api.ClusterPolicyReportsInterface
+	ephrstore  api.EphemeralReportsInterface
+	cephrstore api.ClusterEphemeralReportsInterface
 }
 
 func (p *postgresstore) ClusterPolicyReports() api.ClusterPolicyReportsInterface {
@@ -59,6 +75,14 @@ func (p *postgresstore) ClusterPolicyReports() api.ClusterPolicyReportsInterface
 
 func (p *postgresstore) PolicyReports() api.PolicyReportsInterface {
 	return p.polrstore
+}
+
+func (p *postgresstore) ClusterEphemeralReports() api.ClusterEphemeralReportsInterface {
+	return p.cephrstore
+}
+
+func (p *postgresstore) EphemeralReports() api.EphemeralReportsInterface {
+	return p.ephrstore
 }
 
 func (p *postgresstore) Ready() bool {

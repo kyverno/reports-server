@@ -25,6 +25,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | postgresql.enabled | bool | `true` | Deploy postgresql dependency chart |
 | postgresql.auth.postgresPassword | string | `"reports"` |  |
 | postgresql.auth.database | string | `"reportsdb"` |  |
+| ephemeralReportsStorage.enabled | bool | `true` | Store ephemeral reports in reports-server |
 | nameOverride | string | `""` | Name override |
 | fullnameOverride | string | `""` | Full name override |
 | replicaCount | int | `1` | Number of pod replicas |

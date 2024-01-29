@@ -49,7 +49,7 @@ func (c *cpolrdb) List(ctx context.Context) ([]v1alpha2.ClusterPolicyReport, err
 		var report v1alpha2.ClusterPolicyReport
 		err := json.Unmarshal([]byte(jsonb), &report)
 		if err != nil {
-			klog.ErrorS(err, "failed to unmarshal clusterpolocyreport")
+			klog.ErrorS(err, "failed to unmarshal clusterpolicyreport")
 			return nil, fmt.Errorf("clusterpolicyreport list: cannot convert jsonb to clusterpolicyreport: %v", err)
 		}
 		res = append(res, report)
