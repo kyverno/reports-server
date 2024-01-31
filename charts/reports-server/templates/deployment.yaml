@@ -53,7 +53,7 @@ spec:
             - --secure-port=4443
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: ghcr.io/vishal-chdhry/policy-server@sha256:e8d05ebd4639379d5797c9a81a281449d0394066e6b78295584eb5fc69b5c6d9
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: https
