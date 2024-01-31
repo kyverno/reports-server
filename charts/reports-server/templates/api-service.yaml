@@ -5,6 +5,7 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "reports-server.labels" . | nindent 4 }}
+    kube-aggregator.kubernetes.io/automanaged: "false"
 spec:
   group: wgpolicyk8s.io
   groupPriorityMinimum: 100
@@ -24,6 +25,7 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "reports-server.labels" . | nindent 4 }}
+    kube-aggregator.kubernetes.io/automanaged: "false"
 spec:
   group: reports.kyverno.io
   groupPriorityMinimum: 100

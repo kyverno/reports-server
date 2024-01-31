@@ -144,7 +144,7 @@ config:
   db:
 
     # -- Database host
-    host: reports-server-postgresql
+    host: ""
 
     # -- Database name
     name: reportsdb

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "reports-server.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "reports-server.labels" . | nindent 4 }}
 spec:
@@ -39,7 +40,11 @@ spec:
             {{- if .Values.config.debug }}
             - --debug
             {{- else }}
+            {{- if .Values.config.db.host }}
             - --dbhost={{ .Values.config.db.host }}
+            {{- else }}
+            - --dbhost={{ $.Release.Name }}-postgresql.{{ $.Release.Namespace }}
+            {{- end }}
             - --dbname={{ .Values.config.db.name }}
             - --dbuser={{ .Values.config.db.user }}
             - --dbpassword={{ .Values.config.db.password }}
@@ -48,7 +53,7 @@ spec:
             - --secure-port=4443
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: ghcr.io/vishal-chdhry/policy-server@sha256:e8d05ebd4639379d5797c9a81a281449d0394066e6b78295584eb5fc69b5c6d9
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: https
