@@ -24,7 +24,7 @@ func New(config *PostgresConfig) (api.Storage, error) {
 		return nil, err
 	}
 
-	var sleepDuration = 0 * time.Second
+	sleepDuration := 0 * time.Second
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		time.Sleep(sleepDuration)
 		klog.Infof("pinging postgres db, attempt: %d", attempt)
