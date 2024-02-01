@@ -10,14 +10,49 @@ metadata:
     {{- include "reports-server.labels" . | nindent 4 }}
 rules:
 - apiGroups:
-  - wgpolicyk8s.io
+    - reports.kyverno.io
   resources:
-  - policyreports
-  - clusterpolicyreports
+    - ephemeralreports
+    - clusterephemeralreports
   verbs:
-  - get
-  - list
-  - watch
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+    - deletecollection
+- apiGroups:
+    - wgpolicyk8s.io
+  resources:
+    - policyreports
+    - policyreports/status
+    - clusterpolicyreports
+    - clusterpolicyreports/status
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+    - deletecollection
+- apiGroups:
+    - ''
+    - events.k8s.io
+  resources:
+    - events
+  verbs:
+    - create
+    - patch
+- apiGroups:
+    - authorization.k8s.io
+  resources:
+    - subjectaccessreviews
+  verbs:
+    - create
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

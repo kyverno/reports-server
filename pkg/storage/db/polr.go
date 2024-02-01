@@ -72,11 +72,10 @@ func (p *polrdb) Get(ctx context.Context, name, namespace string) (v1alpha2.Poli
 
 	row := p.db.QueryRow("SELECT report FROM policyreports WHERE (namespace = $1) AND (name = $2)", namespace, name)
 	if err := row.Scan(&jsonb); err != nil {
+		klog.ErrorS(err, fmt.Sprintf("policyreport not found name=%s namespace=%s", name, namespace))
 		if err == sql.ErrNoRows {
-			klog.ErrorS(err, "policyreport not found")
 			return v1alpha2.PolicyReport{}, fmt.Errorf("policyreport get %s/%s: no such policy report: %v", namespace, name, err)
 		}
-		klog.ErrorS(err, "policyreport not found")
 		return v1alpha2.PolicyReport{}, fmt.Errorf("policyreport get %s/%s: %v", namespace, name, err)
 	}
 	var report v1alpha2.PolicyReport
