@@ -27,6 +27,8 @@ func addPolicyReportToTable(table *metav1beta1.Table, polrs ...v1alpha2.PolicyRe
 	for i, polr := range polrs {
 		table.ColumnDefinitions = []metav1beta1.TableColumnDefinition{
 			{Name: "Name", Type: "string", Format: "name", Description: "Name of the resource"},
+			{Name: "Kind", Type: "string", Format: "string"},
+			{Name: "Name", Type: "string", Format: "string"},
 			{Name: "Pass", Type: "integer", Format: "string"},
 			{Name: "Fail", Type: "integer", Format: "string"},
 			{Name: "Warn", Type: "integer", Format: "string"},
@@ -36,6 +38,8 @@ func addPolicyReportToTable(table *metav1beta1.Table, polrs ...v1alpha2.PolicyRe
 		}
 		row := make([]interface{}, 0, len(table.ColumnDefinitions))
 		row = append(row, polr.Name)
+		row = append(row, polr.Scope.Kind)
+		row = append(row, polr.Scope.Name)
 		row = append(row, polr.Summary.Pass)
 		row = append(row, polr.Summary.Fail)
 		row = append(row, polr.Summary.Warn)
@@ -53,6 +57,8 @@ func addClusterPolicyReportToTable(table *metav1beta1.Table, cpolrs ...v1alpha2.
 	for i, cpolr := range cpolrs {
 		table.ColumnDefinitions = []metav1beta1.TableColumnDefinition{
 			{Name: "Name", Type: "string", Format: "name", Description: "Name of the resource"},
+			{Name: "Kind", Type: "string", Format: "string"},
+			{Name: "Name", Type: "string", Format: "string"},
 			{Name: "Pass", Type: "integer", Format: "string"},
 			{Name: "Fail", Type: "integer", Format: "string"},
 			{Name: "Warn", Type: "integer", Format: "string"},
@@ -62,6 +68,8 @@ func addClusterPolicyReportToTable(table *metav1beta1.Table, cpolrs ...v1alpha2.
 		}
 		row := make([]interface{}, 0, len(table.ColumnDefinitions))
 		row = append(row, cpolr.Name)
+		row = append(row, cpolr.Scope.Kind)
+		row = append(row, cpolr.Scope.Name)
 		row = append(row, cpolr.Summary.Pass)
 		row = append(row, cpolr.Summary.Fail)
 		row = append(row, cpolr.Summary.Warn)
