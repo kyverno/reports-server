@@ -11,7 +11,7 @@ postgresql:
 
 apiServices:
 
-  # -- Store reports in reports-server 
+  # -- Store reports in reports-server
   enabled: true
 
   # -- Store ephemeral reports in reports-server
