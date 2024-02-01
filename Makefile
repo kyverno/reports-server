@@ -27,6 +27,11 @@ KO_VERSION                         := v0.14.1
 HELM                               := $(TOOLS_DIR)/helm
 HELM_VERSION                       := v3.10.1
 TOOLS                              := $(REGISTER_GEN) $(OPENAPI_GEN) $(KIND) $(KO) $(HELM)
+ifeq ($(GOOS), darwin)
+SED                                := gsed
+else
+SED                                := sed
+endif
 
 $(REGISTER_GEN):
 	@echo Install register-gen... >&2
@@ -129,10 +134,18 @@ codegen-helm-docs: ## Generate helm docs
 	@echo Generate helm docs... >&2
 	@docker run -v ${PWD}/charts:/work -w /work jnorwood/helm-docs:v1.11.0 -s file
 
+.PHONY: codegen-manifest-install-latest
+codegen-install-manifest: $(HELM) ## Create install manifest
+	@echo Generate latest install manifest... >&2
+	@$(HELM) template kyverno --namespace kyverno ./charts/reports-server/ \
+ 		| $(SED) -e '/^#.*/d' \
+		> ./config/install.yaml
+
 .PHONY: codegen
 codegen: ## Rebuild all generated code and docs
 codegen: codegen-helm-docs
 codegen: codegen-openapi
+codegen: codegen-install-manifest
 
 .PHONY: verify-codegen
 verify-codegen: codegen ## Verify all generated code and docs are up to date

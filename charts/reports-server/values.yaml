@@ -9,10 +9,13 @@ postgresql:
 
     database: reportsdb
 
-ephemeralReportsStorage:
+apiServices:
+
+  # -- Store reports in reports-server 
+  enabled: true
 
   # -- Store ephemeral reports in reports-server
-  enabled: true
+  installEphemeralReportsService: true
 
 # -- Name override
 nameOverride: ""
