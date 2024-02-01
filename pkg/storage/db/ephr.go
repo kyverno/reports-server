@@ -72,11 +72,10 @@ func (p *ephrdb) Get(ctx context.Context, name, namespace string) (reportsv1.Eph
 
 	row := p.db.QueryRow("SELECT report FROM ephemeralreports WHERE (namespace = $1) AND (name = $2)", namespace, name)
 	if err := row.Scan(&jsonb); err != nil {
+		klog.ErrorS(err, fmt.Sprintf("ephemeralreport not found name=%s namespace=%s", name, namespace))
 		if err == sql.ErrNoRows {
-			klog.ErrorS(err, "ephemeralreport not found")
 			return reportsv1.EphemeralReport{}, fmt.Errorf("ephemeralreport get %s/%s: no such ephemeral report: %v", namespace, name, err)
 		}
-		klog.ErrorS(err, "ephemeralreport not found")
 		return reportsv1.EphemeralReport{}, fmt.Errorf("ephemeralreport get %s/%s: %v", namespace, name, err)
 	}
 	var report reportsv1.EphemeralReport

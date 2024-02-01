@@ -67,8 +67,8 @@ func (c *cephr) Get(ctx context.Context, name string) (reportsv1.ClusterEphemera
 
 	row := c.db.QueryRow("SELECT report FROM clusterephemeralreports WHERE (name = $1)", name)
 	if err := row.Scan(&jsonb); err != nil {
+		klog.ErrorS(err, fmt.Sprintf("clusterephemeralreport not found name=%s", name))
 		if err == sql.ErrNoRows {
-			klog.ErrorS(err, "cluster ephemeral ephemeral report not found")
 			return reportsv1.ClusterEphemeralReport{}, fmt.Errorf("clusterephemeralreport get %s: no such ephemeral report", name)
 		}
 		return reportsv1.ClusterEphemeralReport{}, fmt.Errorf("clusterephemeralreport get %s: %v", name, err)
