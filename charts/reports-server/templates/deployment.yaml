@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "reports-server.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "reports-server.labels" . | nindent 4 }}
 spec:
@@ -39,7 +40,11 @@ spec:
             {{- if .Values.config.debug }}
             - --debug
             {{- else }}
+            {{- if .Values.config.db.host }}
             - --dbhost={{ .Values.config.db.host }}
+            {{- else }}
+            - --dbhost={{ $.Release.Name }}-postgresql.{{ $.Release.Namespace }}
+            {{- end }}
             - --dbname={{ .Values.config.db.name }}
             - --dbuser={{ .Values.config.db.user }}
             - --dbpassword={{ .Values.config.db.password }}

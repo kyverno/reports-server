@@ -56,7 +56,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | service.type | string | `"ClusterIP"` | Service type |
 | service.port | int | `443` | Service port |
 | config.debug | bool | `false` | Enable debug (to use inmemorydatabase) |
-| config.db.host | string | `"reports-server-postgresql"` | Database host |
+| config.db.host | string | `""` | Database host |
 | config.db.name | string | `"reportsdb"` | Database name |
 | config.db.user | string | `"postgres"` | Database user |
 | config.db.password | string | `"reports"` | Database password |
