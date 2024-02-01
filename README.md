@@ -43,4 +43,15 @@ kubectl apply -f config/install.yaml # todo: use a release url
 ```
 
 ### Helm Chart
-Reports server can be installed via the official Helm chart: -URL-
+Reports server can be installed via the official Helm chart:
+```shell
+helm install report-server --namespace kyverno --wait ./charts/reports-server/ # todo: use a offical helm chart
+```
+
+Note: if you already have wgpolicy CRDs or kyverno CRDs installed, you won't be able to install api services. Use the following command to install other components:
+
+```shell
+helm install report-server --namespace kyverno --wait ./charts/reports-server/ --set apiServices.enabled=false # todo: use a offical helm chart
+```
+
+Now you can update the [apiservice samples](./config/samples/apiservices.yaml) with the right reports-server name and namespace and apply that manifest.
