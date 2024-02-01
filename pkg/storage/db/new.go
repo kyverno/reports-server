@@ -1,12 +1,19 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/kyverno/reports-server/pkg/storage/api"
 	_ "github.com/lib/pq"
 	"k8s.io/klog/v2"
+)
+
+const (
+	maxRetries      = 10
+	backoffDuration = 15 * time.Second
 )
 
 func New(config *PostgresConfig) (api.Storage, error) {
@@ -17,7 +24,18 @@ func New(config *PostgresConfig) (api.Storage, error) {
 		return nil, err
 	}
 
-	klog.Info("pinging postgres db")
+	sleepDuration := 0 * time.Second
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		time.Sleep(sleepDuration)
+		klog.Infof("pinging postgres db, attempt: %d", attempt)
+		err := db.PingContext(context.TODO())
+		if err == nil {
+			break
+		}
+		klog.Error("failed to ping db", err.Error())
+		sleepDuration = sleepDuration + backoffDuration
+	}
+
 	err = db.Ping()
 	if err != nil {
 		klog.Error("failed to ping db", err.Error())
