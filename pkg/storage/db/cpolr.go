@@ -67,8 +67,8 @@ func (c *cpolrdb) Get(ctx context.Context, name string) (v1alpha2.ClusterPolicyR
 
 	row := c.db.QueryRow("SELECT report FROM clusterpolicyreports WHERE (name = $1)", name)
 	if err := row.Scan(&jsonb); err != nil {
+		klog.ErrorS(err, fmt.Sprintf("clusterpolicyreport not found name=%s", name))
 		if err == sql.ErrNoRows {
-			klog.ErrorS(err, "cluster policy report not found")
 			return v1alpha2.ClusterPolicyReport{}, fmt.Errorf("clusterpolicyreport get %s: no such policy report", name)
 		}
 		return v1alpha2.ClusterPolicyReport{}, fmt.Errorf("clusterpolicyreport get %s: %v", name, err)
