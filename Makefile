@@ -137,7 +137,7 @@ codegen-helm-docs: ## Generate helm docs
 .PHONY: codegen-manifest-install-latest
 codegen-install-manifest: $(HELM) ## Create install manifest
 	@echo Generate latest install manifest... >&2
-	@$(HELM) template kyverno --namespace kyverno ./charts/reports-server/ \
+	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
  		| $(SED) -e '/^#.*/d' \
 		> ./config/install.yaml
 
