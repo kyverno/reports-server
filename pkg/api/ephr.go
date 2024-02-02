@@ -63,6 +63,8 @@ func (p *ephrStore) List(ctx context.Context, options *metainternalversion.ListO
 		// }
 	}
 	namespace := genericapirequest.NamespaceValue(ctx)
+
+	klog.Infof("listing ephemeral reports for namespace=%s", namespace)
 	list, err := p.listEphr(namespace)
 	if err != nil {
 		return nil, errors.NewBadRequest("failed to list resource ephemeralreport")
@@ -89,6 +91,8 @@ func (p *ephrStore) List(ctx context.Context, options *metainternalversion.ListO
 
 func (p *ephrStore) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
 	namespace := genericapirequest.NamespaceValue(ctx)
+
+	klog.Infof("getting ephemeral reports name=%s namespace=%s", name, namespace)
 	report, err := p.getEphr(name, namespace)
 	if err != nil || report == nil {
 		return nil, errors.NewNotFound(reportsv1.Resource("ephemeralreports"), name)
@@ -119,10 +123,12 @@ func (p *ephrStore) Create(ctx context.Context, obj runtime.Object, createValida
 	}
 
 	namespace := genericapirequest.NamespaceValue(ctx)
+
 	if len(ephr.Namespace) == 0 {
 		ephr.Namespace = namespace
 	}
 
+	klog.Infof("creating ephemeral reports name=%s namespace=%s", ephr.Name, ephr.Namespace)
 	if !isDryRun {
 		err := p.createEphr(ephr)
 		if err != nil {
@@ -185,6 +191,7 @@ func (p *ephrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		ephr.Namespace = namespace
 	}
 
+	klog.Infof("updating ephemeral reports name=%s namespace=%s", ephr.Name, ephr.Namespace)
 	if !isDryRun {
 		err := p.updateEphr(ephr, false)
 		if err != nil {
@@ -214,6 +221,7 @@ func (p *ephrStore) Delete(ctx context.Context, name string, deleteValidation re
 		return nil, false, errors.NewBadRequest(fmt.Sprintf("invalid resource: %s", err.Error()))
 	}
 
+	klog.Infof("deleting ephemeral reports name=%s namespace=%s", ephr.Name, ephr.Namespace)
 	if !isDryRun {
 		err = p.deleteEphr(ephr)
 		if err != nil {

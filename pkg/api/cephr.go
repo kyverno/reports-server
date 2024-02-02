@@ -61,6 +61,7 @@ func (c *cephrStore) List(ctx context.Context, options *metainternalversion.List
 		// 	fieldSelector = options.FieldSelector
 		// }
 	}
+	klog.Infof("listing cluster ephemeral reports")
 	list, err := c.listCephr()
 	if err != nil {
 		return nil, errors.NewBadRequest("failed to list resource clusterephemeralreport")
@@ -86,6 +87,7 @@ func (c *cephrStore) List(ctx context.Context, options *metainternalversion.List
 }
 
 func (c *cephrStore) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
+	klog.Infof("getting cluster ephemeral reports name=%s", name)
 	report, err := c.getCephr(name)
 	if err != nil || report == nil {
 		return nil, errors.NewNotFound(reportsv1.Resource("clusterephemeralreports"), name)
@@ -115,6 +117,7 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 		return nil, errors.NewBadRequest("failed to validate cluster ephemeral report")
 	}
 
+	klog.Infof("creating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
 		if err := c.createCephr(cephr); err != nil {
 			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create cluster ephemeral report: %s", err.Error()))
@@ -171,8 +174,9 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		return nil, false, errors.NewBadRequest("failed to validate cluster ephemeral report")
 	}
 
+	klog.Infof("updating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
-		if err := c.createCephr(cephr); err != nil {
+		if err := c.updateCephr(cephr, false); err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create cluster ephemeral report: %s", err.Error()))
 		}
 		if err := c.broadcaster.Action(watch.Modified, updatedObject); err != nil {
@@ -198,6 +202,7 @@ func (c *cephrStore) Delete(ctx context.Context, name string, deleteValidation r
 		return nil, false, errors.NewBadRequest(fmt.Sprintf("invalid resource: %s", err.Error()))
 	}
 
+	klog.Infof("deleting cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
 		if err = c.deleteCephr(cephr); err != nil {
 			klog.ErrorS(err, "failed to delete cephr", "name", name)

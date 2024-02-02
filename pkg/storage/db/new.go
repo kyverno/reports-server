@@ -13,7 +13,7 @@ import (
 
 const (
 	maxRetries      = 10
-	backoffDuration = 15 * time.Second
+	backoffDuration = 30 * time.Second
 )
 
 func New(config *PostgresConfig) (api.Storage, error) {
@@ -24,7 +24,7 @@ func New(config *PostgresConfig) (api.Storage, error) {
 		return nil, err
 	}
 
-	sleepDuration := 0 * time.Second
+	sleepDuration := 30 * time.Second
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		time.Sleep(sleepDuration)
 		klog.Infof("pinging postgres db, attempt: %d", attempt)

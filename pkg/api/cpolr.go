@@ -61,6 +61,7 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 		// 	fieldSelector = options.FieldSelector
 		// }
 	}
+	klog.Infof("listing all cluster policy reports")
 	list, err := c.listCpolr()
 	if err != nil {
 		return nil, errors.NewBadRequest("failed to list resource clusterpolicyreport")
@@ -86,6 +87,7 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 }
 
 func (c *cpolrStore) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
+	klog.Infof("fetching cluster policy report name=%s", name)
 	report, err := c.getCpolr(name)
 	if err != nil || report == nil {
 		return nil, errors.NewNotFound(v1alpha2.Resource("clusterpolicyreports"), name)
@@ -115,6 +117,7 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 		return nil, errors.NewBadRequest("failed to validate cluster policy report")
 	}
 
+	klog.Infof("creating cluster policy report name=%s", cpolr.Name)
 	if !isDryRun {
 		if err := c.createCpolr(cpolr); err != nil {
 			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create cluster policy report: %s", err.Error()))
@@ -171,8 +174,9 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		return nil, false, errors.NewBadRequest("failed to validate cluster policy report")
 	}
 
+	klog.Infof("updating cluster policy report name=%s", cpolr.Name)
 	if !isDryRun {
-		if err := c.createCpolr(cpolr); err != nil {
+		if err := c.updateCpolr(cpolr, false); err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create cluster policy report: %s", err.Error()))
 		}
 		if err := c.broadcaster.Action(watch.Modified, updatedObject); err != nil {
@@ -198,6 +202,7 @@ func (c *cpolrStore) Delete(ctx context.Context, name string, deleteValidation r
 		return nil, false, errors.NewBadRequest(fmt.Sprintf("invalid resource: %s", err.Error()))
 	}
 
+	klog.Infof("deleting cluster policy report name=%s", cpolr.Name)
 	if !isDryRun {
 		if err = c.deleteCpolr(cpolr); err != nil {
 			klog.ErrorS(err, "failed to delete cpolr", "name", name)

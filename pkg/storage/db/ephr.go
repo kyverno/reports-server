@@ -39,8 +39,14 @@ func (p *ephrdb) List(ctx context.Context, namespace string) ([]reportsv1.Epheme
 	klog.Infof("listing all values for namespace:%s", namespace)
 	res := make([]reportsv1.EphemeralReport, 0)
 	var jsonb string
+	var rows *sql.Rows
+	var err error
 
-	rows, err := p.db.Query("SELECT report FROM ephemeralreports WHERE namespace = $1", namespace)
+	if len(namespace) == 0 {
+		rows, err = p.db.Query("SELECT report FROM ephemeralreports")
+	} else {
+		rows, err = p.db.Query("SELECT report FROM ephemeralreports WHERE namespace = $1", namespace)
+	}
 	if err != nil {
 		klog.ErrorS(err, "ephemeralreport list: ")
 		return nil, fmt.Errorf("ephemeralreport list %q: %v", namespace, err)
