@@ -134,18 +134,26 @@ codegen-helm-docs: ## Generate helm docs
 	@echo Generate helm docs... >&2
 	@docker run -v ${PWD}/charts:/work -w /work jnorwood/helm-docs:v1.11.0 -s file
 
-.PHONY: codegen-manifest-install-latest
+.PHONY: codegen-install-manifest
 codegen-install-manifest: $(HELM) ## Create install manifest
 	@echo Generate latest install manifest... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
  		| $(SED) -e '/^#.*/d' \
 		> ./config/install.yaml
 
+.PHONY: codegen-manifest-debug
+codegen-debug-manifest: $(HELM) ## Create debug manifest
+	@echo Generate debug manifest... >&2
+	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ --set image.tag=latest \
+ 		| $(SED) -e '/^#.*/d' \
+		> ./config/debug.yaml
+
 .PHONY: codegen
 codegen: ## Rebuild all generated code and docs
 codegen: codegen-helm-docs
 codegen: codegen-openapi
 codegen: codegen-install-manifest
+codegen: codegen-debug-manifest
 
 .PHONY: verify-codegen
 verify-codegen: codegen ## Verify all generated code and docs are up to date
