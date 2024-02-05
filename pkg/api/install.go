@@ -51,6 +51,7 @@ func BuildPolicyReports(polr, cpolr rest.Storage) genericapiserver.APIGroupInfo 
 		"clusterpolicyreports": cpolr,
 	}
 	apiGroupInfo.VersionedResourcesStorageMap[v1alpha2.SchemeGroupVersion.Version] = policyReportsResources
+	apiGroupInfo.NegotiatedSerializer = DefaultSubsetNegotiatedSerializer(Codecs)
 
 	return apiGroupInfo
 }
@@ -63,6 +64,7 @@ func BuildEphemeralReports(ephr, cephr rest.Storage) genericapiserver.APIGroupIn
 		"clusterephemeralreports": cephr,
 	}
 	apiGroupInfo.VersionedResourcesStorageMap[reportsv1.SchemeGroupVersion.Version] = ephemeralReportsResources
+	apiGroupInfo.NegotiatedSerializer = DefaultSubsetNegotiatedSerializer(Codecs)
 
 	return apiGroupInfo
 }
