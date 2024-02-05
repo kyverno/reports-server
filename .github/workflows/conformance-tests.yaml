@@ -42,6 +42,11 @@ jobs:
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version: ~1.21.1
+      - name: Install helm
+        id: helm
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Tools
         run: |
           set -e
@@ -64,8 +69,8 @@ jobs:
       - name: Install report server testing
         run: |
           set -e
-          kubectl create ns reports-server
-          kubectl create -f ./config/debug.yaml
+          export HELM=${{ steps.helm.outputs.helm-path }}
+          make kind-install
       - name: Wait for report server ready
         run: |
           set -e
