@@ -63,6 +63,8 @@ func (p *polrStore) List(ctx context.Context, options *metainternalversion.ListO
 		// }
 	}
 	namespace := genericapirequest.NamespaceValue(ctx)
+
+	klog.Infof("listing policy reports for namespace=%s", namespace)
 	list, err := p.listPolr(namespace)
 	if err != nil {
 		return nil, errors.NewBadRequest("failed to list resource policyreport")
@@ -89,6 +91,8 @@ func (p *polrStore) List(ctx context.Context, options *metainternalversion.ListO
 
 func (p *polrStore) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
 	namespace := genericapirequest.NamespaceValue(ctx)
+
+	klog.Infof("getting policy reports name=%s namespace=%s", name, namespace)
 	report, err := p.getPolr(name, namespace)
 	if err != nil || report == nil {
 		return nil, errors.NewNotFound(v1alpha2.Resource("policyreports"), name)
@@ -119,10 +123,12 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 	}
 
 	namespace := genericapirequest.NamespaceValue(ctx)
+
 	if len(polr.Namespace) == 0 {
 		polr.Namespace = namespace
 	}
 
+	klog.Infof("creating policy reports name=%s namespace=%s", polr.Name, polr.Namespace)
 	if !isDryRun {
 		err := p.createPolr(polr)
 		if err != nil {
@@ -185,6 +191,7 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		polr.Namespace = namespace
 	}
 
+	klog.Infof("updating policy reports name=%s namespace=%s", polr.Name, polr.Namespace)
 	if !isDryRun {
 		err := p.updatePolr(polr, false)
 		if err != nil {
@@ -214,6 +221,7 @@ func (p *polrStore) Delete(ctx context.Context, name string, deleteValidation re
 		return nil, false, errors.NewBadRequest(fmt.Sprintf("invalid resource: %s", err.Error()))
 	}
 
+	klog.Infof("deleting policy reports name=%s namespace=%s", polr.Name, polr.Namespace)
 	if !isDryRun {
 		err = p.deletePolr(polr)
 		if err != nil {

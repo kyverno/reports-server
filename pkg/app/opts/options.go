@@ -167,7 +167,7 @@ func (o Options) restConfig() (*rest.Config, error) {
 		return nil, fmt.Errorf("unable to construct lister client config: %v", err)
 	}
 
-	config.ContentType = "application/vnd.kubernetes.protobuf"
+	// config.ContentType = "application/vnd.kubernetes.protobuf"
 
 	err = rest.SetKubernetesDefaults(config)
 	if err != nil {

@@ -39,8 +39,15 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyR
 	klog.Infof("listing all values for namespace:%s", namespace)
 	res := make([]v1alpha2.PolicyReport, 0)
 	var jsonb string
+	var rows *sql.Rows
+	var err error
 
-	rows, err := p.db.Query("SELECT report FROM policyreports WHERE namespace = $1", namespace)
+	if len(namespace) == 0 {
+		rows, err = p.db.Query("SELECT report FROM policyreports")
+	} else {
+		rows, err = p.db.Query("SELECT report FROM policyreports WHERE namespace = $1", namespace)
+	}
+
 	if err != nil {
 		klog.ErrorS(err, "policyreport list: ")
 		return nil, fmt.Errorf("policyreport list %q: %v", namespace, err)
