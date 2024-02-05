@@ -143,7 +143,7 @@ codegen-helm-docs: ## Generate helm docs
 	@echo Generate helm docs... >&2
 	@docker run -v ${PWD}/charts:/work -w /work jnorwood/helm-docs:v1.11.0 -s file
 
-.PHONY: codegen-manifest-install-latest
+.PHONY: codegen-install-manifest
 codegen-install-manifest: $(HELM) ## Create install manifest
 	@echo Generate latest install manifest... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
