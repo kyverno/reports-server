@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  chainsaw:
+  required:
     strategy:
       fail-fast: false
       matrix:
@@ -95,10 +95,3 @@ jobs:
       - name: Debug failure
         if: failure()
         uses: ./.github/actions/failure-logs
-
-  required:
-    needs:
-      - chainsaw
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Conformance tests passed!"
