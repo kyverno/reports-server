@@ -5,7 +5,7 @@ go 1.21.4
 toolchain go1.21.5
 
 require (
-	github.com/kyverno/kyverno v1.5.0-rc1.0.20240129102419-3bf235925914
+	github.com/kyverno/kyverno v1.12.0-alpha.0
 	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
