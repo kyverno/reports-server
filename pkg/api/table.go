@@ -38,8 +38,15 @@ func addPolicyReportToTable(table *metav1beta1.Table, polrs ...v1alpha2.PolicyRe
 		}
 		row := make([]interface{}, 0, len(table.ColumnDefinitions))
 		row = append(row, polr.Name)
-		row = append(row, polr.Scope.Kind)
-		row = append(row, polr.Scope.Name)
+
+		if polr.Scope == nil {
+			row = append(row, "")
+			row = append(row, "")
+		} else {
+			row = append(row, polr.Scope.Kind)
+			row = append(row, polr.Scope.Name)
+		}
+
 		row = append(row, polr.Summary.Pass)
 		row = append(row, polr.Summary.Fail)
 		row = append(row, polr.Summary.Warn)
@@ -68,8 +75,15 @@ func addClusterPolicyReportToTable(table *metav1beta1.Table, cpolrs ...v1alpha2.
 		}
 		row := make([]interface{}, 0, len(table.ColumnDefinitions))
 		row = append(row, cpolr.Name)
-		row = append(row, cpolr.Scope.Kind)
-		row = append(row, cpolr.Scope.Name)
+
+		if cpolr.Scope == nil {
+			row = append(row, "")
+			row = append(row, "")
+		} else {
+			row = append(row, cpolr.Scope.Kind)
+			row = append(row, cpolr.Scope.Name)
+		}
+
 		row = append(row, cpolr.Summary.Pass)
 		row = append(row, cpolr.Summary.Fail)
 		row = append(row, cpolr.Summary.Warn)
