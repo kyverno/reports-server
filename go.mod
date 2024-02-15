@@ -9,7 +9,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
-	k8s.io/apimachinery v0.29.1
+	k8s.io/apimachinery v0.29.2
 	k8s.io/apiserver v0.29.1
 	k8s.io/client-go v0.29.1
 	k8s.io/component-base v0.29.1
