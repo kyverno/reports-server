@@ -7,7 +7,7 @@ permissions: {}
 on:
   push:
     tags:
-      - 'reports-server-chart-v*'
+      - 'reports-server-chart-*'
 
 jobs:
   helm-tests:
@@ -61,7 +61,7 @@ jobs:
       - name: Create charts tmp directory
         run: |
           mkdir charts-tmp
-          if [[ "$RELEASE_VERSION" = "reports-server-chart-v"* ]]; then
+          if [[ "$RELEASE_VERSION" = "reports-server-chart-"* ]]; then
             cp -a charts/reports-server charts-tmp/reports-server
           fi
 
