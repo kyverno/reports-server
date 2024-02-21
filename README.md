@@ -23,7 +23,7 @@ Benefits of reports server:
 
 ## Installation
 
-reports server can be installed in a test cluster, directly from the YAML manifest or via the official Helm chart. 
+The reports server can be installed in a test cluster, directly from the YAML manifest or via the official Helm chart. 
 
 ### Local Install
 To locally install the reports server, run the following command:
