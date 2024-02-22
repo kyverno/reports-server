@@ -7,7 +7,7 @@ If kyverno is already installed in the cluster, follow the [migration guide](#mi
 Reports-server comes with a postgreSQL database. It is recommended to bring-your-own postgres database to have finer control of database configurations ([see database configuration guide](#database-configuration)).
 
 ### YAML Manifest
-It is recommended to install Reports-server using `kubectl apply`, especially when you have policy reports CRDs installed in your cluster ([see migration guide](#migration)). To install reports server using YAML manifest, run the following command:
+It is recommended to install Reports-server using `kubectl apply`, especially when policy reports CRDs are already installed in the cluster ([see migration guide](#migration)). To install reports server using YAML manifest, run the following command:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kyverno/reports-server/main/config/install.yaml
@@ -57,8 +57,6 @@ Build docker images, load images in kind cluster, and deploy helm chart
 ```bash
 make kind-install
 ```
-
-Note: If you already have kyverno installed in your cluster, you need to follow the [migration doc](#migration) to install reports-server.
 
 ## Migration 
 
