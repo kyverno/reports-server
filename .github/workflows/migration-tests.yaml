@@ -91,7 +91,7 @@ jobs:
       - name: Wait for kyverno to pick up the change
         run: |
           set -e
-          sleep 300
+          sleep 600
       - name: API Service status post migration
         run: |
           set -e
