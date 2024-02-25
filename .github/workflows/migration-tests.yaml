@@ -88,6 +88,10 @@ jobs:
           set -e
           kubectl wait --namespace reports-server --for=condition=ready pod --selector '!job-name' --timeout=120s
           kubectl wait --for condition="available" apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io --timeout=120s
+      - name: Wait for kyverno to pick up the change
+        run: |
+          set -e
+          sleep 300
       - name: API Service status post migration
         run: |
           set -e
