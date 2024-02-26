@@ -33,15 +33,16 @@ Optionally, show all available chart versions for reports-server.
 helm search repo reports-server --l
 ```
 
-You can install reports server in any namespace. This example uses `reports-server` as the namespace:
+Create a namespace and install the reports-server chart:
 
 ```bash
-kubectl create namespace reports-server
+helm install reports-server -n reports-server reports-server/reports-server --create-namespace
 ```
 
-Install the reports-server chart:
+To install pre-releases, add the --devel switch to Helm:
+
 ```bash
-helm install reports-server --namespace reports-server reports-server/reports-server --devel
+helm install reports-server -n reports-server reports-server/reports-server --create-namespace --devel
 ```
 
 ### Testing
