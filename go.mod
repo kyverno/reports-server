@@ -5,11 +5,11 @@ go 1.21.4
 toolchain go1.21.5
 
 require (
-	github.com/kyverno/kyverno v1.5.0-rc1.0.20240129102419-3bf235925914
+	github.com/kyverno/kyverno v1.12.0-alpha.1
 	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
-	k8s.io/apimachinery v0.29.1
+	k8s.io/apimachinery v0.29.2
 	k8s.io/apiserver v0.29.1
 	k8s.io/client-go v0.29.1
 	k8s.io/component-base v0.29.1
@@ -102,7 +102,7 @@ require (
 	k8s.io/kms v0.29.1 // indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.29.0 // indirect
-	sigs.k8s.io/controller-runtime v0.17.0 // indirect
+	sigs.k8s.io/controller-runtime v0.17.1 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
