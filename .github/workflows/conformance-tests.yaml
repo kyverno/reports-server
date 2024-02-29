@@ -88,7 +88,7 @@ jobs:
           set -e
           kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io
       - name: Install Chainsaw
-        uses: kyverno/action-install-chainsaw@204730d723e1fd712e54e069031290ba2c1c14bd # v0.1.6
+        uses: kyverno/action-install-chainsaw@3bf0752f44d348d859fefa022f113bda6a24a1ae # v0.1.7
         with:
           release: v0.0.9
       - name: Test with Chainsaw
