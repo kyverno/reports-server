@@ -145,15 +145,21 @@ config:
   debug: false
 
   db:
+    # If a secret is provided, values from the secret will be used instead of those set below.
+    secretName: ""
 
     # -- Database host
     host: ""
+    hostSecretKeyName: "host"
 
     # -- Database name
     name: reportsdb
+    dbNameSecretKeyName: "dbname"
 
     # -- Database user
     user: postgres
+    userSecretKeyName: "username"
 
     # -- Database password
     password: reports
+    passwordSecretKeyName: "password"
