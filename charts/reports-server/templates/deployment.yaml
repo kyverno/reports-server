@@ -49,22 +49,22 @@ spec:
             - --secure-port=4443
           {{- if .Values.config.db.secretName }}
           env:
-            - name: PG_HOST
+            - name: DB_HOST
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.config.db.hostSecretKeyName }}
                   name: {{ .Values.config.db.secretName }}
-            - name: PG_DATABASE
+            - name: DB_DATABASE
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.config.db.dbNameSecretKeyName }}
                   name: {{ .Values.config.db.secretName }}
-            - name: PG_USER
+            - name: DB_USER
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.config.db.userSecretKeyName }}
                   name: {{ .Values.config.db.secretName }}
-            - name: PG_PASSWORD
+            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.config.db.passwordSecretKeyName }}
