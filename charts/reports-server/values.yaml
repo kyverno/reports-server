@@ -145,21 +145,25 @@ config:
   debug: false
 
   db:
-    # If a secret is provided, values from the secret will be used instead of those set below.
+    # -- If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`.
     secretName: ""
 
     # -- Database host
     host: ""
+    # -- The database host will be read from this `key` in the specified Secret, when `db.secretName` is set.
     hostSecretKeyName: "host"
 
     # -- Database name
     name: reportsdb
+    # -- The database name will be read from this `key` in the specified Secret, when `db.secretName` is set.
     dbNameSecretKeyName: "dbname"
 
     # -- Database user
     user: postgres
+    # -- The database username will be read from this `key` in the specified Secret, when `db.secretName` is set.
     userSecretKeyName: "username"
 
     # -- Database password
     password: reports
+    # -- The database password will be read from this `key` in the specified Secret, when `db.secretName` is set.
     passwordSecretKeyName: "password"
