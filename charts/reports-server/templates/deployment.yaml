@@ -40,17 +40,36 @@ spec:
             {{- if .Values.config.debug }}
             - --debug
             {{- else }}
-            {{- if .Values.config.db.host }}
-            - --dbhost={{ .Values.config.db.host }}
-            {{- else }}
-            - --dbhost={{ $.Release.Name }}-postgresql.{{ $.Release.Namespace }}
-            {{- end }}
-            - --dbname={{ .Values.config.db.name }}
-            - --dbuser={{ .Values.config.db.user }}
-            - --dbpassword={{ .Values.config.db.password }}
+            - --dbhost={{ include "reports-server.dbHost" . }}
+            - --dbname={{ include "reports-server.dbName" . }}
+            - --dbuser={{ include "reports-server.dbUser" . }}
+            - --dbpassword={{ include "reports-server.dbPassword" . }}
             {{- end }}
             - --cert-dir=/tmp
             - --secure-port=4443
+          {{- if .Values.config.db.secretName }}
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.config.db.hostSecretKeyName }}
+                  name: {{ .Values.config.db.secretName }}
+            - name: DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.config.db.dbNameSecretKeyName }}
+                  name: {{ .Values.config.db.secretName }}
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.config.db.userSecretKeyName }}
+                  name: {{ .Values.config.db.secretName }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.config.db.passwordSecretKeyName }}
+                  name: {{ .Values.config.db.secretName }}
+          {{- end}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
