@@ -35,7 +35,7 @@ jobs:
         set -e
         make tests
     - name: Upload Report to Codecov
-      uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+      uses: codecov/codecov-action@6d798873df2b1b8e5846dba6fb86631229fbcb17 # v4.4.0
       with:
         files: ./coverage.out
         fail_ci_if_error: true
