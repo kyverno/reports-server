@@ -147,6 +147,7 @@ codegen-helm-docs: ## Generate helm docs
 codegen-install-manifest: $(HELM) ## Create install manifest
 	@echo Generate latest install manifest... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+		--set templating.enabled=true \
  		| $(SED) -e '/^#.*/d' \
 		> ./config/install.yaml
 
