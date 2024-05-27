@@ -151,11 +151,21 @@ codegen-install-manifest: $(HELM) ## Create install manifest
  		| $(SED) -e '/^#.*/d' \
 		> ./config/install.yaml
 
+codegen-install-manifest-inmemory: $(HELM) ## Create install manifest without postgres
+	@echo Generate latest install manifest... >&2
+	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+		--set config.debug=true \
+		--set postgresql.enabled=false \
+		--set templating.enabled=true \
+ 		| $(SED) -e '/^#.*/d' \
+		> ./config/install-inmemory.yaml
+
 .PHONY: codegen
 codegen: ## Rebuild all generated code and docs
 codegen: codegen-helm-docs
 codegen: codegen-openapi
 codegen: codegen-install-manifest
+codegen: codegen-install-manifest-inmemory
 
 .PHONY: verify-codegen
 verify-codegen: codegen ## Verify all generated code and docs are up to date
