@@ -194,6 +194,14 @@ kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and depl
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA)
 
+.PHONY: kind-apply
+kind-apply: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
+	@echo Install chart... >&2
+	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server \
+		--set image.registry=$(KO_REGISTRY) \
+		--set image.repository=$(PACKAGE) \
+		--set image.tag=$(GIT_SHA) \
+			| kubectl apply -f -
 ########
 # HELP #
 ########
