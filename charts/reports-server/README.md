@@ -71,6 +71,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.sslkey | string | `""` | Database SSL key |
 | config.db.sslcert | string | `""` | Database SSL cert |
 
+
 ## Source Code
 
 * <https://github.com/kyverno/reports-server>
