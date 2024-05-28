@@ -1,14 +1,14 @@
 apiVersion: v2
-name: policy-reports
+name: reports-server
 type: application
-version: 0.0.1
-appVersion: v0.0.1
+version: 0.1.0-alpha.1
+appVersion: v0.1.0-alpha.1
 keywords:
   - kubernetes
   - policy reports storage
   - postgresql
 sources:
-  - https://github.com/kyverno/policy-reports
+  - https://github.com/kyverno/reports-server
 maintainers:
   - name: Nirmata
     url: https://kyverno.io/

@@ -8,16 +8,16 @@ TODO
 
 ## Installing the Chart
 
-Add `policy-reports` Helm repository:
+Add `reports-server` Helm repository:
 
 ```shell
-helm repo add policy-reports https://kyverno.github.io/policy-reports/
+helm repo add reports-server https://kyverno.github.io/reports-server/
 ```
 
-Install `policy-reports` Helm chart:
+Install `reports-server` Helm chart:
 
 ```shell
-helm install policy-reports --namespace policy-reports --create-namespace policy-reports/policy-reports
+helm install reports-server --namespace reports-server --create-namespace reports-server/reports-server
 ```
 
 {{ template "chart.valuesSection" . }}

@@ -1,9 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "policy-reports.fullname" . }}
+  name: {{ include "reports-server.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "policy-reports.labels" . | nindent 4 }}
+    {{- include "reports-server.labels" . | nindent 4 }}
 spec:
   strategy:
     rollingUpdate:
@@ -13,7 +14,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "policy-reports.selectorLabels" . | nindent 6 }}
+      {{- include "reports-server.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -21,7 +22,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "policy-reports.selectorLabels" . | nindent 8 }}
+        {{- include "reports-server.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
@@ -30,7 +31,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "policy-reports.serviceAccountName" . }}
+      serviceAccountName: {{ include "reports-server.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -39,13 +40,40 @@ spec:
             {{- if .Values.config.debug }}
             - --debug
             {{- else }}
-            - --dbhost={{ .Values.config.db.host }}
-            - --dbname={{ .Values.config.db.name }}
-            - --dbuser={{ .Values.config.db.user }}
-            - --dbpassword={{ .Values.config.db.password }}
+            - --dbhost={{ include "reports-server.dbHost" . }}
+            - --dbname={{ include "reports-server.dbName" . }}
+            - --dbuser={{ include "reports-server.dbUser" . }}
+            - --dbpassword={{ include "reports-server.dbPassword" . }}
+            - --dbsslmode={{ .Values.config.db.sslmode }}
+            - --dbsslrootcert={{ .Values.config.db.sslrootcert }}
+            - --dbsslkey={{ .Values.config.db.sslkey }}
+            - --dbsslcert={{ .Values.config.db.sslcert }}
             {{- end }}
             - --cert-dir=/tmp
             - --secure-port=4443
+          {{- if .Values.config.db.secretName }}
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.config.db.hostSecretKeyName }}
+                  name: {{ .Values.config.db.secretName }}
+            - name: DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.config.db.dbNameSecretKeyName }}
+                  name: {{ .Values.config.db.secretName }}
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.config.db.userSecretKeyName }}
+                  name: {{ .Values.config.db.secretName }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.config.db.passwordSecretKeyName }}
+                  name: {{ .Values.config.db.secretName }}
+          {{- end}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

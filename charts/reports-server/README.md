@@ -1,21 +1,21 @@
-# policy-reports
+# reports-server
 
-![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.0.1](https://img.shields.io/badge/AppVersion-v0.0.1-informational?style=flat-square)
+![Version: 0.1.0-alpha.1](https://img.shields.io/badge/Version-0.1.0--alpha.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.0-alpha.1](https://img.shields.io/badge/AppVersion-v0.1.0--alpha.1-informational?style=flat-square)
 
 TODO
 
 ## Installing the Chart
 
-Add `policy-reports` Helm repository:
+Add `reports-server` Helm repository:
 
 ```shell
-helm repo add policy-reports https://kyverno.github.io/policy-reports/
+helm repo add reports-server https://kyverno.github.io/reports-server/
 ```
 
-Install `policy-reports` Helm chart:
+Install `reports-server` Helm chart:
 
 ```shell
-helm install policy-reports --namespace policy-reports --create-namespace policy-reports/policy-reports
+helm install reports-server --namespace reports-server --create-namespace reports-server/reports-server
 ```
 
 ## Values
@@ -25,11 +25,13 @@ helm install policy-reports --namespace policy-reports --create-namespace policy
 | postgresql.enabled | bool | `true` | Deploy postgresql dependency chart |
 | postgresql.auth.postgresPassword | string | `"reports"` |  |
 | postgresql.auth.database | string | `"reportsdb"` |  |
+| apiServices.enabled | bool | `true` | Store reports in reports-server |
+| apiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
 | nameOverride | string | `""` | Name override |
 | fullnameOverride | string | `""` | Full name override |
 | replicaCount | int | `1` | Number of pod replicas |
 | image.registry | string | `"ghcr.io"` | Image registry |
-| image.repository | string | `"kyverno/policy-reports"` | Image repository |
+| image.repository | string | `"kyverno/reports-server"` | Image repository |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.tag | string | `nil` | Image tag (will default to app version if not set) |
 | imagePullSecrets | list | `[]` | Image pull secrets |
@@ -55,14 +57,23 @@ helm install policy-reports --namespace policy-reports --create-namespace policy
 | service.type | string | `"ClusterIP"` | Service type |
 | service.port | int | `443` | Service port |
 | config.debug | bool | `false` | Enable debug (to use inmemorydatabase) |
-| config.db.host | string | `"policy-reports-postgresql"` | Database host |
+| config.db.secretName | string | `""` | If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`. |
+| config.db.host | string | `""` | Database host |
+| config.db.hostSecretKeyName | string | `"host"` | The database host will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.name | string | `"reportsdb"` | Database name |
+| config.db.dbNameSecretKeyName | string | `"dbname"` | The database name will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.user | string | `"postgres"` | Database user |
+| config.db.userSecretKeyName | string | `"username"` | The database username will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.password | string | `"reports"` | Database password |
+| config.db.passwordSecretKeyName | string | `"password"` | The database password will be read from this `key` in the specified Secret, when `db.secretName` is set. |
+| config.db.sslmode | string | `"disable"` | Database SSL |
+| config.db.sslrootcert | string | `""` | Database SSL root cert |
+| config.db.sslkey | string | `""` | Database SSL key |
+| config.db.sslcert | string | `""` | Database SSL cert |
 
 ## Source Code
 
-* <https://github.com/kyverno/policy-reports>
+* <https://github.com/kyverno/reports-server>
 
 ## Requirements
 

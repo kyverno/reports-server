@@ -5,12 +5,12 @@
 ##########
 
 ORG                                ?= kyverno
-PACKAGE                            ?= github.com/$(ORG)/policy-reports
+PACKAGE                            ?= github.com/$(ORG)/reports-server
 GIT_SHA                            := $(shell git rev-parse HEAD)
 GOOS                               ?= $(shell go env GOOS)
 GOARCH                             ?= $(shell go env GOARCH)
 REGISTRY                           ?= ghcr.io
-REPO                               ?= policy-reports
+REPO                               ?= reports-server
 
 #########
 # TOOLS #
@@ -27,6 +27,11 @@ KO_VERSION                         := v0.14.1
 HELM                               := $(TOOLS_DIR)/helm
 HELM_VERSION                       := v3.10.1
 TOOLS                              := $(REGISTER_GEN) $(OPENAPI_GEN) $(KIND) $(KO) $(HELM)
+ifeq ($(GOOS), darwin)
+SED                                := gsed
+else
+SED                                := sed
+endif
 
 $(REGISTER_GEN):
 	@echo Install register-gen... >&2
@@ -66,7 +71,7 @@ LOCAL_PLATFORM := linux/$(GOARCH)
 KO_REGISTRY    := ko.local
 KO_TAGS        := $(GIT_SHA)
 KO_CACHE       ?= /tmp/ko-cache
-BIN            := policy-reports
+BIN            := reports-server
 
 .PHONY: fmt
 fmt: ## Run go fmt
@@ -90,6 +95,15 @@ ko-build: $(KO) ## Build image (with ko)
 	@echo Build image with ko... >&2
 	@LDFLAGS=$(LD_FLAGS) KOCACHE=$(KO_CACHE) KO_DOCKER_REPO=$(KO_REGISTRY) \
 		$(KO) build . --preserve-import-paths --tags=$(KO_TAGS) --platform=$(LOCAL_PLATFORM)
+
+########
+# TEST #
+########
+
+.PHONY: tests
+tests: build ## Run tests
+	@echo Running tests... >&2
+	@go test ./... -race -coverprofile=coverage.out -covermode=atomic
 
 ###########
 # CODEGEN #
@@ -118,6 +132,8 @@ codegen-openapi: $(PACKAGE_SHIM) $(OPENAPI_GEN) ## Generate openapi
 		-i k8s.io/apimachinery/pkg/types \
 		-i k8s.io/api/core/v1 \
 		-i sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2 \
+		-i github.com/kyverno/kyverno/api/reports/v1 \
+		-i github.com/kyverno/kyverno/api/policyreport/v1alpha2 \
 		-p ./pkg/api/generated/openapi \
 		-O zz_generated.openapi \
 		-h ./.hack/boilerplate.go.txt
@@ -127,10 +143,18 @@ codegen-helm-docs: ## Generate helm docs
 	@echo Generate helm docs... >&2
 	@docker run -v ${PWD}/charts:/work -w /work jnorwood/helm-docs:v1.11.0 -s file
 
+.PHONY: codegen-install-manifest
+codegen-install-manifest: $(HELM) ## Create install manifest
+	@echo Generate latest install manifest... >&2
+	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+ 		| $(SED) -e '/^#.*/d' \
+		> ./config/install.yaml
+
 .PHONY: codegen
 codegen: ## Rebuild all generated code and docs
 codegen: codegen-helm-docs
 codegen: codegen-openapi
+codegen: codegen-install-manifest
 
 .PHONY: verify-codegen
 verify-codegen: codegen ## Verify all generated code and docs are up to date
@@ -165,7 +189,7 @@ kind-load: $(KIND) ko-build ## Build image and load in kind cluster
 .PHONY: kind-install
 kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
 	@echo Install chart... >&2
-	@$(HELM) upgrade --install policy-reports --namespace policy-reports --create-namespace --wait ./charts/policy-reports \
+	@$(HELM) upgrade --install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
 		--set image.registry=$(KO_REGISTRY) \
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA)

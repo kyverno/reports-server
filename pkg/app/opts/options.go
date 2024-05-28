@@ -5,10 +5,10 @@ import (
 	"net"
 	"strings"
 
-	"github.com/kyverno/policy-reports/pkg/api"
-	generatedopenapi "github.com/kyverno/policy-reports/pkg/api/generated/openapi"
-	"github.com/kyverno/policy-reports/pkg/server"
-	"github.com/kyverno/policy-reports/pkg/storage/db"
+	"github.com/kyverno/reports-server/pkg/api"
+	generatedopenapi "github.com/kyverno/reports-server/pkg/api/generated/openapi"
+	"github.com/kyverno/reports-server/pkg/server"
+	"github.com/kyverno/reports-server/pkg/storage/db"
 	openapinamer "k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
@@ -33,11 +33,17 @@ type Options struct {
 	ShowVersion bool
 	Debug       bool
 	Kubeconfig  string
-	DBHost      string
-	DBPort      int
-	DBUser      string
-	DBPassword  string
-	DBName      string
+
+	// dbopts
+	DBHost        string
+	DBPort        int
+	DBUser        string
+	DBPassword    string
+	DBName        string
+	DBSSLMode     string
+	DBSSLRootCert string
+	DBSSLKey      string
+	DBSSLCert     string
 
 	// Only to be used to for testing
 	DisableAuthForTesting bool
@@ -67,6 +73,10 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.StringVar(&o.DBUser, "dbuser", "postgres", "Username to login into postgres")
 	msfs.StringVar(&o.DBPassword, "dbpassword", "password", "Password to login into postgres")
 	msfs.StringVar(&o.DBName, "dbname", "reportsdb", "Name of the database to store policy reports in")
+	msfs.StringVar(&o.DBSSLMode, "dbsslmode", "disable", "SSL mode of the postgres database.")
+	msfs.StringVar(&o.DBSSLRootCert, "dbsslrootcert", "", "Path to database root cert.")
+	msfs.StringVar(&o.DBSSLKey, "dbsslkey", "", "Path to database ssl key.")
+	msfs.StringVar(&o.DBSSLCert, "dbsslcert", "", "Path to database ssl cert.")
 
 	o.SecureServing.AddFlags(fs.FlagSet("apiserver secure serving"))
 	o.Authentication.AddFlags(fs.FlagSet("apiserver authentication"))
@@ -78,7 +88,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	return fs
 }
 
-// NewOptions constructs a new set of default options for policy-reports.
+// NewOptions constructs a new set of default options for reports-server.
 func NewOptions() *Options {
 	return &Options{
 		SecureServing:  genericoptions.NewSecureServingOptions().WithLoopback(),
@@ -101,11 +111,15 @@ func (o Options) ServerConfig() (*server.Config, error) {
 	}
 
 	dbconfig := &db.PostgresConfig{
-		Host:     o.DBHost,
-		Port:     o.DBPort,
-		User:     o.DBUser,
-		Password: o.DBPassword,
-		DBname:   o.DBName,
+		Host:        o.DBHost,
+		Port:        o.DBPort,
+		User:        o.DBUser,
+		Password:    o.DBPassword,
+		DBname:      o.DBName,
+		SSLMode:     o.DBSSLMode,
+		SSLRootCert: o.DBSSLRootCert,
+		SSLKey:      o.DBSSLKey,
+		SSLCert:     o.DBSSLCert,
 	}
 
 	return &server.Config{
@@ -144,8 +158,8 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	// enable OpenAPI schemas
 	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(generatedopenapi.GetOpenAPIDefinitions, openapinamer.NewDefinitionNamer(api.Scheme))
 	serverConfig.OpenAPIV3Config = genericapiserver.DefaultOpenAPIV3Config(generatedopenapi.GetOpenAPIDefinitions, openapinamer.NewDefinitionNamer(api.Scheme))
-	serverConfig.OpenAPIConfig.Info.Title = "policy-reports"
-	serverConfig.OpenAPIV3Config.Info.Title = "policy-reports"
+	serverConfig.OpenAPIConfig.Info.Title = "reports-server"
+	serverConfig.OpenAPIV3Config.Info.Title = "reports-server"
 	serverConfig.OpenAPIConfig.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0] // TODO(directxman12): remove this once autosetting this doesn't require security definitions
 	serverConfig.OpenAPIV3Config.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0]
 
@@ -167,7 +181,8 @@ func (o Options) restConfig() (*rest.Config, error) {
 		return nil, fmt.Errorf("unable to construct lister client config: %v", err)
 	}
 
-	config.ContentType = "application/vnd.kubernetes.protobuf"
+	// config.ContentType = "application/json"
+	// config.AcceptContentTypes = "application/json,application/vnd.kubernetes.protobuf"
 
 	err = rest.SetKubernetesDefaults(config)
 	if err != nil {

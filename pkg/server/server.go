@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyverno/policy-reports/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/storage"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/apiserver/pkg/server/healthz"
 	"k8s.io/component-base/metrics"

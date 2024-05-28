@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/kyverno/policy-reports/pkg/storage/api"
+	"github.com/kyverno/reports-server/pkg/storage/api"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
@@ -39,8 +39,15 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyR
 	klog.Infof("listing all values for namespace:%s", namespace)
 	res := make([]v1alpha2.PolicyReport, 0)
 	var jsonb string
+	var rows *sql.Rows
+	var err error
 
-	rows, err := p.db.Query("SELECT report FROM policyreports WHERE namespace = $1", namespace)
+	if len(namespace) == 0 {
+		rows, err = p.db.Query("SELECT report FROM policyreports")
+	} else {
+		rows, err = p.db.Query("SELECT report FROM policyreports WHERE namespace = $1", namespace)
+	}
+
 	if err != nil {
 		klog.ErrorS(err, "policyreport list: ")
 		return nil, fmt.Errorf("policyreport list %q: %v", namespace, err)
@@ -72,11 +79,10 @@ func (p *polrdb) Get(ctx context.Context, name, namespace string) (v1alpha2.Poli
 
 	row := p.db.QueryRow("SELECT report FROM policyreports WHERE (namespace = $1) AND (name = $2)", namespace, name)
 	if err := row.Scan(&jsonb); err != nil {
+		klog.ErrorS(err, fmt.Sprintf("policyreport not found name=%s namespace=%s", name, namespace))
 		if err == sql.ErrNoRows {
-			klog.ErrorS(err, "policyreport not found")
 			return v1alpha2.PolicyReport{}, fmt.Errorf("policyreport get %s/%s: no such policy report: %v", namespace, name, err)
 		}
-		klog.ErrorS(err, "policyreport not found")
 		return v1alpha2.PolicyReport{}, fmt.Errorf("policyreport get %s/%s: %v", namespace, name, err)
 	}
 	var report v1alpha2.PolicyReport
