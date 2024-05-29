@@ -94,9 +94,9 @@ func Install(store storage.Interface, server *genericapiserver.GenericAPIServer)
 }
 
 func installWgPolicyTypesInternal(s *runtime.Scheme) error {
-	var SchemeGroupVersion = schema.GroupVersion{Group: "wgpolicyk8s.io", Version: runtime.APIVersionInternal}
+	schemeGroupVersion := schema.GroupVersion{Group: "wgpolicyk8s.io", Version: runtime.APIVersionInternal}
 	addKnownTypes := func(scheme *runtime.Scheme) error {
-		scheme.AddKnownTypes(SchemeGroupVersion,
+		scheme.AddKnownTypes(schemeGroupVersion,
 			&v1alpha2.ClusterPolicyReport{},
 			&v1alpha2.PolicyReport{},
 			&v1alpha2.ClusterPolicyReportList{},
@@ -104,7 +104,7 @@ func installWgPolicyTypesInternal(s *runtime.Scheme) error {
 		)
 		return nil
 	}
-	SchemeBuilder := runtime.NewSchemeBuilder(addKnownTypes)
-	utilruntime.Must(SchemeBuilder.AddToScheme(s))
+	schemeBuilder := runtime.NewSchemeBuilder(addKnownTypes)
+	utilruntime.Must(schemeBuilder.AddToScheme(s))
 	return nil
 }
