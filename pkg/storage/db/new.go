@@ -16,7 +16,7 @@ const (
 	sleepDuration = 15 * time.Second
 )
 
-func New(config *PostgresConfig) (api.Storage, error) {
+func New(config *PostgresConfig, clusterId string) (api.Storage, error) {
 	klog.Infof("starting postgres db, config: %s", config.String())
 	db, err := sql.Open("postgres", config.String())
 	if err != nil {
@@ -43,25 +43,25 @@ func New(config *PostgresConfig) (api.Storage, error) {
 	klog.Info("successfully connected to db")
 
 	klog.Info("starting reports store")
-	polrstore, err := NewPolicyReportStore(db)
+	polrstore, err := NewPolicyReportStore(db, clusterId)
 	if err != nil {
 		klog.Error("failed to start policy report store", err.Error())
 		return nil, err
 	}
 
-	cpolrstore, err := NewClusterPolicyReportStore(db)
+	cpolrstore, err := NewClusterPolicyReportStore(db, clusterId)
 	if err != nil {
 		klog.Error("failed to start cluster policy report store", err.Error())
 		return nil, err
 	}
 
-	ephrstore, err := NewEphemeralReportStore(db)
+	ephrstore, err := NewEphemeralReportStore(db, clusterId)
 	if err != nil {
 		klog.Error("failed to start policy report store", err.Error())
 		return nil, err
 	}
 
-	cephrstore, err := NewClusterEphemeralReportStore(db)
+	cephrstore, err := NewClusterEphemeralReportStore(db, clusterId)
 	if err != nil {
 		klog.Error("failed to start cluster policy report store", err.Error())
 		return nil, err
