@@ -133,11 +133,18 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
 
+	oldObj, err := c.getCephr(name)
+	if err != nil && !forceAllowCreate {
+		return nil, false, err
+	}
+
+	updatedObject, err := objInfo.UpdatedObject(ctx, oldObj)
+	if err != nil && !forceAllowCreate {
+		return nil, false, err
+	}
+	cephr := updatedObject.(*reportsv1.ClusterEphemeralReport)
 	if forceAllowCreate {
-		oldObj, _ := c.getCephr(name)
-		updatedObject, _ := objInfo.UpdatedObject(ctx, oldObj)
-		cephr := updatedObject.(*reportsv1.ClusterEphemeralReport)
-		if err := c.updateCephr(cephr, true); err != nil {
+		if err := c.updateCephr(cephr, oldObj); err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
 		if err := c.broadcaster.Action(watch.Added, updatedObject); err != nil {
@@ -146,15 +153,6 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		return updatedObject, true, nil
 	}
 
-	oldObj, err := c.getCephr(name)
-	if err != nil {
-		return nil, false, err
-	}
-
-	updatedObject, err := objInfo.UpdatedObject(ctx, oldObj)
-	if err != nil {
-		return nil, false, err
-	}
 	err = updateValidation(ctx, updatedObject, oldObj)
 	if err != nil {
 		switch options.FieldValidation {
@@ -176,7 +174,7 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 
 	klog.Infof("updating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
-		if err := c.updateCephr(cephr, false); err != nil {
+		if err := c.updateCephr(cephr, oldObj); err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create cluster ephemeral report: %s", err.Error()))
 		}
 		if err := c.broadcaster.Action(watch.Modified, updatedObject); err != nil {
@@ -312,21 +310,12 @@ func (c *cephrStore) createCephr(report *reportsv1.ClusterEphemeralReport) error
 	return c.store.ClusterEphemeralReports().Create(context.TODO(), *report)
 }
 
-func (c *cephrStore) updateCephr(report *reportsv1.ClusterEphemeralReport, force bool) error {
-	if !force {
-		oldReport, err := c.getCephr(report.GetName())
-		if err != nil {
-			return errorpkg.Wrapf(err, "old cluster ephemeral report not found")
-		}
-		oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
-		if err != nil {
-			return errorpkg.Wrapf(err, "could not parse resource version")
-		}
-
-		report.ResourceVersion = fmt.Sprint(oldRV + 1)
-	} else {
-		report.ResourceVersion = "1"
+func (c *cephrStore) updateCephr(report *reportsv1.ClusterEphemeralReport, oldReport *reportsv1.ClusterEphemeralReport) error {
+	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
+	if err != nil {
+		return errorpkg.Wrapf(err, "could not parse resource version")
 	}
+	report.ResourceVersion = fmt.Sprint(oldRV + 1)
 
 	return c.store.ClusterEphemeralReports().Update(context.TODO(), *report)
 }

@@ -146,11 +146,19 @@ func (p *ephrStore) Update(ctx context.Context, name string, objInfo rest.Update
 	isDryRun := slices.Contains(options.DryRun, "All")
 	namespace := genericapirequest.NamespaceValue(ctx)
 
+	oldObj, err := p.getEphr(name, namespace)
+	if err != nil && !forceAllowCreate {
+		return nil, false, err
+	}
+
+	updatedObject, err := objInfo.UpdatedObject(ctx, oldObj)
+	if err != nil && !forceAllowCreate {
+		return nil, false, err
+	}
+	ephr := updatedObject.(*reportsv1.EphemeralReport)
+
 	if forceAllowCreate {
-		oldObj, _ := p.getEphr(name, namespace)
-		updatedObject, _ := objInfo.UpdatedObject(ctx, oldObj)
-		ephr := updatedObject.(*reportsv1.EphemeralReport)
-		if err := p.updateEphr(ephr, true); err != nil {
+		if err := p.updateEphr(ephr, oldObj); err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
 		if err := p.broadcaster.Action(watch.Added, updatedObject); err != nil {
@@ -159,15 +167,6 @@ func (p *ephrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		return updatedObject, true, nil
 	}
 
-	oldObj, err := p.getEphr(name, namespace)
-	if err != nil {
-		return nil, false, err
-	}
-
-	updatedObject, err := objInfo.UpdatedObject(ctx, oldObj)
-	if err != nil {
-		return nil, false, err
-	}
 	err = updateValidation(ctx, updatedObject, oldObj)
 	if err != nil {
 		switch options.FieldValidation {
@@ -193,7 +192,7 @@ func (p *ephrStore) Update(ctx context.Context, name string, objInfo rest.Update
 
 	klog.Infof("updating ephemeral reports name=%s namespace=%s", ephr.Name, ephr.Namespace)
 	if !isDryRun {
-		err := p.updateEphr(ephr, false)
+		err := p.updateEphr(ephr, oldObj)
 		if err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create ephemeral report: %s", err.Error()))
 		}
@@ -333,21 +332,12 @@ func (p *ephrStore) createEphr(report *reportsv1.EphemeralReport) error {
 	return p.store.EphemeralReports().Create(context.TODO(), *report)
 }
 
-func (p *ephrStore) updateEphr(report *reportsv1.EphemeralReport, force bool) error {
-	if !force {
-		oldReport, err := p.getEphr(report.GetName(), report.Namespace)
-		if err != nil {
-			return errorpkg.Wrapf(err, "old ephemeral report not found")
-		}
-		oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
-		if err != nil {
-			return errorpkg.Wrapf(err, "could not parse resource version")
-		}
-
-		report.ResourceVersion = fmt.Sprint(oldRV + 1)
-	} else {
-		report.ResourceVersion = "1"
+func (p *ephrStore) updateEphr(report *reportsv1.EphemeralReport, oldReport *reportsv1.EphemeralReport) error {
+	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
+	if err != nil {
+		return errorpkg.Wrapf(err, "could not parse resource version")
 	}
+	report.ResourceVersion = fmt.Sprint(oldRV + 1)
 
 	return p.store.EphemeralReports().Update(context.TODO(), *report)
 }

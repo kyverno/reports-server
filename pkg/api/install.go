@@ -35,6 +35,7 @@ var (
 )
 
 func init() {
+	utilruntime.Must(installWgPolicyTypesInternal(Scheme))
 	utilruntime.Must(v1alpha2.AddToScheme(Scheme))
 	utilruntime.Must(Scheme.SetVersionPriority(v1alpha2.SchemeGroupVersion))
 	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
@@ -89,5 +90,21 @@ func Install(store storage.Interface, server *genericapiserver.GenericAPIServer)
 		return err
 	}
 
+	return nil
+}
+
+func installWgPolicyTypesInternal(s *runtime.Scheme) error {
+	var SchemeGroupVersion = schema.GroupVersion{Group: "wgpolicyk8s.io", Version: runtime.APIVersionInternal}
+	addKnownTypes := func(scheme *runtime.Scheme) error {
+		scheme.AddKnownTypes(SchemeGroupVersion,
+			&v1alpha2.ClusterPolicyReport{},
+			&v1alpha2.PolicyReport{},
+			&v1alpha2.ClusterPolicyReportList{},
+			&v1alpha2.PolicyReportList{},
+		)
+		return nil
+	}
+	SchemeBuilder := runtime.NewSchemeBuilder(addKnownTypes)
+	utilruntime.Must(SchemeBuilder.AddToScheme(s))
 	return nil
 }
