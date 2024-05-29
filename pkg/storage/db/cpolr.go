@@ -19,9 +19,15 @@ type cpolrdb struct {
 }
 
 func NewClusterPolicyReportStore(db *sql.DB, clusterId string) (api.ClusterPolicyReportsInterface, error) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS clusterpolicyreports (name VARCHAR NOT NULL, clusterId VARCHAR NOT NULL, report JSONB NOT NULL, PRIMARY KEY(name))")
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS clusterpolicyreports (name VARCHAR NOT NULL, clusterId VARCHAR NOT NULL, report JSONB NOT NULL, PRIMARY KEY(name, clusterId))")
 	if err != nil {
 		klog.ErrorS(err, "failed to create table")
+		return nil, err
+	}
+
+	_, err = db.Exec("CREATE INDEX IF NOT EXISTS clusterpolicyreportcluster ON clusterpolicyreports(clusterId)")
+	if err != nil {
+		klog.ErrorS(err, "failed to create index")
 		return nil, err
 	}
 
