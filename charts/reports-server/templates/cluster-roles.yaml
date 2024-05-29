@@ -1,7 +1,6 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-metadata:
   name: {{ include "reports-server.fullname" . }}
   labels:
     rbac.authorization.k8s.io/aggregate-to-admin: 'true'
