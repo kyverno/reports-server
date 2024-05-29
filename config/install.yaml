@@ -60,6 +60,13 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
+    - ''
+  resources:
+    - namespaces
+  verbs:
+    - get
+    - list
+- apiGroups:
     - reports.kyverno.io
   resources:
     - ephemeralreports
