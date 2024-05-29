@@ -1,7 +1,6 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-metadata:
   name: {{ include "reports-server.fullname" . }}
   labels:
     rbac.authorization.k8s.io/aggregate-to-admin: 'true'
@@ -9,6 +8,13 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-view: 'true'
     {{- include "reports-server.labels" . | nindent 4 }}
 rules:
+- apiGroups:
+    - ''
+  resources:
+    - namespaces
+  verbs:
+    - get
+    - list
 - apiGroups:
     - reports.kyverno.io
   resources:

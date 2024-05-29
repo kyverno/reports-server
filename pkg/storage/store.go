@@ -11,10 +11,10 @@ type Interface interface {
 	api.Storage
 }
 
-func New(debug bool, config *db.PostgresConfig) (Interface, error) {
+func New(debug bool, config *db.PostgresConfig, clusterId string) (Interface, error) {
 	klog.Infof("setting up storage, debug=%v", debug)
 	if debug {
 		return inmemory.New(), nil
 	}
-	return db.New(config)
+	return db.New(config, clusterId)
 }
