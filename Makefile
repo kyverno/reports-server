@@ -201,3 +201,19 @@ kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and depl
 .PHONY: help
 help: ## Shows the available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-40s\033[0m %s\n", $$1, $$2}'
+
+################
+# PUBLISH (KO) #
+################
+
+REGISTRY_USERNAME   ?= dummy
+PLATFORMS           := all
+
+.PHONY: ko-login
+ko-login: $(KO)
+	@$(KO) login $(REGISTRY) --username $(REGISTRY_USERNAME) --password $(REGISTRY_PASSWORD)
+
+.PHONY: ko-publish-kyverno
+ko-publish-kyverno: ko-login ## Build and publish reports-server image (with ko)
+	@LD_FLAGS=$(LD_FLAGS) KOCACHE=$(KOCACHE) KO_DOCKER_REPO=$(REPO_KYVERNO) \
+		$(KO) build ./$(KYVERNO_DIR) --bare --tags=$(KO_TAGS) --platform=$(PLATFORMS)
