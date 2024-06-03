@@ -11,6 +11,7 @@ GOOS                               ?= $(shell go env GOOS)
 GOARCH                             ?= $(shell go env GOARCH)
 REGISTRY                           ?= ghcr.io
 REPO                               ?= reports-server
+REPO_REPORTS_SERVER	?= 	$(REGISTRY)/$(ORG)/$(REPO)
 
 #########
 # TOOLS #
@@ -213,7 +214,7 @@ PLATFORMS           := all
 ko-login: $(KO)
 	@$(KO) login $(REGISTRY) --username $(REGISTRY_USERNAME) --password $(REGISTRY_PASSWORD)
 
-.PHONY: ko-publish-kyverno
-ko-publish-kyverno: ko-login ## Build and publish reports-server image (with ko)
-	@LD_FLAGS=$(LD_FLAGS) KOCACHE=$(KOCACHE) KO_DOCKER_REPO=$(REPO_KYVERNO) \
-		$(KO) build ./$(KYVERNO_DIR) --bare --tags=$(KO_TAGS) --platform=$(PLATFORMS)
+.PHONY: ko-publish-reports-server
+ko-publish-reports-server: ko-login ## Build and publish reports-server image (with ko)
+	@LD_FLAGS=$(LD_FLAGS) KOCACHE=$(KOCACHE) KO_DOCKER_REPO=$(REPO_REPORTS_SERVER) \
+		$(KO) build . --bare --tags=$(KO_TAGS) --platform=$(PLATFORMS)
