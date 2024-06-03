@@ -56,8 +56,8 @@ jobs:
           version: ${{ github.ref_name }}
           sign-image: true
           sbom-name: reports-server
-          sbom-repository: ghcr.io/${{ github.repository_owner }}/sbom
-          signature-repository: ghcr.io/${{ github.repository_owner }}/signatures
+          sbom-repository: ghcr.io/${{ github.repository_owner }}/reports-server/sbom
+          signature-repository: ghcr.io/${{ github.repository_owner }}/reports-server/signatures
           main-path: .
   generate-reports-server-provenance:
     needs: publish-images

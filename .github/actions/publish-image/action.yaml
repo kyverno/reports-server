@@ -50,6 +50,7 @@ runs:
       env:
         REGISTRY: ${{ inputs.registry }}
         REPO: ${{ inputs.repository }}
+        REGISTRY_USERNAME: ${{ inputs.registry-username }}
         REGISTRY_PASSWORD: ${{ inputs.registry-password }}
         COSIGN_REPOSITORY: ${{ inputs.sbom-repository }}
       run: |
