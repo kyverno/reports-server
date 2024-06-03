@@ -4,7 +4,7 @@
 # CONFIG #
 ##########
 
-ORG                                ?= kyverno
+ORG                                ?= nirmata
 PACKAGE                            ?= github.com/$(ORG)/reports-server
 GIT_SHA                            := $(shell git rev-parse HEAD)
 GOOS                               ?= $(shell go env GOOS)
