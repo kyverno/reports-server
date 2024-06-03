@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Publish images
+
+permissions: {}
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'release*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish-images:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      id-token: write 
+    outputs:
+      reports-server-digest: ${{ steps.publish-reports-server.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Setup caches
+        uses: ./.github/actions/setup-caches
+        timeout-minutes: 5
+        continue-on-error: true
+        with:
+          build-cache-key: publish-images
+      - name: Setup build env
+        uses: ./.github/actions/setup-build-env
+        timeout-minutes: 30
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@d43c1f16c00cfd3978dde6c07f4bbcf9eb6993ca # v0.16.1
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
+      - name: Publish reports server
+        id: publish-reports-server
+        uses: ./.github/actions/publish-image
+        with:
+          makefile-target: ko-publish-reports-server
+          registry: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository_owner }}
+          version: ${{ github.ref_name }}
+          sign-image: true
+          sbom-name: reports-server
+          sbom-repository: ghcr.io/${{ github.repository_owner }}/sbom
+          signature-repository: ghcr.io/${{ github.repository_owner }}/signatures
+          main-path: .
+  generate-reports-server-provenance:
+    needs: publish-images
+    permissions:
+      id-token: write   # To sign the provenance.
+      packages: write   # To upload assets to release.
+      actions: read     # To read the workflow path.
+    # NOTE: The container generator workflow is not officially released as GA.
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.9.0
+    with:
+      image: ghcr.io/${{ github.repository_owner }}/reports-server
+      digest: "${{ needs.publish-images.outputs.reports-server-digest }}"
+      registry-username: ${{ github.actor }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
