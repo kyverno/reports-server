@@ -67,12 +67,22 @@ clean-tools: ## Remove installed tools
 #########
 
 CGO_ENABLED    ?= 0
-LD_FLAGS       := "-s -w"
 LOCAL_PLATFORM := linux/$(GOARCH)
 KO_REGISTRY    := ko.local
-KO_TAGS        := $(GIT_SHA)
 KO_CACHE       ?= /tmp/ko-cache
 BIN            := reports-server
+ifdef VERSION
+LD_FLAGS       := "-s -w -X $(PACKAGE)/pkg/version.BuildVersion=$(VERSION)"
+else
+LD_FLAGS       := "-s -w"
+endif
+ifndef VERSION
+KO_TAGS             := $(GIT_SHA)
+else ifeq ($(VERSION),main)
+KO_TAGS             := $(GIT_SHA),latest
+else
+KO_TAGS             := $(GIT_SHA),$(subst /,-,$(VERSION))
+endif
 
 .PHONY: fmt
 fmt: ## Run go fmt

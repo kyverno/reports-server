@@ -48,7 +48,7 @@ jobs:
         id: publish-reports-server
         uses: ./.github/actions/publish-image
         with:
-          makefile-target: ko-build
+          makefile-target: ko-publish-reports-server
           registry: ghcr.io
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
