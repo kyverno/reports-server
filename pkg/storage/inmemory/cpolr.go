@@ -12,7 +12,7 @@ import (
 
 type cpolrdb struct {
 	sync.Mutex
-	db map[string]v1alpha2.ClusterPolicyReport
+	db *db[v1alpha2.ClusterPolicyReport]
 }
 
 func (c *cpolrdb) key(name string) string {
@@ -25,9 +25,10 @@ func (c *cpolrdb) List(ctx context.Context) ([]v1alpha2.ClusterPolicyReport, err
 
 	klog.Infof("listing all values")
 
-	res := make([]v1alpha2.ClusterPolicyReport, 0, len(c.db))
-	for _, val := range c.db {
-		res = append(res, val)
+	res := make([]v1alpha2.ClusterPolicyReport, 0, len(c.db.Keys()))
+	for _, k := range c.db.Keys() {
+		v, _ := c.db.Get(k)
+		res = append(res, *v)
 	}
 
 	klog.Infof("list found length: %d", len(res))
@@ -40,9 +41,9 @@ func (c *cpolrdb) Get(ctx context.Context, name string) (v1alpha2.ClusterPolicyR
 
 	key := c.key(name)
 	klog.Infof("getting value for key:%s", key)
-	if val, ok := c.db[key]; ok {
+	if val, _ := c.db.Get(key); val != nil {
 		klog.Infof("value found for key:%s", key)
-		return val, nil
+		return *val, nil
 	} else {
 		klog.Errorf("value not found for key:%s", key)
 		return v1alpha2.ClusterPolicyReport{}, errors.NewNotFound(groupResource, key)
@@ -55,13 +56,12 @@ func (c *cpolrdb) Create(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport
 
 	key := c.key(cpolr.Name)
 	klog.Infof("creating entry for key:%s", key)
-	if _, found := c.db[key]; found {
+	if v, _ := c.db.Get(key); v == nil {
 		klog.Errorf("entry already exists k:%s", key)
 		return errors.NewAlreadyExists(groupResource, key)
 	} else {
-		c.db[key] = cpolr
 		klog.Infof("entry created for key:%s", key)
-		return nil
+		return c.db.Store(key, cpolr)
 	}
 }
 
@@ -71,13 +71,12 @@ func (c *cpolrdb) Update(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport
 
 	key := c.key(cpolr.Name)
 	klog.Infof("updating entry for key:%s", key)
-	if _, found := c.db[key]; !found {
+	if v, _ := c.db.Get(key); v == nil {
 		klog.Errorf("entry does not exist k:%s", key)
 		return errors.NewNotFound(groupResource, key)
 	} else {
-		c.db[key] = cpolr
 		klog.Infof("entry updated for key:%s", key)
-		return nil
+		return c.db.Store(key, cpolr)
 	}
 }
 
@@ -87,11 +86,11 @@ func (c *cpolrdb) Delete(ctx context.Context, name string) error {
 
 	key := c.key(name)
 	klog.Infof("deleting entry for key:%s", key)
-	if _, found := c.db[key]; !found {
+	if v, _ := c.db.Get(key); v == nil {
 		klog.Errorf("entry does not exist k:%s", key)
 		return errors.NewNotFound(groupResource, key)
 	} else {
-		delete(c.db, key)
+		c.db.Delete(key)
 		klog.Infof("entry deleted for key:%s", key)
 		return nil
 	}
