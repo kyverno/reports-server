@@ -1,9 +1,9 @@
 package storage
 
 import (
-	"github.com/kyverno/reports-server/pkg/storage/api"
-	"github.com/kyverno/reports-server/pkg/storage/db"
-	"github.com/kyverno/reports-server/pkg/storage/inmemory"
+	"github.com/nirmata/reports-server/pkg/storage/api"
+	"github.com/nirmata/reports-server/pkg/storage/db"
+	"github.com/nirmata/reports-server/pkg/storage/inmemory"
 	"k8s.io/klog/v2"
 )
 

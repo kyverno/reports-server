@@ -3,9 +3,9 @@ package server
 import (
 	"net/http"
 
-	"github.com/kyverno/reports-server/pkg/api"
-	"github.com/kyverno/reports-server/pkg/storage"
-	"github.com/kyverno/reports-server/pkg/storage/db"
+	"github.com/nirmata/reports-server/pkg/api"
+	"github.com/nirmata/reports-server/pkg/storage"
+	"github.com/nirmata/reports-server/pkg/storage/db"
 	apimetrics "k8s.io/apiserver/pkg/endpoints/metrics"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/client-go/rest"

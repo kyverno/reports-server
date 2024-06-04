@@ -8,7 +8,7 @@ keywords:
   - policy reports storage
   - postgresql
 sources:
-  - https://github.com/kyverno/reports-server
+  - https://github.com/nirmata/reports-server
 maintainers:
   - name: Nirmata
     url: https://kyverno.io/
