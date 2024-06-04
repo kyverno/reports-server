@@ -56,7 +56,7 @@ func (c *cpolrdb) Create(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport
 
 	key := c.key(cpolr.Name)
 	klog.Infof("creating entry for key:%s", key)
-	if v, _ := c.db.Get(key); v == nil {
+	if v, _ := c.db.Get(key); v != nil {
 		klog.Errorf("entry already exists k:%s", key)
 		return errors.NewAlreadyExists(groupResource, key)
 	} else {
