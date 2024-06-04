@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-
-	"k8s.io/klog/v2"
 )
 
 type db[T any] struct {
@@ -72,11 +70,9 @@ func compressData[T any](obj T) ([]byte, error) {
 }
 
 func decompressData[T any](data []byte) (*T, error) {
-	klog.Info("compressed size: ", len(data))
 	r := bytes.NewReader(data)
 	decomp := lzw.NewReader(r, lzw.LSB, 8)
 	data, err := io.ReadAll(decomp)
-	klog.Info("decompressed size: ", len(data))
 
 	if err != nil {
 		return nil, err
