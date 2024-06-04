@@ -216,6 +216,16 @@ kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and depl
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA)
 
+.PHONY: kind-install-inmemory
+kind-install-inmemory: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
+	@echo Install chart... >&2
+	@$(HELM) upgrade --install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
+		--set image.registry=$(KO_REGISTRY) \
+		--set config.debug=true \
+		--set postgresql.enabled=false \
+		--set image.repository=$(PACKAGE) \
+		--set image.tag=$(GIT_SHA)
+
 ########
 # HELP #
 ########
