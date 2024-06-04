@@ -57,7 +57,7 @@ func (c *cephrdb) Create(ctx context.Context, cephr reportsv1.ClusterEphemeralRe
 
 	key := c.key(cephr.Name)
 	klog.Infof("creating entry for key:%s", key)
-	if v, _ := c.db.Get(key); v == nil {
+	if v, _ := c.db.Get(key); v != nil {
 		klog.Errorf("entry already exists k:%s", key)
 		return errors.NewAlreadyExists(utils.ClusterEphemeralReportsGR, key)
 	} else {
