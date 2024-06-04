@@ -14,7 +14,7 @@ import (
 
 type ephrdb struct {
 	sync.Mutex
-	db map[string]reportsv1.EphemeralReport
+	db *db[reportsv1.EphemeralReport]
 }
 
 func (e *ephrdb) key(name, namespace string) string {
@@ -28,9 +28,10 @@ func (e *ephrdb) List(ctx context.Context, namespace string) ([]reportsv1.Epheme
 	klog.Infof("listing all values for namespace:%s", namespace)
 	res := make([]reportsv1.EphemeralReport, 0)
 
-	for k, v := range e.db {
+	for _, k := range e.db.Keys() {
 		if namespace == "" || strings.HasPrefix(k, namespace) {
-			res = append(res, v)
+			v, _ := e.db.Get(k)
+			res = append(res, *v)
 			klog.Infof("value found for prefix:%s, key:%s", namespace, k)
 		}
 	}
@@ -45,9 +46,9 @@ func (e *ephrdb) Get(ctx context.Context, name, namespace string) (reportsv1.Eph
 
 	key := e.key(name, namespace)
 	klog.Infof("getting value for key:%s", key)
-	if val, ok := e.db[key]; ok {
+	if val, _ := e.db.Get(key); val != nil {
 		klog.Infof("value found for key:%s", key)
-		return val, nil
+		return *val, nil
 	} else {
 		klog.Errorf("value not found for key:%s", key)
 		return reportsv1.EphemeralReport{}, errors.NewNotFound(utils.EphemeralReportsGR, key)
@@ -60,13 +61,12 @@ func (e *ephrdb) Create(ctx context.Context, ephr reportsv1.EphemeralReport) err
 
 	key := e.key(ephr.Name, ephr.Namespace)
 	klog.Infof("creating entry for key:%s", key)
-	if _, found := e.db[key]; found {
+	if val, _ := e.db.Get(key); val != nil {
 		klog.Errorf("entry already exists k:%s", key)
 		return errors.NewAlreadyExists(utils.EphemeralReportsGR, key)
 	} else {
-		e.db[key] = ephr
 		klog.Infof("entry created for key:%s", key)
-		return nil
+		return e.db.Store(key, ephr)
 	}
 }
 
@@ -76,13 +76,12 @@ func (e *ephrdb) Update(ctx context.Context, ephr reportsv1.EphemeralReport) err
 
 	key := e.key(ephr.Name, ephr.Namespace)
 	klog.Infof("updating entry for key:%s", key)
-	if _, found := e.db[key]; !found {
+	if val, _ := e.db.Get(key); val == nil {
 		klog.Errorf("entry does not exist k:%s", key)
 		return errors.NewNotFound(utils.EphemeralReportsGR, key)
 	} else {
-		e.db[key] = ephr
 		klog.Infof("entry updated for key:%s", key)
-		return nil
+		return e.db.Store(key, ephr)
 	}
 }
 
@@ -92,11 +91,11 @@ func (e *ephrdb) Delete(ctx context.Context, name, namespace string) error {
 
 	key := e.key(name, namespace)
 	klog.Infof("deleting entry for key:%s", key)
-	if _, found := e.db[key]; !found {
+	if val, _ := e.db.Get(key); val == nil {
 		klog.Errorf("entry does not exist k:%s", key)
 		return errors.NewNotFound(utils.EphemeralReportsGR, key)
 	} else {
-		delete(e.db, key)
+		e.db.Delete(key)
 		klog.Infof("entry deleted for key:%s", key)
 		return nil
 	}
