@@ -261,6 +261,10 @@ spec:
             - --dbname=reportsdb
             - --dbuser=postgres
             - --dbpassword=reports
+            - --dbsslmode=disable
+            - --dbsslrootcert=
+            - --dbsslkey=
+            - --dbsslcert=
             - --cert-dir=/tmp
             - --secure-port=4443
           securityContext:

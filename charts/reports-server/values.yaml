@@ -165,10 +165,24 @@ config:
 
     # -- Database user
     user: postgres
+
     # -- The database username will be read from this `key` in the specified Secret, when `db.secretName` is set.
     userSecretKeyName: "username"
 
     # -- Database password
     password: reports
+
     # -- The database password will be read from this `key` in the specified Secret, when `db.secretName` is set.
     passwordSecretKeyName: "password"
+
+    # -- Database SSL
+    sslmode: disable
+
+    # -- Database SSL root cert
+    sslrootcert: ""
+
+    # -- Database SSL key
+    sslkey: ""
+
+    # -- Database SSL cert
+    sslcert: ""
