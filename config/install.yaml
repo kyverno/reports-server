@@ -1,5 +1,10 @@
 ---
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: reports-server
+---
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: reports-server-postgresql
@@ -42,7 +47,6 @@ data:
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
-metadata:
 metadata:
   name: reports-server
   labels:
