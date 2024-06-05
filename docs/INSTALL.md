@@ -30,7 +30,7 @@ Reports server can be configured to work with any postgres instance in an out of
 <!-- ``` -->
 Get the values for hostname, dbname, postgres username and postgres password from managed postgres and fill the values in helm values
 
-Create a namespace and install the reports-server chart:
+Install the reports-server chart:
 
 ```bash
 helm install reports-server -n reports-server --create-namespace --wait ./charts/reports-server/ \
