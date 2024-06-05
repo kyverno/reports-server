@@ -146,11 +146,19 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 	isDryRun := slices.Contains(options.DryRun, "All")
 	namespace := genericapirequest.NamespaceValue(ctx)
 
+	oldObj, err := p.getPolr(name, namespace)
+	if err != nil && !forceAllowCreate {
+		return nil, false, err
+	}
+
+	updatedObject, err := objInfo.UpdatedObject(ctx, oldObj)
+	if err != nil && !forceAllowCreate {
+		return nil, false, err
+	}
+	polr := updatedObject.(*v1alpha2.PolicyReport)
+
 	if forceAllowCreate {
-		oldObj, _ := p.getPolr(name, namespace)
-		updatedObject, _ := objInfo.UpdatedObject(ctx, oldObj)
-		polr := updatedObject.(*v1alpha2.PolicyReport)
-		if err := p.updatePolr(polr, true); err != nil {
+		if err := p.updatePolr(polr, oldObj); err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
 		if err := p.broadcaster.Action(watch.Added, updatedObject); err != nil {
@@ -159,15 +167,6 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		return updatedObject, true, nil
 	}
 
-	oldObj, err := p.getPolr(name, namespace)
-	if err != nil {
-		return nil, false, err
-	}
-
-	updatedObject, err := objInfo.UpdatedObject(ctx, oldObj)
-	if err != nil {
-		return nil, false, err
-	}
 	err = updateValidation(ctx, updatedObject, oldObj)
 	if err != nil {
 		switch options.FieldValidation {
@@ -193,7 +192,7 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 
 	klog.Infof("updating policy reports name=%s namespace=%s", polr.Name, polr.Namespace)
 	if !isDryRun {
-		err := p.updatePolr(polr, false)
+		err := p.updatePolr(polr, oldObj)
 		if err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
 		}
@@ -333,21 +332,12 @@ func (p *polrStore) createPolr(report *v1alpha2.PolicyReport) error {
 	return p.store.PolicyReports().Create(context.TODO(), *report)
 }
 
-func (p *polrStore) updatePolr(report *v1alpha2.PolicyReport, force bool) error {
-	if !force {
-		oldReport, err := p.getPolr(report.GetName(), report.Namespace)
-		if err != nil {
-			return errorpkg.Wrapf(err, "old policy report not found")
-		}
-		oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
-		if err != nil {
-			return errorpkg.Wrapf(err, "could not parse resource version")
-		}
-
-		report.ResourceVersion = fmt.Sprint(oldRV + 1)
-	} else {
-		report.ResourceVersion = "1"
+func (p *polrStore) updatePolr(report *v1alpha2.PolicyReport, oldReport *v1alpha2.PolicyReport) error {
+	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
+	if err != nil {
+		return errorpkg.Wrapf(err, "could not parse resource version")
 	}
+	report.ResourceVersion = fmt.Sprint(oldRV + 1)
 
 	return p.store.PolicyReports().Update(context.TODO(), *report)
 }
