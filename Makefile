@@ -11,6 +11,7 @@ GOOS                               ?= $(shell go env GOOS)
 GOARCH                             ?= $(shell go env GOARCH)
 REGISTRY                           ?= ghcr.io
 REPO                               ?= reports-server
+REPO_REPORTS_SERVER	?= 	$(REGISTRY)/$(ORG)/$(REPO)
 
 #########
 # TOOLS #
@@ -66,12 +67,22 @@ clean-tools: ## Remove installed tools
 #########
 
 CGO_ENABLED    ?= 0
-LD_FLAGS       := "-s -w"
 LOCAL_PLATFORM := linux/$(GOARCH)
 KO_REGISTRY    := ko.local
-KO_TAGS        := $(GIT_SHA)
 KO_CACHE       ?= /tmp/ko-cache
 BIN            := reports-server
+ifdef VERSION
+LD_FLAGS       := "-s -w -X $(PACKAGE)/pkg/version.BuildVersion=$(VERSION)"
+else
+LD_FLAGS       := "-s -w"
+endif
+ifndef VERSION
+KO_TAGS             := $(GIT_SHA)
+else ifeq ($(VERSION),main)
+KO_TAGS             := $(GIT_SHA),latest
+else
+KO_TAGS             := $(GIT_SHA),$(subst /,-,$(VERSION))
+endif
 
 .PHONY: fmt
 fmt: ## Run go fmt
@@ -209,3 +220,19 @@ kind-apply: $(HELM) kind-load ## Build image, load it in kind cluster and deploy
 .PHONY: help
 help: ## Shows the available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-40s\033[0m %s\n", $$1, $$2}'
+
+################
+# PUBLISH (KO) #
+################
+
+REGISTRY_USERNAME   ?= dummy
+PLATFORMS           := all
+
+.PHONY: ko-login
+ko-login: $(KO)
+	@$(KO) login $(REGISTRY) --username $(REGISTRY_USERNAME) --password $(REGISTRY_PASSWORD)
+
+.PHONY: ko-publish-reports-server
+ko-publish-reports-server: ko-login ## Build and publish reports-server image (with ko)
+	@LD_FLAGS=$(LD_FLAGS) KOCACHE=$(KOCACHE) KO_DOCKER_REPO=$(REPO_REPORTS_SERVER) \
+		$(KO) build . --bare --tags=$(KO_TAGS) --platform=$(PLATFORMS)
