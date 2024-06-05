@@ -82,7 +82,8 @@ jobs:
         run: |
           set -e
           kubectl create ns reports-server
-          kubectl apply -f ./config/install.yaml
+          export HELM=${{ steps.helm.outputs.helm-path }}
+          make kind-apply
       - name: Wait for report server ready
         run: |
           set -e

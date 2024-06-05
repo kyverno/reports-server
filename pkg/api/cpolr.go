@@ -133,11 +133,18 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
 
+	oldObj, err := c.getCpolr(name)
+	if err != nil && !forceAllowCreate {
+		return nil, false, err
+	}
+
+	updatedObject, err := objInfo.UpdatedObject(ctx, oldObj)
+	if err != nil && !forceAllowCreate {
+		return nil, false, err
+	}
+	cpolr := updatedObject.(*v1alpha2.ClusterPolicyReport)
 	if forceAllowCreate {
-		oldObj, _ := c.getCpolr(name)
-		updatedObject, _ := objInfo.UpdatedObject(ctx, oldObj)
-		cpolr := updatedObject.(*v1alpha2.ClusterPolicyReport)
-		if err := c.updateCpolr(cpolr, true); err != nil {
+		if err := c.updateCpolr(cpolr, oldObj); err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
 		if err := c.broadcaster.Action(watch.Added, updatedObject); err != nil {
@@ -146,15 +153,6 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		return updatedObject, true, nil
 	}
 
-	oldObj, err := c.getCpolr(name)
-	if err != nil {
-		return nil, false, err
-	}
-
-	updatedObject, err := objInfo.UpdatedObject(ctx, oldObj)
-	if err != nil {
-		return nil, false, err
-	}
 	err = updateValidation(ctx, updatedObject, oldObj)
 	if err != nil {
 		switch options.FieldValidation {
@@ -176,7 +174,7 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 
 	klog.Infof("updating cluster policy report name=%s", cpolr.Name)
 	if !isDryRun {
-		if err := c.updateCpolr(cpolr, false); err != nil {
+		if err := c.updateCpolr(cpolr, oldObj); err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create cluster policy report: %s", err.Error()))
 		}
 		if err := c.broadcaster.Action(watch.Modified, updatedObject); err != nil {
@@ -312,21 +310,12 @@ func (c *cpolrStore) createCpolr(report *v1alpha2.ClusterPolicyReport) error {
 	return c.store.ClusterPolicyReports().Create(context.TODO(), *report)
 }
 
-func (c *cpolrStore) updateCpolr(report *v1alpha2.ClusterPolicyReport, force bool) error {
-	if !force {
-		oldReport, err := c.getCpolr(report.GetName())
-		if err != nil {
-			return errorpkg.Wrapf(err, "old cluster policy report not found")
-		}
-		oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
-		if err != nil {
-			return errorpkg.Wrapf(err, "could not parse resource version")
-		}
-
-		report.ResourceVersion = fmt.Sprint(oldRV + 1)
-	} else {
-		report.ResourceVersion = "1"
+func (c *cpolrStore) updateCpolr(report *v1alpha2.ClusterPolicyReport, oldReport *v1alpha2.ClusterPolicyReport) error {
+	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
+	if err != nil {
+		return errorpkg.Wrapf(err, "could not parse resource version")
 	}
+	report.ResourceVersion = fmt.Sprint(oldRV + 1)
 
 	return c.store.ClusterPolicyReports().Update(context.TODO(), *report)
 }

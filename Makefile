@@ -11,6 +11,7 @@ GOOS                               ?= $(shell go env GOOS)
 GOARCH                             ?= $(shell go env GOARCH)
 REGISTRY                           ?= ghcr.io
 REPO                               ?= reports-server
+REPO_REPORTS_SERVER	?= 	$(REGISTRY)/$(ORG)/$(REPO)
 
 #########
 # TOOLS #
@@ -66,12 +67,22 @@ clean-tools: ## Remove installed tools
 #########
 
 CGO_ENABLED    ?= 0
-LD_FLAGS       := "-s -w"
 LOCAL_PLATFORM := linux/$(GOARCH)
 KO_REGISTRY    := ko.local
-KO_TAGS        := $(GIT_SHA)
 KO_CACHE       ?= /tmp/ko-cache
 BIN            := reports-server
+ifdef VERSION
+LD_FLAGS       := "-s -w -X $(PACKAGE)/pkg/version.BuildVersion=$(VERSION)"
+else
+LD_FLAGS       := "-s -w"
+endif
+ifndef VERSION
+KO_TAGS             := $(GIT_SHA)
+else ifeq ($(VERSION),main)
+KO_TAGS             := $(GIT_SHA),latest
+else
+KO_TAGS             := $(GIT_SHA),$(subst /,-,$(VERSION))
+endif
 
 .PHONY: fmt
 fmt: ## Run go fmt
@@ -147,14 +158,25 @@ codegen-helm-docs: ## Generate helm docs
 codegen-install-manifest: $(HELM) ## Create install manifest
 	@echo Generate latest install manifest... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+		--set templating.enabled=true \
  		| $(SED) -e '/^#.*/d' \
 		> ./config/install.yaml
+
+codegen-install-manifest-inmemory: $(HELM) ## Create install manifest without postgres
+	@echo Generate latest install manifest... >&2
+	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+		--set config.debug=true \
+		--set postgresql.enabled=false \
+		--set templating.enabled=true \
+ 		| $(SED) -e '/^#.*/d' \
+		> ./config/install-inmemory.yaml
 
 .PHONY: codegen
 codegen: ## Rebuild all generated code and docs
 codegen: codegen-helm-docs
 codegen: codegen-openapi
 codegen: codegen-install-manifest
+codegen: codegen-install-manifest-inmemory
 
 .PHONY: verify-codegen
 verify-codegen: codegen ## Verify all generated code and docs are up to date
@@ -194,6 +216,25 @@ kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and depl
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA)
 
+.PHONY: kind-install-inmemory
+kind-install-inmemory: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
+	@echo Install chart... >&2
+	@$(HELM) upgrade --install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
+		--set image.registry=$(KO_REGISTRY) \
+		--set config.debug=true \
+		--set postgresql.enabled=false \
+		--set image.repository=$(PACKAGE) \
+		--set image.tag=$(GIT_SHA)
+ 
+.PHONY: kind-apply
+kind-apply: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
+	@echo Install chart... >&2
+	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server \
+		--set image.registry=$(KO_REGISTRY) \
+		--set image.repository=$(PACKAGE) \
+		--set image.tag=$(GIT_SHA) \
+			| kubectl apply -f -
+
 ########
 # HELP #
 ########
@@ -201,3 +242,19 @@ kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and depl
 .PHONY: help
 help: ## Shows the available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-40s\033[0m %s\n", $$1, $$2}'
+
+################
+# PUBLISH (KO) #
+################
+
+REGISTRY_USERNAME   ?= dummy
+PLATFORMS           := all
+
+.PHONY: ko-login
+ko-login: $(KO)
+	@$(KO) login $(REGISTRY) --username $(REGISTRY_USERNAME) --password $(REGISTRY_PASSWORD)
+
+.PHONY: ko-publish-reports-server
+ko-publish-reports-server: ko-login ## Build and publish reports-server image (with ko)
+	@LD_FLAGS=$(LD_FLAGS) KOCACHE=$(KOCACHE) KO_DOCKER_REPO=$(REPO_REPORTS_SERVER) \
+		$(KO) build . --bare --tags=$(KO_TAGS) --platform=$(PLATFORMS)

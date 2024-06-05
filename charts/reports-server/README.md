@@ -66,6 +66,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.userSecretKeyName | string | `"username"` | The database username will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.password | string | `"reports"` | Database password |
 | config.db.passwordSecretKeyName | string | `"password"` | The database password will be read from this `key` in the specified Secret, when `db.secretName` is set. |
+| config.db.sslmode | string | `"disable"` | Database SSL |
+| config.db.sslrootcert | string | `""` | Database SSL root cert |
+| config.db.sslkey | string | `""` | Database SSL key |
+| config.db.sslcert | string | `""` | Database SSL cert |
 
 ## Source Code
 
