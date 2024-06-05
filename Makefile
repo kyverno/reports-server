@@ -158,14 +158,25 @@ codegen-helm-docs: ## Generate helm docs
 codegen-install-manifest: $(HELM) ## Create install manifest
 	@echo Generate latest install manifest... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+		--set templating.enabled=true \
  		| $(SED) -e '/^#.*/d' \
 		> ./config/install.yaml
+
+codegen-install-manifest-inmemory: $(HELM) ## Create install manifest without postgres
+	@echo Generate latest install manifest... >&2
+	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+		--set config.debug=true \
+		--set postgresql.enabled=false \
+		--set templating.enabled=true \
+ 		| $(SED) -e '/^#.*/d' \
+		> ./config/install-inmemory.yaml
 
 .PHONY: codegen
 codegen: ## Rebuild all generated code and docs
 codegen: codegen-helm-docs
 codegen: codegen-openapi
 codegen: codegen-install-manifest
+codegen: codegen-install-manifest-inmemory
 
 .PHONY: verify-codegen
 verify-codegen: codegen ## Verify all generated code and docs are up to date
@@ -202,6 +213,16 @@ kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and depl
 	@echo Install chart... >&2
 	@$(HELM) upgrade --install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
 		--set image.registry=$(KO_REGISTRY) \
+		--set image.repository=$(PACKAGE) \
+		--set image.tag=$(GIT_SHA)
+
+.PHONY: kind-install-inmemory
+kind-install-inmemory: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
+	@echo Install chart... >&2
+	@$(HELM) upgrade --install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
+		--set image.registry=$(KO_REGISTRY) \
+		--set config.debug=true \
+		--set postgresql.enabled=false \
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA)
 
