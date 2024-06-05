@@ -1,3 +1,8 @@
+# -- Internal settings used with `helm template` to generate install manifest
+# @ignored
+templating:
+  enabled: false
+
 postgresql:
 
   # -- Deploy postgresql dependency chart
