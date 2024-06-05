@@ -72,8 +72,8 @@ func compressData[T any](obj T) ([]byte, error) {
 func decompressData[T any](data []byte) (*T, error) {
 	r := bytes.NewReader(data)
 	decomp := lzw.NewReader(r, lzw.LSB, 8)
-	data, err := io.ReadAll(decomp)
 
+	data, err := io.ReadAll(decomp)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,6 @@ func decompressData[T any](data []byte) (*T, error) {
 
 	var obj T
 	err = json.Unmarshal(data, &obj)
-
 	if err != nil {
 		return nil, err
 	}
