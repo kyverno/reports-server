@@ -1,4 +1,4 @@
-module github.com/kyverno/reports-server/tools
+module github.com/nirmata/reports-server/tools
 
 go 1.21
 

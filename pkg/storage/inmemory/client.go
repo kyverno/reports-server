@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	"github.com/kyverno/reports-server/pkg/storage/api"
+	"github.com/nirmata/reports-server/pkg/storage/api"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
@@ -31,16 +31,16 @@ type ClusterPolicyReportsInterface interface {
 func New() api.Storage {
 	inMemoryDb := &inMemoryDb{
 		cpolrdb: &cpolrdb{
-			db: make(map[string]v1alpha2.ClusterPolicyReport),
+			db: NewDB[v1alpha2.ClusterPolicyReport](),
 		},
 		polrdb: &polrdb{
-			db: make(map[string]v1alpha2.PolicyReport),
+			db: NewDB[v1alpha2.PolicyReport](),
 		},
 		cephrdb: &cephrdb{
-			db: make(map[string]reportsv1.ClusterEphemeralReport),
+			db: NewDB[reportsv1.ClusterEphemeralReport](),
 		},
 		ephrdb: &ephrdb{
-			db: make(map[string]reportsv1.EphemeralReport),
+			db: NewDB[reportsv1.EphemeralReport](),
 		},
 	}
 	return inMemoryDb

@@ -30,7 +30,7 @@ image:
   # -- Image registry
   registry: ghcr.io
   # -- Image repository
-  repository: kyverno/reports-server
+  repository: nirmata/reports-server
   # -- Image pull policy
   pullPolicy: IfNotPresent
   # -- Image tag (will default to app version if not set)

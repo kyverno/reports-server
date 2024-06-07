@@ -31,7 +31,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | fullnameOverride | string | `""` | Full name override |
 | replicaCount | int | `1` | Number of pod replicas |
 | image.registry | string | `"ghcr.io"` | Image registry |
-| image.repository | string | `"kyverno/reports-server"` | Image repository |
+| image.repository | string | `"nirmata/reports-server"` | Image repository |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.tag | string | `nil` | Image tag (will default to app version if not set) |
 | imagePullSecrets | list | `[]` | Image pull secrets |
@@ -69,7 +69,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 
 ## Source Code
 
-* <https://github.com/kyverno/reports-server>
+* <https://github.com/nirmata/reports-server>
 
 ## Requirements
 
