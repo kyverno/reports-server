@@ -1,13 +1,16 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
-	"github.com/nirmata/reports-server/pkg/api"
-	"github.com/nirmata/reports-server/pkg/storage"
-	"github.com/nirmata/reports-server/pkg/storage/db"
+	"github.com/kyverno/reports-server/pkg/api"
+	"github.com/kyverno/reports-server/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/storage/db"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apimetrics "k8s.io/apiserver/pkg/endpoints/metrics"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/component-base/metrics"
 	"k8s.io/component-base/metrics/legacyregistry"
@@ -34,7 +37,11 @@ func (c Config) Complete() (*server, error) {
 	}
 	genericServer.Handler.NonGoRestfulMux.HandleFunc("/metrics", metricsHandler)
 
-	store, err := storage.New(c.Debug, c.DBconfig)
+	id, err := c.getClusterId()
+	if err != nil {
+		return nil, err
+	}
+	store, err := storage.New(c.Debug, c.DBconfig, id)
 	if err != nil {
 		return nil, err
 	}
@@ -68,4 +75,19 @@ func (c Config) metricsHandler() (http.HandlerFunc, error) {
 		legacyregistry.Handler().ServeHTTP(w, req)
 		metrics.HandlerFor(registry, metrics.HandlerOpts{}).ServeHTTP(w, req)
 	}, nil
+}
+
+func (c Config) getClusterId() (string, error) {
+	clientset, err := kubernetes.NewForConfig(c.Rest)
+	if err != nil {
+		return "", err
+	}
+
+	// Kubernetes clusters do not have a uid. The uid of kubesystem namespace does not change and is commonly accepted as the id of the cluster
+	ns, err := clientset.CoreV1().Namespaces().Get(context.Background(), "kube-system", metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	return string(ns.GetUID()), nil
 }
