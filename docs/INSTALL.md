@@ -13,27 +13,28 @@ There are three configuration to install reports server:
 
 Reports server can be configured to work with any postgres instance in an out of the cluster. You can install reports server with a postgres instance outside of the cluster with helm as follows.
 
-In order to install reports-server with Helm, first add the Reports-server Helm repository:
-```bash
-helm repo add reports-server https://kyverno.github.io/reports-server
-```
-
-Scan the new repository for charts:
-```bash
-helm repo update
-```
-
-Optionally, show all available chart versions for reports-server.
-
-```bash
-helm search repo reports-server --l
-```
+<!-- In order to install reports-server with Helm, first add the Reports-server Helm repository: -->
+<!-- ```bash -->
+<!-- helm repo add reports-server https://kyverno.github.io/reports-server -->
+<!-- ``` -->
+<!---->
+<!-- Scan the new repository for charts: -->
+<!-- ```bash -->
+<!-- helm repo update -->
+<!-- ``` -->
+<!---->
+<!-- Optionally, show all available chart versions for reports-server. -->
+<!---->
+<!-- ```bash -->
+<!-- helm search repo reports-server --l -->
+<!-- ``` -->
 Get the values for hostname, dbname, postgres username and postgres password from managed postgres and fill the values in helm values
 
 Create a namespace and install the reports-server chart:
 
 ```bash
-helm install reports-server -n reports-server --create-namespace --wait reports-server/reports-server \
+helm install reports-server -n reports-server --create-namespace --wait ./charts/reports-server/ \
+        --set image.tag=latest \
         --set postgresql.enabled=false \
         --set config.db.host=<HOST_NAME> \
         --set config.db.name=<DB_NAME> \
@@ -67,25 +68,26 @@ Create a CloudNativePG postgres cluster:
 kubectl create -f config/samples/cnpg-cluster.yaml
 ```
 
-In order to install reports-server with Helm, first add the Reports-server Helm repository:
-```bash
-helm repo add reports-server https://kyverno.github.io/reports-server
-```
+<!-- In order to install reports-server with Helm, first add the Reports-server Helm repository: -->
+<!-- ```bash -->
+<!-- helm repo add reports-server https://kyverno.github.io/reports-server -->
+<!-- ``` -->
+<!---->
+<!-- Scan the new repository for charts: -->
+<!-- ```bash -->
+<!-- helm repo update -->
+<!-- ``` -->
+<!---->
+<!-- Optionally, show all available chart versions for reports-server. -->
+<!---->
+<!-- ```bash -->
+<!-- helm search repo reports-server --l -->
+<!-- ``` -->
+Install the reports-server chart:
 
-Scan the new repository for charts:
 ```bash
-helm repo update
-```
-
-Optionally, show all available chart versions for reports-server.
-
-```bash
-helm search repo reports-server --l
-```
-Create a namespace and install the reports-server chart:
-
-```bash
-helm install reports-server -n reports-server --create-namespace --wait reports-server/reports-server \
+helm install reports-server -n reports-server --create-namespace --wait ./charts/reports-server \
+        --set image.tag=latest \
         --set postgresql.enabled=false \
         --set config.db.host=reports-server-cluster-rw.reports-server \
         --set config.db.name=reportsdb \
@@ -96,26 +98,27 @@ helm install reports-server -n reports-server --create-namespace --wait reports-
 ## With inmemory storage
 Reports server can be installed without any database as well. In this case, reports will be stored in the memory of reports-server pod. You can install reports-server with inmemory configuration as follows:
 
-In order to install reports-server with Helm, first add the Reports-server Helm repository:
-```bash
-helm repo add reports-server https://kyverno.github.io/reports-server
-```
-
-Scan the new repository for charts:
-```bash
-helm repo update
-```
-
-Optionally, show all available chart versions for reports-server.
-
-```bash
-helm search repo reports-server --l
-```
+<!-- In order to install reports-server with Helm, first add the Reports-server Helm repository: -->
+<!-- ```bash -->
+<!-- helm repo add reports-server https://kyverno.github.io/reports-server -->
+<!-- ``` -->
+<!---->
+<!-- Scan the new repository for charts: -->
+<!-- ```bash -->
+<!-- helm repo update -->
+<!-- ``` -->
+<!---->
+<!-- Optionally, show all available chart versions for reports-server. -->
+<!---->
+<!-- ```bash -->
+<!-- helm search repo reports-server --l -->
+<!-- ``` -->
 
 Install the reports-server chart:
 
 ```bash
-helm install reports-server --namespace reports-server --create-namespace --wait reports-server/reports-server \
+helm install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
+        --set image.tag=latest \
         --set config.debug=true \
         --set postgresql.enabled=false
 ```
