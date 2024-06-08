@@ -227,6 +227,7 @@ kind-install-inmemory: $(HELM) kind-load ## Build image, load it in kind cluster
 		--set postgresql.enabled=false \
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA)
+<<<<<<< HEAD
  
 .PHONY: kind-apply
 kind-apply: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
@@ -236,6 +237,8 @@ kind-apply: $(HELM) kind-load ## Build image, load it in kind cluster and deploy
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA) \
 			| kubectl apply -f -
+=======
+>>>>>>> da73ac7 (feat: fix listing in inmemory)
 
 ########
 # HELP #
