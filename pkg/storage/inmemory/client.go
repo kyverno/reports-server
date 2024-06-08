@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	"github.com/kyverno/reports-server/pkg/storage/api"
+	"github.com/nirmata/reports-server/pkg/storage/api"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 

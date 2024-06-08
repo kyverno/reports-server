@@ -14,7 +14,7 @@ Follow the given methods to migrate to reports server on your existing cluster:
 
 YAML manifest can be installed directly using `kubectl apply` and this will overwrite the existing API services. Run the following command:
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kyverno/reports-server/main/config/install.yaml
+kubectl apply -f https://raw.githubusercontent.com/nirmata/reports-server/main/config/install.yaml
 ```
 
 ## Helm Chart
