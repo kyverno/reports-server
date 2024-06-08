@@ -39,7 +39,8 @@ helm install reports-server -n reports-server --create-namespace --wait ./charts
         --set config.db.host=<HOST_NAME> \
         --set config.db.name=<DB_NAME> \
         --set config.db.user=<POSTGRES_USERNAME> \
-        --set config.db.password=<POSTGRES_PASSWORD>
+        --set config.db.password=<POSTGRES_PASSWORD> \
+        --set config.db.sslmode=<SSL_MODE>
 ```
 
 ## With Incluster database
