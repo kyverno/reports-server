@@ -285,7 +285,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/kyverno/reports-server:latest"
+          image: "ghcr.io/nirmata/reports-server:latest"
           imagePullPolicy: IfNotPresent
           ports:
             - name: https

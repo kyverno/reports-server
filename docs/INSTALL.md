@@ -10,7 +10,7 @@ Reports-server comes with a postgreSQL database. It is recommended to bring-your
 It is recommended to install Reports-server using `kubectl apply`, especially when policy reports CRDs are already installed in the cluster ([see migration guide](#migration)). To install reports server using YAML manifest, create a `reports-server` namespace and run the following command:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kyverno/reports-server/main/config/install.yaml
+kubectl apply -f https://raw.githubusercontent.com/nirmata/reports-server/main/config/install.yaml
 ```
 
 ### Helm Chart

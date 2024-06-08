@@ -192,7 +192,7 @@ verify-codegen: codegen ## Verify all generated code and docs are up to date
 # KIND #
 ########
 
-KIND_IMAGE     ?= kindest/node:v1.28.0
+KIND_IMAGE     ?= kindest/node:v1.30.0
 KIND_NAME      ?= kind
 
 .PHONY: kind-create
