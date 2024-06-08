@@ -96,6 +96,23 @@ helm install reports-server -n reports-server --create-namespace --wait ./charts
         --set config.db.password=$(kubectl get secret -n reports-server reports-server-cluster-app --template={{.data.password}} | base64 -d)
 ```
 
+To run without cnpg:
+```bash
+helm install reports-server -n reports-server --create-namespace --wait ./charts/reports-server \
+                             --set image.tag=latest \
+                             --set config.db.name=reportsdb
+```
+NOTE: to check where the reports are stored you can then exec into the postgres pod
+```bash
+kubectl exec -it reports-server-postgresql-0 -n reports-server -- psql -U postgres 
+```
+then connect to the db
+```
+\c reportsdb
+```
+and query for specific data.
+
+
 ## With inmemory storage
 Reports server can be installed without any database as well. In this case, reports will be stored in the memory of reports-server pod. You can install reports-server with inmemory configuration as follows:
 
