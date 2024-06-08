@@ -31,6 +31,13 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
+    - ''
+  resources:
+    - namespaces
+  verbs:
+    - get
+    - list
+- apiGroups:
     - reports.kyverno.io
   resources:
     - ephemeralreports
@@ -183,7 +190,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/kyverno/reports-server:latest"
+          image: "ghcr.io/nirmata/reports-server:v0.1.0-alpha.1"
           imagePullPolicy: IfNotPresent
           ports:
             - name: https
