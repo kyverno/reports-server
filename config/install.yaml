@@ -285,7 +285,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/nirmata/reports-server:latest"
+          image: "ghcr.io/nirmata/reports-server:v0.1.0-alpha.1"
           imagePullPolicy: IfNotPresent
           ports:
             - name: https
