@@ -28,7 +28,7 @@ func (e *ephrdb) List(ctx context.Context, namespace string) ([]reportsv1.Epheme
 	res := make([]reportsv1.EphemeralReport, 0)
 
 	for _, k := range e.db.Keys() {
-		if strings.HasPrefix(k, fmt.Sprintf("ephr/%s/", namespace)) {
+		if namespace == "" || strings.HasPrefix(k, fmt.Sprintf("ephr/%s/", namespace)) {
 			v, _ := e.db.Get(k)
 			res = append(res, *v)
 			klog.Infof("value found for prefix:%s, key:%s", namespace, k)
