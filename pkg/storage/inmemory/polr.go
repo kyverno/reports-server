@@ -28,7 +28,7 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyR
 	res := make([]v1alpha2.PolicyReport, 0)
 
 	for k, v := range p.db {
-		if strings.HasPrefix(k, namespace) {
+		if namespace == "" || strings.HasPrefix(k, namespace) {
 			res = append(res, v)
 			klog.Infof("value found for prefix:%s, key:%s", namespace, k)
 		}
