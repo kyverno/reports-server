@@ -8,6 +8,10 @@ on:
     branches:
       - "main"
 
+  push:
+    branches:
+      - main
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -18,6 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         k8s-version:
+          - name: v1.25
+            version: v1.25.14
           - name: v1.26
             version: v1.26.13
           - name: v1.27
@@ -26,6 +32,8 @@ jobs:
             version: v1.28.6
           - name: v1.29
             version: v1.29.1
+          - name: v1.30
+            version: v1.30.0
         tests:
           - ^reports$
     runs-on: ubuntu-latest
@@ -33,15 +41,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Checkout kyverno/kyverno
+      - name: Checkout nirmata/kyverno
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          repository: kyverno/kyverno
+          repository: nirmata/kyverno
           path: kyverno
       - name: Setup Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
-          go-version: ~1.21.1
+          go-version: ~1.22.2
       - name: Install helm
         id: helm
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
