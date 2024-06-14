@@ -44,6 +44,10 @@ spec:
             - --dbname={{ include "reports-server.dbName" . }}
             - --dbuser={{ include "reports-server.dbUser" . }}
             - --dbpassword={{ include "reports-server.dbPassword" . }}
+            - --dbsslmode={{ .Values.config.db.sslmode }}
+            - --dbsslrootcert={{ .Values.config.db.sslrootcert }}
+            - --dbsslkey={{ .Values.config.db.sslkey }}
+            - --dbsslcert={{ .Values.config.db.sslcert }}
             {{- end }}
             - --cert-dir=/tmp
             - --secure-port=4443
