@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/kyverno/reports-server/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
@@ -49,7 +50,7 @@ func (p *polrdb) Get(ctx context.Context, name, namespace string) (v1alpha2.Poli
 		return val, nil
 	} else {
 		klog.Errorf("value not found for key:%s", key)
-		return v1alpha2.PolicyReport{}, errors.NewNotFound(groupResource, key)
+		return v1alpha2.PolicyReport{}, errors.NewNotFound(utils.PolicyReportsGR, key)
 	}
 }
 
@@ -61,7 +62,7 @@ func (p *polrdb) Create(ctx context.Context, polr v1alpha2.PolicyReport) error {
 	klog.Infof("creating entry for key:%s", key)
 	if _, found := p.db[key]; found {
 		klog.Errorf("entry already exists k:%s", key)
-		return errors.NewAlreadyExists(groupResource, key)
+		return errors.NewAlreadyExists(utils.PolicyReportsGR, key)
 	} else {
 		p.db[key] = polr
 		klog.Infof("entry created for key:%s", key)
@@ -77,7 +78,7 @@ func (p *polrdb) Update(ctx context.Context, polr v1alpha2.PolicyReport) error {
 	klog.Infof("updating entry for key:%s", key)
 	if _, found := p.db[key]; !found {
 		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(groupResource, key)
+		return errors.NewNotFound(utils.PolicyReportsGR, key)
 	} else {
 		p.db[key] = polr
 		klog.Infof("entry updated for key:%s", key)
@@ -93,7 +94,7 @@ func (p *polrdb) Delete(ctx context.Context, name, namespace string) error {
 	klog.Infof("deleting entry for key:%s", key)
 	if _, found := p.db[key]; !found {
 		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(groupResource, key)
+		return errors.NewNotFound(utils.PolicyReportsGR, key)
 	} else {
 		delete(p.db, key)
 		klog.Infof("entry deleted for key:%s", key)

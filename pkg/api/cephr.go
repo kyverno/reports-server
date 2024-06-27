@@ -8,6 +8,7 @@ import (
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/utils"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
@@ -94,7 +95,7 @@ func (c *cephrStore) Get(ctx context.Context, name string, options *metav1.GetOp
 	klog.Infof("getting cluster ephemeral reports name=%s", name)
 	report, err := c.getCephr(name)
 	if err != nil || report == nil {
-		return nil, errors.NewNotFound(reportsv1.Resource("clusterephemeralreports"), name)
+		return nil, errors.NewNotFound(utils.ClusterEphemeralReportsGR, name)
 	}
 	return report, nil
 }
@@ -119,6 +120,12 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 	cephr, ok := obj.(*reportsv1.ClusterEphemeralReport)
 	if !ok {
 		return nil, errors.NewBadRequest("failed to validate cluster ephemeral report")
+	}
+	if cephr.Name == "" {
+		if cephr.GenerateName == "" {
+			return nil, errors.NewConflict(utils.ClusterEphemeralReportsGR, cephr.Name, fmt.Errorf("name and generate name not provided"))
+		}
+		cephr.Name = nameGenerator.GenerateName(cephr.GenerateName)
 	}
 
 	klog.Infof("creating cluster ephemeral reports name=%s", cephr.Name)
@@ -154,7 +161,7 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		if err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
-		if err := c.broadcaster.Action(watch.Added, r); err != nil {
+		if err := c.broadcaster.Action(watch.Modified, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 		return updatedObject, true, nil
@@ -199,7 +206,7 @@ func (c *cephrStore) Delete(ctx context.Context, name string, deleteValidation r
 	cephr, err := c.getCephr(name)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find cephrs", "name", name)
-		return nil, false, errors.NewNotFound(reportsv1.Resource("clusterephemeralreports"), name)
+		return nil, false, errors.NewNotFound(utils.ClusterEphemeralReportsGR, name)
 	}
 
 	err = deleteValidation(ctx, cephr)
@@ -239,13 +246,10 @@ func (c *cephrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 
 	if !isDryRun {
 		for _, cephr := range cephrList.Items {
-			obj, isDeleted, err := c.Delete(ctx, cephr.GetName(), deleteValidation, options)
+			_, isDeleted, err := c.Delete(ctx, cephr.GetName(), deleteValidation, options)
 			if !isDeleted {
 				klog.ErrorS(err, "Failed to delete cephr", "name", cephr.GetName())
 				return nil, errors.NewBadRequest(fmt.Sprintf("Failed to delete cluster ephemral report: %s", cephr.GetName()))
-			}
-			if err := c.broadcaster.Action(watch.Deleted, obj); err != nil {
-				klog.ErrorS(err, "failed to broadcast event")
 			}
 		}
 	}

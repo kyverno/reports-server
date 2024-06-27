@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/kyverno/reports-server/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/utils"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
@@ -41,7 +42,6 @@ func (c *cpolrStore) New() runtime.Object {
 
 func (c *cpolrStore) Destroy() {
 }
-
 func (c *cpolrStore) Kind() string {
 	return "ClusterPolicyReport"
 }
@@ -94,7 +94,7 @@ func (c *cpolrStore) Get(ctx context.Context, name string, options *metav1.GetOp
 	klog.Infof("fetching cluster policy report name=%s", name)
 	report, err := c.getCpolr(name)
 	if err != nil || report == nil {
-		return nil, errors.NewNotFound(v1alpha2.Resource("clusterpolicyreports"), name)
+		return nil, errors.NewNotFound(utils.ClusterPolicyReportsGR, name)
 	}
 	return report, nil
 }
@@ -119,6 +119,12 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 	cpolr, ok := obj.(*v1alpha2.ClusterPolicyReport)
 	if !ok {
 		return nil, errors.NewBadRequest("failed to validate cluster policy report")
+	}
+	if cpolr.Name == "" {
+		if cpolr.GenerateName == "" {
+			return nil, errors.NewConflict(utils.ClusterPolicyReportsGR, cpolr.Name, fmt.Errorf("name and generate name not provided"))
+		}
+		cpolr.Name = nameGenerator.GenerateName(cpolr.GenerateName)
 	}
 
 	klog.Infof("creating cluster policy report name=%s", cpolr.Name)
@@ -153,7 +159,7 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		if err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
-		if err := c.broadcaster.Action(watch.Added, r); err != nil {
+		if err := c.broadcaster.Action(watch.Modified, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 		return updatedObject, true, nil
@@ -198,7 +204,7 @@ func (c *cpolrStore) Delete(ctx context.Context, name string, deleteValidation r
 	cpolr, err := c.getCpolr(name)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find cpolrs", "name", name)
-		return nil, false, errors.NewNotFound(v1alpha2.Resource("clusterpolicyreports"), name)
+		return nil, false, errors.NewNotFound(utils.ClusterPolicyReportsGR, name)
 	}
 
 	err = deleteValidation(ctx, cpolr)
@@ -238,13 +244,10 @@ func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 
 	if !isDryRun {
 		for _, cpolr := range cpolrList.Items {
-			obj, isDeleted, err := c.Delete(ctx, cpolr.GetName(), deleteValidation, options)
+			_, isDeleted, err := c.Delete(ctx, cpolr.GetName(), deleteValidation, options)
 			if !isDeleted {
 				klog.ErrorS(err, "Failed to delete cpolr", "name", cpolr.GetName())
 				return nil, errors.NewBadRequest(fmt.Sprintf("Failed to delete cluster policy report: %s", cpolr.GetName()))
-			}
-			if err := c.broadcaster.Action(watch.Deleted, obj); err != nil {
-				klog.ErrorS(err, "failed to broadcast event")
 			}
 		}
 	}
