@@ -158,6 +158,7 @@ codegen-helm-docs: ## Generate helm docs
 codegen-install-manifest: $(HELM) ## Create install manifest
 	@echo Generate latest install manifest... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+		--set image.tag=latest \
 		--set templating.enabled=true \
  		| $(SED) -e '/^#.*/d' \
 		> ./config/install.yaml
@@ -165,6 +166,7 @@ codegen-install-manifest: $(HELM) ## Create install manifest
 codegen-install-manifest-inmemory: $(HELM) ## Create install manifest without postgres
 	@echo Generate latest install manifest... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+		--set image.tag=latest \
 		--set config.debug=true \
 		--set postgresql.enabled=false \
 		--set templating.enabled=true \
