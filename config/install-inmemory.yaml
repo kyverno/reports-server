@@ -183,7 +183,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/kyverno/reports-server:v0.1.0-alpha.1"
+          image: "ghcr.io/kyverno/reports-server:latest"
           imagePullPolicy: IfNotPresent
           ports:
             - name: https

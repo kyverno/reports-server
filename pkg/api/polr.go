@@ -76,6 +76,10 @@ func (p *polrStore) List(ctx context.Context, options *metainternalversion.ListO
 
 	polrList := &v1alpha2.PolicyReportList{
 		Items: make([]v1alpha2.PolicyReport, 0),
+		ListMeta: metav1.ListMeta{
+			// TODO: Fix this!!
+			ResourceVersion: "1",
+		},
 	}
 	for _, polr := range list.Items {
 		if polr.Labels == nil {
@@ -130,11 +134,12 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 
 	klog.Infof("creating policy reports name=%s namespace=%s", polr.Name, polr.Namespace)
 	if !isDryRun {
-		err := p.createPolr(polr)
+		r, err := p.createPolr(polr)
 		if err != nil {
 			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
 		}
-		if err := p.broadcaster.Action(watch.Added, obj); err != nil {
+		klog.Info(r.ResourceVersion)
+		if err := p.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 	}
@@ -158,10 +163,11 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 	polr := updatedObject.(*v1alpha2.PolicyReport)
 
 	if forceAllowCreate {
-		if err := p.updatePolr(polr, oldObj); err != nil {
+		r, err := p.updatePolr(polr, oldObj)
+		if err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
-		if err := p.broadcaster.Action(watch.Added, updatedObject); err != nil {
+		if err := p.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 		return updatedObject, true, nil
@@ -192,11 +198,11 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 
 	klog.Infof("updating policy reports name=%s namespace=%s", polr.Name, polr.Namespace)
 	if !isDryRun {
-		err := p.updatePolr(polr, oldObj)
+		r, err := p.updatePolr(polr, oldObj)
 		if err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
 		}
-		if err := p.broadcaster.Action(watch.Modified, updatedObject); err != nil {
+		if err := p.broadcaster.Action(watch.Modified, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 	}
@@ -324,22 +330,22 @@ func (p *polrStore) listPolr(namespace string) (*v1alpha2.PolicyReportList, erro
 	return reportList, nil
 }
 
-func (p *polrStore) createPolr(report *v1alpha2.PolicyReport) error {
+func (p *polrStore) createPolr(report *v1alpha2.PolicyReport) (*v1alpha2.PolicyReport, error) {
 	report.ResourceVersion = fmt.Sprint(1)
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
-	return p.store.PolicyReports().Create(context.TODO(), *report)
+	return report, p.store.PolicyReports().Create(context.TODO(), *report)
 }
 
-func (p *polrStore) updatePolr(report *v1alpha2.PolicyReport, oldReport *v1alpha2.PolicyReport) error {
+func (p *polrStore) updatePolr(report *v1alpha2.PolicyReport, oldReport *v1alpha2.PolicyReport) (*v1alpha2.PolicyReport, error) {
 	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
 	if err != nil {
-		return errorpkg.Wrapf(err, "could not parse resource version")
+		return nil, errorpkg.Wrapf(err, "could not parse resource version")
 	}
 	report.ResourceVersion = fmt.Sprint(oldRV + 1)
 
-	return p.store.PolicyReports().Update(context.TODO(), *report)
+	return report, p.store.PolicyReports().Update(context.TODO(), *report)
 }
 
 func (p *polrStore) deletePolr(report *v1alpha2.PolicyReport) error {

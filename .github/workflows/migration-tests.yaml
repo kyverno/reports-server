@@ -73,7 +73,7 @@ jobs:
       - name: Wait for kyverno ready
         run: |
           set -e
-          kubectl wait --namespace kyverno --for=condition=ready pod --selector '!job-name' --timeout=60s
+          kubectl wait --namespace kyverno --for=condition=ready pod --selector '!job-name' --timeout=120s
       - name: API Service status before migation
         run: |
           set -e
@@ -98,9 +98,7 @@ jobs:
           set -e
           kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io
       - name: Install Chainsaw
-        uses: kyverno/action-install-chainsaw@07b6c986572f2abaf6647c85d37cbecfddc4a6ab # v0.1.3
-        with:
-          release: v0.0.9
+        uses: kyverno/action-install-chainsaw@573a9c636f7c586f86ecb9de9674176daf80ee29 # v0.2.5
       - name: Test with Chainsaw
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
