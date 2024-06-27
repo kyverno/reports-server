@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/kyverno/reports-server/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/utils"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
@@ -99,7 +100,7 @@ func (p *polrStore) Get(ctx context.Context, name string, options *metav1.GetOpt
 	klog.Infof("getting policy reports name=%s namespace=%s", name, namespace)
 	report, err := p.getPolr(name, namespace)
 	if err != nil || report == nil {
-		return nil, errors.NewNotFound(v1alpha2.Resource("policyreports"), name)
+		return nil, errors.NewNotFound(utils.PolicyReportsGR, name)
 	}
 	return report, nil
 }
@@ -130,6 +131,12 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 
 	if len(polr.Namespace) == 0 {
 		polr.Namespace = namespace
+	}
+	if polr.Name == "" {
+		if polr.GenerateName == "" {
+			return nil, errors.NewConflict(utils.PolicyReportsGR, polr.Name, fmt.Errorf("name and generate name not provided"))
+		}
+		polr.Name = nameGenerator.GenerateName(polr.GenerateName)
 	}
 
 	klog.Infof("creating policy reports name=%s namespace=%s", polr.Name, polr.Namespace)
@@ -167,7 +174,7 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		if err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
-		if err := p.broadcaster.Action(watch.Added, r); err != nil {
+		if err := p.broadcaster.Action(watch.Modified, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 		return updatedObject, true, nil
@@ -217,7 +224,7 @@ func (p *polrStore) Delete(ctx context.Context, name string, deleteValidation re
 	polr, err := p.getPolr(name, namespace)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find polrs", "name", name, "namespace", klog.KRef("", namespace))
-		return nil, false, errors.NewNotFound(v1alpha2.Resource("policyreports"), name)
+		return nil, false, errors.NewNotFound(utils.PolicyReportsGR, name)
 	}
 
 	err = deleteValidation(ctx, polr)
@@ -259,13 +266,10 @@ func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 
 	if !isDryRun {
 		for _, polr := range polrList.Items {
-			obj, isDeleted, err := p.Delete(ctx, polr.GetName(), deleteValidation, options)
+			_, isDeleted, err := p.Delete(ctx, polr.GetName(), deleteValidation, options)
 			if !isDeleted {
 				klog.ErrorS(err, "Failed to delete polr", "name", polr.GetName(), "namespace", klog.KRef("", namespace))
 				return nil, errors.NewBadRequest(fmt.Sprintf("Failed to delete policy report: %s/%s", polr.Namespace, polr.GetName()))
-			}
-			if err := p.broadcaster.Action(watch.Deleted, obj); err != nil {
-				klog.ErrorS(err, "failed to broadcast event")
 			}
 		}
 	}
