@@ -9,8 +9,6 @@ import (
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
-var groupResource = v1alpha2.SchemeGroupVersion.WithResource("policyreportsa").GroupResource()
-
 type inMemoryDb struct {
 	sync.Mutex
 

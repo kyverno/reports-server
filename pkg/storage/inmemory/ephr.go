@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
+	"github.com/kyverno/reports-server/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
 )
@@ -49,7 +50,7 @@ func (e *ephrdb) Get(ctx context.Context, name, namespace string) (reportsv1.Eph
 		return val, nil
 	} else {
 		klog.Errorf("value not found for key:%s", key)
-		return reportsv1.EphemeralReport{}, errors.NewNotFound(groupResource, key)
+		return reportsv1.EphemeralReport{}, errors.NewNotFound(utils.EphemeralReportsGR, key)
 	}
 }
 
@@ -61,7 +62,7 @@ func (e *ephrdb) Create(ctx context.Context, ephr reportsv1.EphemeralReport) err
 	klog.Infof("creating entry for key:%s", key)
 	if _, found := e.db[key]; found {
 		klog.Errorf("entry already exists k:%s", key)
-		return errors.NewAlreadyExists(groupResource, key)
+		return errors.NewAlreadyExists(utils.EphemeralReportsGR, key)
 	} else {
 		e.db[key] = ephr
 		klog.Infof("entry created for key:%s", key)
@@ -77,7 +78,7 @@ func (e *ephrdb) Update(ctx context.Context, ephr reportsv1.EphemeralReport) err
 	klog.Infof("updating entry for key:%s", key)
 	if _, found := e.db[key]; !found {
 		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(groupResource, key)
+		return errors.NewNotFound(utils.EphemeralReportsGR, key)
 	} else {
 		e.db[key] = ephr
 		klog.Infof("entry updated for key:%s", key)
@@ -93,7 +94,7 @@ func (e *ephrdb) Delete(ctx context.Context, name, namespace string) error {
 	klog.Infof("deleting entry for key:%s", key)
 	if _, found := e.db[key]; !found {
 		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(groupResource, key)
+		return errors.NewNotFound(utils.EphemeralReportsGR, key)
 	} else {
 		delete(e.db, key)
 		klog.Infof("entry deleted for key:%s", key)
