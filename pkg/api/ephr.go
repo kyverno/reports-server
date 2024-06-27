@@ -8,6 +8,7 @@ import (
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/utils"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
@@ -99,7 +100,7 @@ func (p *ephrStore) Get(ctx context.Context, name string, options *metav1.GetOpt
 	klog.Infof("getting ephemeral reports name=%s namespace=%s", name, namespace)
 	report, err := p.getEphr(name, namespace)
 	if err != nil || report == nil {
-		return nil, errors.NewNotFound(reportsv1.Resource("ephemeralreports"), name)
+		return nil, errors.NewNotFound(utils.EphemeralReportsGR, name)
 	}
 	return report, nil
 }
@@ -124,6 +125,12 @@ func (p *ephrStore) Create(ctx context.Context, obj runtime.Object, createValida
 	ephr, ok := obj.(*reportsv1.EphemeralReport)
 	if !ok {
 		return nil, errors.NewBadRequest("failed to validate ephemeral report")
+	}
+	if ephr.Name == "" {
+		if ephr.GenerateName == "" {
+			return nil, errors.NewConflict(utils.EphemeralReportsGR, ephr.Name, fmt.Errorf("name and generate name not provided"))
+		}
+		ephr.Name = nameGenerator.GenerateName(ephr.GenerateName)
 	}
 
 	namespace := genericapirequest.NamespaceValue(ctx)
@@ -166,7 +173,7 @@ func (p *ephrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		if err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
-		if err := p.broadcaster.Action(watch.Added, r); err != nil {
+		if err := p.broadcaster.Action(watch.Modified, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 		return updatedObject, true, nil
@@ -216,7 +223,7 @@ func (p *ephrStore) Delete(ctx context.Context, name string, deleteValidation re
 	ephr, err := p.getEphr(name, namespace)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find ephrs", "name", name, "namespace", klog.KRef("", namespace))
-		return nil, false, errors.NewNotFound(reportsv1.Resource("ephemeralreports"), name)
+		return nil, false, errors.NewNotFound(utils.EphemeralReportsGR, name)
 	}
 
 	err = deleteValidation(ctx, ephr)
@@ -258,13 +265,10 @@ func (p *ephrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 
 	if !isDryRun {
 		for _, ephr := range ephrList.Items {
-			obj, isDeleted, err := p.Delete(ctx, ephr.GetName(), deleteValidation, options)
+			_, isDeleted, err := p.Delete(ctx, ephr.GetName(), deleteValidation, options)
 			if !isDeleted {
 				klog.ErrorS(err, "Failed to delete ephr", "name", ephr.GetName(), "namespace", klog.KRef("", namespace))
 				return nil, errors.NewBadRequest(fmt.Sprintf("Failed to delete ephemeral report: %s/%s", ephr.Namespace, ephr.GetName()))
-			}
-			if err := p.broadcaster.Action(watch.Deleted, obj); err != nil {
-				klog.ErrorS(err, "failed to broadcast event")
 			}
 		}
 	}
