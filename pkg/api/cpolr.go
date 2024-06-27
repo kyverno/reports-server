@@ -42,6 +42,7 @@ func (c *cpolrStore) New() runtime.Object {
 
 func (c *cpolrStore) Destroy() {
 }
+
 func (c *cpolrStore) Kind() string {
 	return "ClusterPolicyReport"
 }
