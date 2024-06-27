@@ -73,6 +73,10 @@ func (c *cephrStore) List(ctx context.Context, options *metainternalversion.List
 
 	cephrList := &reportsv1.ClusterEphemeralReportList{
 		Items: make([]reportsv1.ClusterEphemeralReport, 0),
+		ListMeta: metav1.ListMeta{
+			// TODO: Fix this!!
+			ResourceVersion: "1",
+		},
 	}
 	for _, cephr := range list.Items {
 		if cephr.Labels == nil {
@@ -119,10 +123,12 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 
 	klog.Infof("creating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
-		if err := c.createCephr(cephr); err != nil {
+		r, err := c.createCephr(cephr)
+		if err != nil {
 			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create cluster ephemeral report: %s", err.Error()))
 		}
-		if err := c.broadcaster.Action(watch.Added, obj); err != nil {
+		klog.Info(r.ResourceVersion)
+		if err := c.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 	}
@@ -144,10 +150,11 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 	}
 	cephr := updatedObject.(*reportsv1.ClusterEphemeralReport)
 	if forceAllowCreate {
-		if err := c.updateCephr(cephr, oldObj); err != nil {
+		r, err := c.updateCephr(cephr, oldObj)
+		if err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
-		if err := c.broadcaster.Action(watch.Added, updatedObject); err != nil {
+		if err := c.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 		return updatedObject, true, nil
@@ -174,10 +181,11 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 
 	klog.Infof("updating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
-		if err := c.updateCephr(cephr, oldObj); err != nil {
+		r, err := c.updateCephr(cephr, oldObj)
+		if err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create cluster ephemeral report: %s", err.Error()))
 		}
-		if err := c.broadcaster.Action(watch.Modified, updatedObject); err != nil {
+		if err := c.broadcaster.Action(watch.Modified, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 	}
@@ -302,22 +310,22 @@ func (c *cephrStore) listCephr() (*reportsv1.ClusterEphemeralReportList, error) 
 	return reportList, nil
 }
 
-func (c *cephrStore) createCephr(report *reportsv1.ClusterEphemeralReport) error {
+func (c *cephrStore) createCephr(report *reportsv1.ClusterEphemeralReport) (*reportsv1.ClusterEphemeralReport, error) {
 	report.ResourceVersion = fmt.Sprint(1)
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
-	return c.store.ClusterEphemeralReports().Create(context.TODO(), *report)
+	return report, c.store.ClusterEphemeralReports().Create(context.TODO(), *report)
 }
 
-func (c *cephrStore) updateCephr(report *reportsv1.ClusterEphemeralReport, oldReport *reportsv1.ClusterEphemeralReport) error {
+func (c *cephrStore) updateCephr(report *reportsv1.ClusterEphemeralReport, oldReport *reportsv1.ClusterEphemeralReport) (*reportsv1.ClusterEphemeralReport, error) {
 	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
 	if err != nil {
-		return errorpkg.Wrapf(err, "could not parse resource version")
+		return nil, errorpkg.Wrapf(err, "could not parse resource version")
 	}
 	report.ResourceVersion = fmt.Sprint(oldRV + 1)
 
-	return c.store.ClusterEphemeralReports().Update(context.TODO(), *report)
+	return report, c.store.ClusterEphemeralReports().Update(context.TODO(), *report)
 }
 
 func (c *cephrStore) deleteCephr(report *reportsv1.ClusterEphemeralReport) error {

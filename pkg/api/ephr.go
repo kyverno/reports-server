@@ -76,6 +76,10 @@ func (p *ephrStore) List(ctx context.Context, options *metainternalversion.ListO
 
 	ephrList := &reportsv1.EphemeralReportList{
 		Items: make([]reportsv1.EphemeralReport, 0),
+		ListMeta: metav1.ListMeta{
+			// TODO: Fix this!!
+			ResourceVersion: "1",
+		},
 	}
 	for _, ephr := range list.Items {
 		if ephr.Labels == nil {
@@ -130,11 +134,11 @@ func (p *ephrStore) Create(ctx context.Context, obj runtime.Object, createValida
 
 	klog.Infof("creating ephemeral reports name=%s namespace=%s", ephr.Name, ephr.Namespace)
 	if !isDryRun {
-		err := p.createEphr(ephr)
+		r, err := p.createEphr(ephr)
 		if err != nil {
 			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create ephemeral report: %s", err.Error()))
 		}
-		if err := p.broadcaster.Action(watch.Added, obj); err != nil {
+		if err := p.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 	}
@@ -158,10 +162,11 @@ func (p *ephrStore) Update(ctx context.Context, name string, objInfo rest.Update
 	ephr := updatedObject.(*reportsv1.EphemeralReport)
 
 	if forceAllowCreate {
-		if err := p.updateEphr(ephr, oldObj); err != nil {
+		r, err := p.updateEphr(ephr, oldObj)
+		if err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
-		if err := p.broadcaster.Action(watch.Added, updatedObject); err != nil {
+		if err := p.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 		return updatedObject, true, nil
@@ -192,11 +197,11 @@ func (p *ephrStore) Update(ctx context.Context, name string, objInfo rest.Update
 
 	klog.Infof("updating ephemeral reports name=%s namespace=%s", ephr.Name, ephr.Namespace)
 	if !isDryRun {
-		err := p.updateEphr(ephr, oldObj)
+		r, err := p.updateEphr(ephr, oldObj)
 		if err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create ephemeral report: %s", err.Error()))
 		}
-		if err := p.broadcaster.Action(watch.Modified, updatedObject); err != nil {
+		if err := p.broadcaster.Action(watch.Modified, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
 	}
@@ -324,22 +329,22 @@ func (p *ephrStore) listEphr(namespace string) (*reportsv1.EphemeralReportList, 
 	return reportList, nil
 }
 
-func (p *ephrStore) createEphr(report *reportsv1.EphemeralReport) error {
+func (p *ephrStore) createEphr(report *reportsv1.EphemeralReport) (*reportsv1.EphemeralReport, error) {
 	report.ResourceVersion = fmt.Sprint(1)
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
-	return p.store.EphemeralReports().Create(context.TODO(), *report)
+	return report, p.store.EphemeralReports().Create(context.TODO(), *report)
 }
 
-func (p *ephrStore) updateEphr(report *reportsv1.EphemeralReport, oldReport *reportsv1.EphemeralReport) error {
+func (p *ephrStore) updateEphr(report *reportsv1.EphemeralReport, oldReport *reportsv1.EphemeralReport) (*reportsv1.EphemeralReport, error) {
 	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
 	if err != nil {
-		return errorpkg.Wrapf(err, "could not parse resource version")
+		return nil, errorpkg.Wrapf(err, "could not parse resource version")
 	}
 	report.ResourceVersion = fmt.Sprint(oldRV + 1)
 
-	return p.store.EphemeralReports().Update(context.TODO(), *report)
+	return report, p.store.EphemeralReports().Update(context.TODO(), *report)
 }
 
 func (p *ephrStore) deleteEphr(report *reportsv1.EphemeralReport) error {
