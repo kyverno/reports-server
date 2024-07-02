@@ -73,7 +73,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 
 ## Source Code
 
-* <https://github.com/nirmata/reports-server>
+* <https://github.com/kyverno/reports-server>
 
 ## Requirements
 

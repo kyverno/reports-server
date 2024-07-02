@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nirmata/reports-server/pkg/app/opts"
+	"github.com/kyverno/reports-server/pkg/app/opts"
 	"github.com/spf13/cobra"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/logs"

@@ -3,8 +3,8 @@ package server
 import (
 	"fmt"
 
-	"github.com/nirmata/reports-server/pkg/api"
-	"github.com/nirmata/reports-server/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/api"
+	"github.com/kyverno/reports-server/pkg/storage"
 	"k8s.io/component-base/metrics"
 )
 

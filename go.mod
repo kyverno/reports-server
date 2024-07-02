@@ -1,4 +1,4 @@
-module github.com/nirmata/reports-server
+module github.com/kyverno/reports-server
 
 go 1.21.4
 
