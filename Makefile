@@ -5,7 +5,7 @@
 ##########
 
 ORG                                ?= nirmata
-PACKAGE                            ?= github.com/$(ORG)/reports-server
+PACKAGE                            ?= github.com/kyverno/reports-server
 GIT_SHA                            := $(shell git rev-parse HEAD)
 GOOS                               ?= $(shell go env GOOS)
 GOARCH                             ?= $(shell go env GOARCH)
