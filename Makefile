@@ -130,7 +130,7 @@ $(GOPATH_SHIM):
 .INTERMEDIATE: $(PACKAGE_SHIM)
 $(PACKAGE_SHIM): $(GOPATH_SHIM)
 	@echo Create package shim... >&2
-	@mkdir -p $(GOPATH_SHIM)/src/github.com/$(ORG) && ln -s -f ${PWD} $(PACKAGE_SHIM)
+	@mkdir -p $(GOPATH_SHIM)/src/github.com/kyverno && ln -s -f ${PWD} $(PACKAGE_SHIM)
 
 .PHONY: codegen-openapi
 codegen-openapi: $(PACKAGE_SHIM) $(OPENAPI_GEN) ## Generate openapi
