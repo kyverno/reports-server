@@ -29,7 +29,7 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyR
 	res := make([]v1alpha2.PolicyReport, 0)
 
 	for _, k := range p.db.Keys() {
-		if namespace == "" || strings.HasPrefix(k, namespace) {
+		if namespace == "" || strings.HasPrefix(k, fmt.Sprintf("polr/%s/", namespace)) {
 			klog.Infof("value found for prefix:%s, key:%s", namespace, k)
 			v, err := p.db.Get(k)
 			if err != nil {
