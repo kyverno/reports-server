@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"slices"
-	"strconv"
 
 	"github.com/kyverno/reports-server/pkg/storage"
 	"github.com/kyverno/reports-server/pkg/utils"
@@ -160,7 +159,6 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 		if err != nil {
 			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
 		}
-		klog.Info(r.ResourceVersion)
 		if err := p.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
@@ -351,20 +349,15 @@ func (p *polrStore) listPolr(namespace string) (*v1alpha2.PolicyReportList, erro
 }
 
 func (p *polrStore) createPolr(report *v1alpha2.PolicyReport) (*v1alpha2.PolicyReport, error) {
-	report.ResourceVersion = fmt.Sprint(1)
+	report.ResourceVersion = p.store.UseResourceVersion()
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
 	return report, p.store.PolicyReports().Create(context.TODO(), *report)
 }
 
-func (p *polrStore) updatePolr(report *v1alpha2.PolicyReport, oldReport *v1alpha2.PolicyReport) (*v1alpha2.PolicyReport, error) {
-	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
-	if err != nil {
-		return nil, errorpkg.Wrapf(err, "could not parse resource version")
-	}
-	report.ResourceVersion = fmt.Sprint(oldRV + 1)
-
+func (p *polrStore) updatePolr(report *v1alpha2.PolicyReport, _ *v1alpha2.PolicyReport) (*v1alpha2.PolicyReport, error) {
+	report.ResourceVersion = p.store.UseResourceVersion()
 	return report, p.store.PolicyReports().Update(context.TODO(), *report)
 }
 
