@@ -22,6 +22,8 @@ func allowObjectListWatch(object metav1.ObjectMeta, labelSelector labels.Selecto
 		if rv != desiredRv {
 			return false, 0, nil
 		}
+	default:
+		break
 	}
 
 	if labelSelector == nil {

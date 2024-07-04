@@ -73,10 +73,8 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 	// }
 
 	cpolrList := &v1alpha2.ClusterPolicyReportList{
-		Items: make([]v1alpha2.ClusterPolicyReport, 0),
-		ListMeta: metav1.ListMeta{
-			ResourceVersion: "1",
-		},
+		Items:    make([]v1alpha2.ClusterPolicyReport, 0),
+		ListMeta: metav1.ListMeta{},
 	}
 	var desiredRv uint64
 	if len(options.ResourceVersion) == 0 {
@@ -143,6 +141,7 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 	}
 
 	cpolr.Annotations = labelReports(cpolr.Annotations)
+	cpolr.Generation = 1
 	klog.Infof("creating cluster policy report name=%s", cpolr.Name)
 	if !isDryRun {
 		r, err := c.createCpolr(cpolr)
@@ -200,6 +199,7 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		return nil, false, errors.NewBadRequest("failed to validate cluster policy report")
 	}
 	cpolr.Annotations = labelReports(cpolr.Annotations)
+	cpolr.Generation += 1
 	klog.Infof("updating cluster policy report name=%s", cpolr.Name)
 	if !isDryRun {
 		r, err := c.updateCpolr(cpolr, oldObj)
@@ -270,8 +270,36 @@ func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 	return cpolrList, nil
 }
 
-func (c *cpolrStore) Watch(ctx context.Context, _ *metainternalversion.ListOptions) (watch.Interface, error) {
-	return c.broadcaster.Watch()
+func (c *cpolrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+	switch options.ResourceVersion {
+	case "", "0":
+		return c.broadcaster.Watch()
+	default:
+		break
+	}
+	items, err := c.List(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+	list, ok := items.(*v1alpha2.ClusterPolicyReportList)
+	if !ok {
+		return nil, fmt.Errorf("failed to convert runtime object into cluster policy report list")
+	}
+	events := make([]watch.Event, len(list.Items))
+	for _, p := range list.Items {
+		if p.Generation == 1 || p.Generation == 0 {
+			events = append(events, watch.Event{
+				Type:   watch.Added,
+				Object: &p,
+			})
+		} else {
+			events = append(events, watch.Event{
+				Type:   watch.Modified,
+				Object: &p,
+			})
+		}
+	}
+	return c.broadcaster.WatchWithPrefix(events)
 }
 
 func (c *cpolrStore) ConvertToTable(ctx context.Context, object runtime.Object, tableOptions runtime.Object) (*metav1beta1.Table, error) {
