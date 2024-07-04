@@ -73,10 +73,8 @@ func (c *cephrStore) List(ctx context.Context, options *metainternalversion.List
 	// }
 
 	cephrList := &reportsv1.ClusterEphemeralReportList{
-		Items: make([]reportsv1.ClusterEphemeralReport, 0),
-		ListMeta: metav1.ListMeta{
-			ResourceVersion: "1",
-		},
+		Items:    make([]reportsv1.ClusterEphemeralReport, 0),
+		ListMeta: metav1.ListMeta{},
 	}
 	var desiredRv uint64
 	if len(options.ResourceVersion) == 0 {
@@ -143,6 +141,7 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 	}
 
 	cephr.Annotations = labelReports(cephr.Annotations)
+	cephr.Generation += 1
 	klog.Infof("creating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
 		r, err := c.createCephr(cephr)
@@ -201,6 +200,7 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 	}
 
 	cephr.Annotations = labelReports(cephr.Annotations)
+	cephr.Generation += 1
 	klog.Infof("updating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
 		r, err := c.updateCephr(cephr, oldObj)
@@ -271,8 +271,37 @@ func (c *cephrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 	return cephrList, nil
 }
 
-func (c *cephrStore) Watch(ctx context.Context, _ *metainternalversion.ListOptions) (watch.Interface, error) {
-	return c.broadcaster.Watch()
+func (c *cephrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+	switch options.ResourceVersion {
+	case "", "0":
+		return c.broadcaster.Watch()
+	default:
+		break
+	}
+	items, err := c.List(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+	list, ok := items.(*reportsv1.ClusterEphemeralReportList)
+	if !ok {
+		return nil, fmt.Errorf("failed to convert runtime object into cluster ephemeral report list")
+	}
+	events := make([]watch.Event, len(list.Items))
+	for i, pol := range list.Items {
+		report := pol.DeepCopy()
+		if report.Generation == 1 || report.Generation == 0 {
+			events[i] = watch.Event{
+				Type:   watch.Added,
+				Object: report,
+			}
+		} else {
+			events[i] = watch.Event{
+				Type:   watch.Modified,
+				Object: report,
+			}
+		}
+	}
+	return c.broadcaster.WatchWithPrefix(events)
 }
 
 func (c *cephrStore) ConvertToTable(ctx context.Context, object runtime.Object, tableOptions runtime.Object) (*metav1beta1.Table, error) {
