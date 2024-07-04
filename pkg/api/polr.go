@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strconv"
 
 	"github.com/kyverno/reports-server/pkg/storage"
 	"github.com/kyverno/reports-server/pkg/utils"
