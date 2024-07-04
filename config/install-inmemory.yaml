@@ -198,6 +198,7 @@ spec:
               path: /livez
               port: https
               scheme: HTTPS
+            initialDelaySeconds: 90
             periodSeconds: 10
           readinessProbe:
             failureThreshold: 3
@@ -205,7 +206,7 @@ spec:
               path: /readyz
               port: https
               scheme: HTTPS
-            initialDelaySeconds: 20
+            initialDelaySeconds: 100
             periodSeconds: 10
           resources:
             limits: null
