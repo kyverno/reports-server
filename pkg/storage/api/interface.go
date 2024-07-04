@@ -46,3 +46,10 @@ type ClusterEphemeralReportsInterface interface {
 	Update(ctx context.Context, cephr reportsv1.ClusterEphemeralReport) error
 	Delete(ctx context.Context, name string) error
 }
+
+type Versioning interface {
+	// SetResourceVersion sets the resource version to the provided value if its higher
+	SetResourceVersion(string) error
+	// UseResourceVersion returns the current resource version and increments the value by one
+	UseResourceVersion() string
+}
