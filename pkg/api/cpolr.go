@@ -286,17 +286,17 @@ func (c *cpolrStore) Watch(ctx context.Context, options *metainternalversion.Lis
 		return nil, fmt.Errorf("failed to convert runtime object into cluster policy report list")
 	}
 	events := make([]watch.Event, len(list.Items))
-	for _, p := range list.Items {
-		if p.Generation == 1 || p.Generation == 0 {
-			events = append(events, watch.Event{
+	for i, pol := range list.Items {
+		if pol.Generation == 1 || pol.Generation == 0 {
+			events[i] = watch.Event{
 				Type:   watch.Added,
-				Object: &p,
-			})
+				Object: &pol,
+			}
 		} else {
-			events = append(events, watch.Event{
+			events[i] = watch.Event{
 				Type:   watch.Modified,
-				Object: &p,
-			})
+				Object: &pol,
+			}
 		}
 	}
 	return c.broadcaster.WatchWithPrefix(events)
