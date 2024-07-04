@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"slices"
-	"strconv"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/storage"
@@ -336,20 +335,15 @@ func (p *ephrStore) listEphr(namespace string) (*reportsv1.EphemeralReportList, 
 }
 
 func (p *ephrStore) createEphr(report *reportsv1.EphemeralReport) (*reportsv1.EphemeralReport, error) {
-	report.ResourceVersion = fmt.Sprint(1)
+	report.ResourceVersion = p.store.UseResourceVersion()
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
 	return report, p.store.EphemeralReports().Create(context.TODO(), *report)
 }
 
-func (p *ephrStore) updateEphr(report *reportsv1.EphemeralReport, oldReport *reportsv1.EphemeralReport) (*reportsv1.EphemeralReport, error) {
-	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
-	if err != nil {
-		return nil, errorpkg.Wrapf(err, "could not parse resource version")
-	}
-	report.ResourceVersion = fmt.Sprint(oldRV + 1)
-
+func (p *ephrStore) updateEphr(report *reportsv1.EphemeralReport, _ *reportsv1.EphemeralReport) (*reportsv1.EphemeralReport, error) {
+	report.ResourceVersion = p.store.UseResourceVersion()
 	return report, p.store.EphemeralReports().Update(context.TODO(), *report)
 }
 

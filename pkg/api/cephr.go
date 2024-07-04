@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"slices"
-	"strconv"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/storage"
@@ -135,7 +134,6 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 		if err != nil {
 			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create cluster ephemeral report: %s", err.Error()))
 		}
-		klog.Info(r.ResourceVersion)
 		if err := c.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
 		}
@@ -317,20 +315,15 @@ func (c *cephrStore) listCephr() (*reportsv1.ClusterEphemeralReportList, error) 
 }
 
 func (c *cephrStore) createCephr(report *reportsv1.ClusterEphemeralReport) (*reportsv1.ClusterEphemeralReport, error) {
-	report.ResourceVersion = fmt.Sprint(1)
+	report.ResourceVersion = c.store.UseResourceVersion()
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
 	return report, c.store.ClusterEphemeralReports().Create(context.TODO(), *report)
 }
 
-func (c *cephrStore) updateCephr(report *reportsv1.ClusterEphemeralReport, oldReport *reportsv1.ClusterEphemeralReport) (*reportsv1.ClusterEphemeralReport, error) {
-	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
-	if err != nil {
-		return nil, errorpkg.Wrapf(err, "could not parse resource version")
-	}
-	report.ResourceVersion = fmt.Sprint(oldRV + 1)
-
+func (c *cephrStore) updateCephr(report *reportsv1.ClusterEphemeralReport, _ *reportsv1.ClusterEphemeralReport) (*reportsv1.ClusterEphemeralReport, error) {
+	report.ResourceVersion = c.store.UseResourceVersion()
 	return report, c.store.ClusterEphemeralReports().Update(context.TODO(), *report)
 }
 
