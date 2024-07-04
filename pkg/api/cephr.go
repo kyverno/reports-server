@@ -128,6 +128,7 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 		cephr.Name = nameGenerator.GenerateName(cephr.GenerateName)
 	}
 
+	cephr.Annotations = labelReports(cephr.Annotations)
 	klog.Infof("creating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
 		r, err := c.createCephr(cephr)
@@ -186,6 +187,7 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		return nil, false, errors.NewBadRequest("failed to validate cluster ephemeral report")
 	}
 
+	cephr.Annotations = labelReports(cephr.Annotations)
 	klog.Infof("updating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
 		r, err := c.updateCephr(cephr, oldObj)

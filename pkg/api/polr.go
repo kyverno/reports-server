@@ -139,6 +139,7 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 		polr.Name = nameGenerator.GenerateName(polr.GenerateName)
 	}
 
+	polr.Annotations = labelReports(polr.Annotations)
 	klog.Infof("creating policy reports name=%s namespace=%s", polr.Name, polr.Namespace)
 	if !isDryRun {
 		r, err := p.createPolr(polr)
@@ -203,6 +204,7 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		polr.Namespace = namespace
 	}
 
+	polr.Annotations = labelReports(polr.Annotations)
 	klog.Infof("updating policy reports name=%s namespace=%s", polr.Name, polr.Namespace)
 	if !isDryRun {
 		r, err := p.updatePolr(polr, oldObj)
