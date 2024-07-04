@@ -1,6 +1,6 @@
 module github.com/kyverno/reports-server/tools
 
-go 1.21
+go 1.22.2
 
 require (
 	github.com/google/addlicense v1.1.1

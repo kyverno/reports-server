@@ -1,14 +1,13 @@
 module github.com/kyverno/reports-server
 
-go 1.21.4
-
-toolchain go1.21.5
+go 1.22.2
 
 require (
 	github.com/kyverno/kyverno v1.12.0-alpha.1
 	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
+	k8s.io/api v0.29.1
 	k8s.io/apimachinery v0.29.2
 	k8s.io/apiserver v0.29.1
 	k8s.io/client-go v0.29.1
@@ -98,7 +97,6 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.29.1 // indirect
 	k8s.io/kms v0.29.1 // indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.29.0 // indirect
