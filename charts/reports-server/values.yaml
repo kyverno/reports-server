@@ -98,6 +98,29 @@ readinessProbe:
     port: https
     scheme: HTTPS
 
+metrics:
+  # -- Enable prometheus metrics
+  enabled: true
+
+  serviceMonitor:
+    # -- Enable service monitor for scraping prometheus metrics
+    enabled: true
+
+    # -- Service monitor additional labels
+    additionalLabels: {}
+
+    # -- Service monitor scrape interval
+    interval: ""
+
+    # -- Service monitor metric relabelings
+    metricRelabelings: []
+
+    # -- Service monitor relabelings
+    relabelings: []
+
+    # -- Service monitor scrape timeout
+    scrapeTimeout: ""
+
 # We usually recommend not to specify default resources and to leave this as a conscious
 # choice for the user. This also increases chances charts run on environments with little
 # resources, such as Minikube. If you do want to specify resources, uncomment the following

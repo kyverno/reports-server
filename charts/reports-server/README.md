@@ -44,6 +44,13 @@ helm install reports-server --namespace reports-server --create-namespace report
 | securityContext | object | See [values.yaml](values.yaml) | Container security context |
 | livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/livez","port":"https","scheme":"HTTPS"},"initialDelaySeconds":90,"periodSeconds":10}` | Liveness probe |
 | readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/readyz","port":"https","scheme":"HTTPS"},"initialDelaySeconds":100,"periodSeconds":10}` | Readiness probe |
+| metrics.enabled | bool | `true` | Enable prometheus metrics |
+| metrics.serviceMonitor.enabled | bool | `true` | Enable service monitor for scraping prometheus metrics |
+| metrics.serviceMonitor.additionalLabels | object | `{}` | Service monitor additional labels |
+| metrics.serviceMonitor.interval | string | `""` | Service monitor scrape interval |
+| metrics.serviceMonitor.metricRelabelings | list | `[]` | Service monitor metric relabelings |
+| metrics.serviceMonitor.relabelings | list | `[]` | Service monitor relabelings |
+| metrics.serviceMonitor.scrapeTimeout | string | `""` | Service monitor scrape timeout |
 | resources.limits | string | `nil` | Container resource limits |
 | resources.requests | string | `nil` | Container resource requests |
 | autoscaling.enabled | bool | `false` | Enable autoscaling |
