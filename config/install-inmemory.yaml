@@ -172,6 +172,7 @@ spec:
             - --debug
             - --cert-dir=/tmp
             - --secure-port=4443
+            - --authorization-always-allow-paths=/metrics
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -258,3 +259,26 @@ spec:
     namespace: reports-server
   version: v1
   versionPriority: 100
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: reports-server
+  namespace: reports-server
+  labels:
+    helm.sh/chart: reports-server-0.1.0-alpha.1
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/version: "v0.1.0-alpha.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: reports-server
+      app.kubernetes.io/instance: reports-server
+  endpoints:
+    - port: https
+      path: /metrics
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
