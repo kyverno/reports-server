@@ -128,6 +128,7 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 		cpolr.Name = nameGenerator.GenerateName(cpolr.GenerateName)
 	}
 
+	cpolr.Annotations = labelReports(cpolr.Annotations)
 	klog.Infof("creating cluster policy report name=%s", cpolr.Name)
 	if !isDryRun {
 		r, err := c.createCpolr(cpolr)
@@ -184,7 +185,7 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 	if !ok {
 		return nil, false, errors.NewBadRequest("failed to validate cluster policy report")
 	}
-
+	cpolr.Annotations = labelReports(cpolr.Annotations)
 	klog.Infof("updating cluster policy report name=%s", cpolr.Name)
 	if !isDryRun {
 		r, err := c.updateCpolr(cpolr, oldObj)
