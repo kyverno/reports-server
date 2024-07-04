@@ -22,7 +22,7 @@ REGISTER_GEN                       := $(TOOLS_DIR)/register-gen
 OPENAPI_GEN                        := $(TOOLS_DIR)/openapi-gen
 CODE_GEN_VERSION                   := v0.28.0
 KIND                               := $(TOOLS_DIR)/kind
-KIND_VERSION                       := v0.20.0
+KIND_VERSION                       := v0.23.0
 KO                                 := $(TOOLS_DIR)/ko
 KO_VERSION                         := v0.14.1
 HELM                               := $(TOOLS_DIR)/helm
@@ -192,7 +192,7 @@ verify-codegen: codegen ## Verify all generated code and docs are up to date
 # KIND #
 ########
 
-KIND_IMAGE     ?= kindest/node:v1.28.0
+KIND_IMAGE     ?= kindest/node:v1.30.0
 KIND_NAME      ?= kind
 
 .PHONY: kind-create
