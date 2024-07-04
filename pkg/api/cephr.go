@@ -52,7 +52,7 @@ func (c *cephrStore) NewList() runtime.Object {
 }
 
 func (c *cephrStore) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
-	labelSelector := labels.Everything()
+	var labelSelector labels.Selector
 	// fieldSelector := fields.Everything() // TODO: Field selectors
 	if options != nil {
 		if options.LabelSelector != nil {
@@ -75,19 +75,33 @@ func (c *cephrStore) List(ctx context.Context, options *metainternalversion.List
 	cephrList := &reportsv1.ClusterEphemeralReportList{
 		Items: make([]reportsv1.ClusterEphemeralReport, 0),
 		ListMeta: metav1.ListMeta{
-			// TODO: Fix this!!
 			ResourceVersion: "1",
 		},
 	}
-	for _, cephr := range list.Items {
-		if cephr.Labels == nil {
-			return list, nil
+	var desiredRv uint64
+	if len(options.ResourceVersion) == 0 {
+		desiredRv = 1
+	} else {
+		desiredRv, err = strconv.ParseUint(options.ResourceVersion, 10, 64)
+		if err != nil {
+			return nil, err
 		}
-		if labelSelector.Matches(labels.Set(cephr.Labels)) {
+	}
+	var resourceVersion uint64
+	resourceVersion = 1
+	for _, cephr := range list.Items {
+		allow, rv, err := allowObjectListWatch(cephr.ObjectMeta, labelSelector, desiredRv, options.ResourceVersionMatch)
+		if err != nil {
+			return nil, err
+		}
+		if rv > resourceVersion {
+			resourceVersion = rv
+		}
+		if allow {
 			cephrList.Items = append(cephrList.Items, cephr)
 		}
 	}
-
+	cephrList.ListMeta.ResourceVersion = strconv.FormatUint(resourceVersion, 10)
 	return cephrList, nil
 }
 

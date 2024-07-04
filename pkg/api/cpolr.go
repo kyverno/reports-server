@@ -52,7 +52,7 @@ func (c *cpolrStore) NewList() runtime.Object {
 }
 
 func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
-	labelSelector := labels.Everything()
+	var labelSelector labels.Selector
 	// fieldSelector := fields.Everything() // TODO: Field selectors
 	if options != nil {
 		if options.LabelSelector != nil {
@@ -75,19 +75,33 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 	cpolrList := &v1alpha2.ClusterPolicyReportList{
 		Items: make([]v1alpha2.ClusterPolicyReport, 0),
 		ListMeta: metav1.ListMeta{
-			// TODO: Fix this!!
 			ResourceVersion: "1",
 		},
 	}
-	for _, cpolr := range list.Items {
-		if cpolr.Labels == nil {
-			return list, nil
+	var desiredRv uint64
+	if len(options.ResourceVersion) == 0 {
+		desiredRv = 1
+	} else {
+		desiredRv, err = strconv.ParseUint(options.ResourceVersion, 10, 64)
+		if err != nil {
+			return nil, err
 		}
-		if labelSelector.Matches(labels.Set(cpolr.Labels)) {
+	}
+	var resourceVersion uint64
+	resourceVersion = 1
+	for _, cpolr := range list.Items {
+		allow, rv, err := allowObjectListWatch(cpolr.ObjectMeta, labelSelector, desiredRv, options.ResourceVersionMatch)
+		if err != nil {
+			return nil, err
+		}
+		if rv > resourceVersion {
+			resourceVersion = rv
+		}
+		if allow {
 			cpolrList.Items = append(cpolrList.Items, cpolr)
 		}
 	}
-
+	cpolrList.ListMeta.ResourceVersion = strconv.FormatUint(resourceVersion, 10)
 	return cpolrList, nil
 }
 
