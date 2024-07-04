@@ -139,6 +139,7 @@ func (p *ephrStore) Create(ctx context.Context, obj runtime.Object, createValida
 		ephr.Namespace = namespace
 	}
 
+	ephr.Annotations = labelReports(ephr.Annotations)
 	klog.Infof("creating ephemeral reports name=%s namespace=%s", ephr.Name, ephr.Namespace)
 	if !isDryRun {
 		r, err := p.createEphr(ephr)
@@ -202,6 +203,7 @@ func (p *ephrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		ephr.Namespace = namespace
 	}
 
+	ephr.Annotations = labelReports(ephr.Annotations)
 	klog.Infof("updating ephemeral reports name=%s namespace=%s", ephr.Name, ephr.Namespace)
 	if !isDryRun {
 		r, err := p.updateEphr(ephr, oldObj)
