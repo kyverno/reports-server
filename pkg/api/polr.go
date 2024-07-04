@@ -308,15 +308,16 @@ func (p *polrStore) Watch(ctx context.Context, options *metainternalversion.List
 	}
 	events := make([]watch.Event, len(list.Items))
 	for i, pol := range list.Items {
+		report := pol.DeepCopy()
 		if pol.Generation == 1 || pol.Generation == 0 {
 			events[i] = watch.Event{
 				Type:   watch.Added,
-				Object: &pol,
+				Object: report,
 			}
 		} else {
 			events[i] = watch.Event{
 				Type:   watch.Modified,
-				Object: &pol,
+				Object: report,
 			}
 		}
 	}
