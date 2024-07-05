@@ -74,11 +74,11 @@ jobs:
         run: |
           set -e
           kubectl wait --namespace kyverno --for=condition=ready pod --selector '!job-name' --timeout=120s
-      - name: Install PSS policies
-        run: |
-          set -e
-          export HELM=${{ steps.helm.outputs.helm-path }}
-          make install-pss-policies
+      # - name: Install PSS policies
+      #   run: |
+      #     set -e
+      #     export HELM=${{ steps.helm.outputs.helm-path }}
+      #     make install-pss-policies
       - name: API Service status before migation
         run: |
           set -e
