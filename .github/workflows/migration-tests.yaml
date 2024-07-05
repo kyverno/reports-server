@@ -74,6 +74,12 @@ jobs:
         run: |
           set -e
           kubectl wait --namespace kyverno --for=condition=ready pod --selector '!job-name' --timeout=120s
+      - name: Install PSS policies
+        run: |
+          set -e
+          kubectl create ns reports-server
+          export HELM=${{ steps.helm.outputs.helm-path }}
+          make install-pss-policies
       - name: API Service status before migation
         run: |
           set -e
@@ -83,7 +89,13 @@ jobs:
           set -e
           kubectl create ns reports-server
           export HELM=${{ steps.helm.outputs.helm-path }}
-          make kind-apply
+          make kind-migrate
+      - name: Install api services
+        run: |
+          set -e
+          kubectl create ns reports-server
+          export HELM=${{ steps.helm.outputs.helm-path }}
+          make kind-apply-api-services
       - name: Wait for report server ready
         run: |
           set -e
@@ -92,7 +104,7 @@ jobs:
       - name: Wait for kyverno to pick up the change
         run: |
           set -e
-          sleep 600
+          sleep 60
       - name: API Service status post migration
         run: |
           set -e
