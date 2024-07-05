@@ -77,7 +77,6 @@ jobs:
       - name: Install PSS policies
         run: |
           set -e
-          kubectl create ns reports-server
           export HELM=${{ steps.helm.outputs.helm-path }}
           make install-pss-policies
       - name: API Service status before migation
