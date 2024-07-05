@@ -66,7 +66,7 @@ jobs:
         run: |
           set -e
           kind create cluster --image kindest/node:${{ matrix.k8s-version.version }} --config ./.github/kind.yml
-      - name: Install latest kyverno
+      - name: Install kyverno v1.12.4
         run: |
           set -e
           kubectl create -f https://github.com/kyverno/kyverno/raw/main/config/install-latest-testing.yaml
@@ -74,6 +74,11 @@ jobs:
         run: |
           set -e
           kubectl wait --namespace kyverno --for=condition=ready pod --selector '!job-name' --timeout=120s
+      # - name: Install PSS policies
+      #   run: |
+      #     set -e
+      #     export HELM=${{ steps.helm.outputs.helm-path }}
+      #     make install-pss-policies
       - name: API Service status before migation
         run: |
           set -e
@@ -83,7 +88,12 @@ jobs:
           set -e
           kubectl create ns reports-server
           export HELM=${{ steps.helm.outputs.helm-path }}
-          make kind-apply
+          make kind-migrate
+      - name: Install api services
+        run: |
+          set -e
+          export HELM=${{ steps.helm.outputs.helm-path }}
+          make kind-apply-api-services
       - name: Wait for report server ready
         run: |
           set -e
