@@ -34,7 +34,6 @@ Install the reports-server chart:
 
 ```bash
 helm install reports-server -n reports-server --create-namespace --wait ./charts/reports-server/ \
-        --set image.tag=latest \
         --set postgresql.enabled=false \
         --set config.db.host=<HOST_NAME> \
         --set config.db.name=<DB_NAME> \
@@ -88,7 +87,6 @@ Install the reports-server chart:
 
 ```bash
 helm install reports-server -n reports-server --create-namespace --wait ./charts/reports-server \
-        --set image.tag=latest \
         --set postgresql.enabled=false \
         --set config.db.host=reports-server-cluster-rw.reports-server \
         --set config.db.name=reportsdb \
@@ -99,7 +97,6 @@ helm install reports-server -n reports-server --create-namespace --wait ./charts
 To run without cnpg:
 ```bash
 helm install reports-server -n reports-server --create-namespace --wait ./charts/reports-server \
-                             --set image.tag=latest \
                              --set config.db.name=reportsdb
 ```
 NOTE: to check where the reports are stored you can then exec into the postgres pod
@@ -136,7 +133,6 @@ Install the reports-server chart:
 
 ```bash
 helm install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
-        --set image.tag=latest \
         --set config.debug=true \
         --set postgresql.enabled=false
 ```

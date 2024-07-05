@@ -22,7 +22,7 @@ REGISTER_GEN                       := $(TOOLS_DIR)/register-gen
 OPENAPI_GEN                        := $(TOOLS_DIR)/openapi-gen
 CODE_GEN_VERSION                   := v0.28.0
 KIND                               := $(TOOLS_DIR)/kind
-KIND_VERSION                       := v0.20.0
+KIND_VERSION                       := v0.23.0
 KO                                 := $(TOOLS_DIR)/ko
 KO_VERSION                         := v0.14.1
 HELM                               := $(TOOLS_DIR)/helm
@@ -236,6 +236,33 @@ kind-apply: $(HELM) kind-load ## Build image, load it in kind cluster and deploy
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA) \
 			| kubectl apply -f -
+
+.PHONY: kind-migrate
+kind-migrate: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
+	@echo Install chart... >&2
+	@$(HELM) upgrade --install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
+		--set image.registry=$(KO_REGISTRY) \
+		--set image.repository=$(PACKAGE) \
+		--set image.tag=$(GIT_SHA) \
+		--set apiServices.enabled=false
+
+.PHONY: kind-apply-api-services
+kind-apply-api-services: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
+	@echo Install api services... >&2
+	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server \
+		--set image.registry=$(KO_REGISTRY) \
+		--set image.repository=$(PACKAGE) \
+		--set image.tag=$(GIT_SHA) \
+			| kubectl apply -f -
+
+.PHONY: install-pss-policies
+install-pss-policies: $(HELM) 
+	@echo Install pss policies... >&2
+	@$(HELM) repo add kyverno https://kyverno.github.io/kyverno/
+	@$(HELM) upgrade --install kyverno-policies kyverno/kyverno-policies \
+		--set=podSecurityStandard=restricted \
+		--set=background=true \
+		--set=validationFailureAction=Audit
 
 ########
 # HELP #

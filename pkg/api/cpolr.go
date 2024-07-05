@@ -52,7 +52,7 @@ func (c *cpolrStore) NewList() runtime.Object {
 }
 
 func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
-	labelSelector := labels.Everything()
+	var labelSelector labels.Selector
 	// fieldSelector := fields.Everything() // TODO: Field selectors
 	if options != nil {
 		if options.LabelSelector != nil {
@@ -73,21 +73,33 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 	// }
 
 	cpolrList := &v1alpha2.ClusterPolicyReportList{
-		Items: make([]v1alpha2.ClusterPolicyReport, 0),
-		ListMeta: metav1.ListMeta{
-			// TODO: Fix this!!
-			ResourceVersion: "1",
-		},
+		Items:    make([]v1alpha2.ClusterPolicyReport, 0),
+		ListMeta: metav1.ListMeta{},
 	}
-	for _, cpolr := range list.Items {
-		if cpolr.Labels == nil {
-			return list, nil
+	var desiredRv uint64
+	if len(options.ResourceVersion) == 0 {
+		desiredRv = 1
+	} else {
+		desiredRv, err = strconv.ParseUint(options.ResourceVersion, 10, 64)
+		if err != nil {
+			return nil, err
 		}
-		if labelSelector.Matches(labels.Set(cpolr.Labels)) {
+	}
+	var resourceVersion uint64
+	resourceVersion = 1
+	for _, cpolr := range list.Items {
+		allow, rv, err := allowObjectListWatch(cpolr.ObjectMeta, labelSelector, desiredRv, options.ResourceVersionMatch)
+		if err != nil {
+			return nil, err
+		}
+		if rv > resourceVersion {
+			resourceVersion = rv
+		}
+		if allow {
 			cpolrList.Items = append(cpolrList.Items, cpolr)
 		}
 	}
-
+	cpolrList.ListMeta.ResourceVersion = strconv.FormatUint(resourceVersion, 10)
 	return cpolrList, nil
 }
 
@@ -128,6 +140,8 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 		cpolr.Name = nameGenerator.GenerateName(cpolr.GenerateName)
 	}
 
+	cpolr.Annotations = labelReports(cpolr.Annotations)
+	cpolr.Generation = 1
 	klog.Infof("creating cluster policy report name=%s", cpolr.Name)
 	if !isDryRun {
 		r, err := c.createCpolr(cpolr)
@@ -184,7 +198,8 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 	if !ok {
 		return nil, false, errors.NewBadRequest("failed to validate cluster policy report")
 	}
-
+	cpolr.Annotations = labelReports(cpolr.Annotations)
+	cpolr.Generation += 1
 	klog.Infof("updating cluster policy report name=%s", cpolr.Name)
 	if !isDryRun {
 		r, err := c.updateCpolr(cpolr, oldObj)
@@ -255,8 +270,37 @@ func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 	return cpolrList, nil
 }
 
-func (c *cpolrStore) Watch(ctx context.Context, _ *metainternalversion.ListOptions) (watch.Interface, error) {
-	return c.broadcaster.Watch()
+func (c *cpolrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+	switch options.ResourceVersion {
+	case "", "0":
+		return c.broadcaster.Watch()
+	default:
+		break
+	}
+	items, err := c.List(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+	list, ok := items.(*v1alpha2.ClusterPolicyReportList)
+	if !ok {
+		return nil, fmt.Errorf("failed to convert runtime object into cluster policy report list")
+	}
+	events := make([]watch.Event, len(list.Items))
+	for i, pol := range list.Items {
+		report := pol.DeepCopy()
+		if report.Generation == 1 || report.Generation == 0 {
+			events[i] = watch.Event{
+				Type:   watch.Added,
+				Object: report,
+			}
+		} else {
+			events[i] = watch.Event{
+				Type:   watch.Modified,
+				Object: report,
+			}
+		}
+	}
+	return c.broadcaster.WatchWithPrefix(events)
 }
 
 func (c *cpolrStore) ConvertToTable(ctx context.Context, object runtime.Object, tableOptions runtime.Object) (*metav1beta1.Table, error) {
@@ -314,20 +358,15 @@ func (c *cpolrStore) listCpolr() (*v1alpha2.ClusterPolicyReportList, error) {
 }
 
 func (c *cpolrStore) createCpolr(report *v1alpha2.ClusterPolicyReport) (*v1alpha2.ClusterPolicyReport, error) {
-	report.ResourceVersion = fmt.Sprint(1)
+	report.ResourceVersion = c.store.UseResourceVersion()
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
 	return report, c.store.ClusterPolicyReports().Create(context.TODO(), *report)
 }
 
-func (c *cpolrStore) updateCpolr(report *v1alpha2.ClusterPolicyReport, oldReport *v1alpha2.ClusterPolicyReport) (*v1alpha2.ClusterPolicyReport, error) {
-	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
-	if err != nil {
-		return nil, errorpkg.Wrapf(err, "could not parse resource version")
-	}
-	report.ResourceVersion = fmt.Sprint(oldRV + 1)
-
+func (c *cpolrStore) updateCpolr(report *v1alpha2.ClusterPolicyReport, _ *v1alpha2.ClusterPolicyReport) (*v1alpha2.ClusterPolicyReport, error) {
+	report.ResourceVersion = c.store.UseResourceVersion()
 	return report, c.store.ClusterPolicyReports().Update(context.TODO(), *report)
 }
 

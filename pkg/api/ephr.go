@@ -53,7 +53,7 @@ func (p *ephrStore) NewList() runtime.Object {
 }
 
 func (p *ephrStore) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
-	labelSelector := labels.Everything()
+	var labelSelector labels.Selector
 	// fieldSelector := fields.Everything() // TODO: Field selectors
 	if options != nil {
 		if options.LabelSelector != nil {
@@ -76,21 +76,33 @@ func (p *ephrStore) List(ctx context.Context, options *metainternalversion.ListO
 	// }
 
 	ephrList := &reportsv1.EphemeralReportList{
-		Items: make([]reportsv1.EphemeralReport, 0),
-		ListMeta: metav1.ListMeta{
-			// TODO: Fix this!!
-			ResourceVersion: "1",
-		},
+		Items:    make([]reportsv1.EphemeralReport, 0),
+		ListMeta: metav1.ListMeta{},
 	}
-	for _, ephr := range list.Items {
-		if ephr.Labels == nil {
-			return list, nil
+	var desiredRv uint64
+	if len(options.ResourceVersion) == 0 {
+		desiredRv = 1
+	} else {
+		desiredRv, err = strconv.ParseUint(options.ResourceVersion, 10, 64)
+		if err != nil {
+			return nil, err
 		}
-		if labelSelector.Matches(labels.Set(ephr.Labels)) {
+	}
+	var resourceVersion uint64
+	resourceVersion = 1
+	for _, ephr := range list.Items {
+		allow, rv, err := allowObjectListWatch(ephr.ObjectMeta, labelSelector, desiredRv, options.ResourceVersionMatch)
+		if err != nil {
+			return nil, err
+		}
+		if rv > resourceVersion {
+			resourceVersion = rv
+		}
+		if allow {
 			ephrList.Items = append(ephrList.Items, ephr)
 		}
 	}
-
+	ephrList.ListMeta.ResourceVersion = strconv.FormatUint(resourceVersion, 10)
 	return ephrList, nil
 }
 
@@ -139,6 +151,8 @@ func (p *ephrStore) Create(ctx context.Context, obj runtime.Object, createValida
 		ephr.Namespace = namespace
 	}
 
+	ephr.Annotations = labelReports(ephr.Annotations)
+	ephr.Generation = 1
 	klog.Infof("creating ephemeral reports name=%s namespace=%s", ephr.Name, ephr.Namespace)
 	if !isDryRun {
 		r, err := p.createEphr(ephr)
@@ -202,6 +216,8 @@ func (p *ephrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		ephr.Namespace = namespace
 	}
 
+	ephr.Annotations = labelReports(ephr.Annotations)
+	ephr.Generation += 1
 	klog.Infof("updating ephemeral reports name=%s namespace=%s", ephr.Name, ephr.Namespace)
 	if !isDryRun {
 		r, err := p.updateEphr(ephr, oldObj)
@@ -275,8 +291,37 @@ func (p *ephrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 	return ephrList, nil
 }
 
-func (p *ephrStore) Watch(ctx context.Context, _ *metainternalversion.ListOptions) (watch.Interface, error) {
-	return p.broadcaster.Watch()
+func (p *ephrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+	switch options.ResourceVersion {
+	case "", "0":
+		return p.broadcaster.Watch()
+	default:
+		break
+	}
+	items, err := p.List(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+	list, ok := items.(*reportsv1.EphemeralReportList)
+	if !ok {
+		return nil, fmt.Errorf("failed to convert runtime object into ephemeral report list")
+	}
+	events := make([]watch.Event, len(list.Items))
+	for i, pol := range list.Items {
+		report := pol.DeepCopy()
+		if report.Generation == 1 || report.Generation == 0 {
+			events[i] = watch.Event{
+				Type:   watch.Added,
+				Object: report,
+			}
+		} else {
+			events[i] = watch.Event{
+				Type:   watch.Modified,
+				Object: report,
+			}
+		}
+	}
+	return p.broadcaster.WatchWithPrefix(events)
 }
 
 func (p *ephrStore) ConvertToTable(ctx context.Context, object runtime.Object, tableOptions runtime.Object) (*metav1beta1.Table, error) {
@@ -334,20 +379,15 @@ func (p *ephrStore) listEphr(namespace string) (*reportsv1.EphemeralReportList, 
 }
 
 func (p *ephrStore) createEphr(report *reportsv1.EphemeralReport) (*reportsv1.EphemeralReport, error) {
-	report.ResourceVersion = fmt.Sprint(1)
+	report.ResourceVersion = p.store.UseResourceVersion()
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
 	return report, p.store.EphemeralReports().Create(context.TODO(), *report)
 }
 
-func (p *ephrStore) updateEphr(report *reportsv1.EphemeralReport, oldReport *reportsv1.EphemeralReport) (*reportsv1.EphemeralReport, error) {
-	oldRV, err := strconv.ParseInt(oldReport.ResourceVersion, 10, 64)
-	if err != nil {
-		return nil, errorpkg.Wrapf(err, "could not parse resource version")
-	}
-	report.ResourceVersion = fmt.Sprint(oldRV + 1)
-
+func (p *ephrStore) updateEphr(report *reportsv1.EphemeralReport, _ *reportsv1.EphemeralReport) (*reportsv1.EphemeralReport, error) {
+	report.ResourceVersion = p.store.UseResourceVersion()
 	return report, p.store.EphemeralReports().Update(context.TODO(), *report)
 }
 

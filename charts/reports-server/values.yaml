@@ -80,7 +80,8 @@ securityContext:
 
 # -- Liveness probe
 livenessProbe:
-  failureThreshold: 3
+  initialDelaySeconds: 20
+  failureThreshold: 10
   periodSeconds: 10
   httpGet:
     path: /livez
@@ -89,8 +90,8 @@ livenessProbe:
 
 # -- Readiness probe
 readinessProbe:
-  initialDelaySeconds: 20
-  failureThreshold: 3
+  initialDelaySeconds: 30
+  failureThreshold: 10
   periodSeconds: 10
   httpGet:
     path: /readyz
