@@ -10,18 +10,14 @@ Clusters with policy reports CRDs have existing API services for policy reports 
 
 Follow the given methods to migrate to reports server on your existing cluster:
 
-## YAML Manifest
-
-YAML manifest can be installed directly using `kubectl apply` and this will overwrite the existing API services. Run the following command:
-```bash
-kubectl apply -f https://raw.githubusercontent.com/nirmata/reports-server/main/config/install.yaml
-```
-
 ## Helm Chart
 
 Helm cannot overwrite resources when they are not managed by helm. Thus we recommend installing the chart without the api services using the following command:
 ```bash
-helm install reports-server --namespace reports-server reports-server/reports-server --devel  --set apiServices.enabled=false
+```bash
+helm install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
+        --set image.tag=latest \
+        --set apiServices.enabled=false
 ```
 
 Once the helm chart is installed, API services can be manually updated using `kubectl apply`. Update our [apiservices samples](./config/samples/apiservices.yaml) with the right reports-server name and namespace and apply that manifest.
