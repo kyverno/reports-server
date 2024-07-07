@@ -103,6 +103,7 @@ func (p *ephrStore) List(ctx context.Context, options *metainternalversion.ListO
 		}
 	}
 	ephrList.ListMeta.ResourceVersion = strconv.FormatUint(resourceVersion, 10)
+	klog.Infof("filtered list found length: %d", len(ephrList.Items))
 	return ephrList, nil
 }
 
@@ -292,6 +293,7 @@ func (p *ephrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 }
 
 func (p *ephrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+	klog.Infof("watching ephemeral reports rv=%s", options.ResourceVersion)
 	switch options.ResourceVersion {
 	case "", "0":
 		return p.broadcaster.Watch()

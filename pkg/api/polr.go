@@ -103,6 +103,7 @@ func (p *polrStore) List(ctx context.Context, options *metainternalversion.ListO
 		}
 	}
 	polrList.ListMeta.ResourceVersion = strconv.FormatUint(resourceVersion, 10)
+	klog.Infof("filtered list found length: %d", len(polrList.Items))
 	return polrList, nil
 }
 
@@ -292,6 +293,7 @@ func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 }
 
 func (p *polrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+	klog.Infof("watching policy reports rv=%s", options.ResourceVersion)
 	switch options.ResourceVersion {
 	case "", "0":
 		return p.broadcaster.Watch()

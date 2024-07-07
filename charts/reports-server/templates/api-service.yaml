@@ -8,6 +8,8 @@ metadata:
   labels:
     {{- include "reports-server.labels" . | nindent 4 }}
     kube-aggregator.kubernetes.io/automanaged: "false"
+  annotations:
+    helm.sh/hook: post-install
 spec:
   group: wgpolicyk8s.io
   groupPriorityMinimum: 100
@@ -28,6 +30,8 @@ metadata:
   labels:
     {{- include "reports-server.labels" . | nindent 4 }}
     kube-aggregator.kubernetes.io/automanaged: "false"
+  annotations:
+    helm.sh/hook: post-install
 spec:
   group: reports.kyverno.io
   groupPriorityMinimum: 100

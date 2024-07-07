@@ -100,6 +100,7 @@ func (c *cephrStore) List(ctx context.Context, options *metainternalversion.List
 		}
 	}
 	cephrList.ListMeta.ResourceVersion = strconv.FormatUint(resourceVersion, 10)
+	klog.Infof("filtered list found length: %d", len(cephrList.Items))
 	return cephrList, nil
 }
 
@@ -272,6 +273,7 @@ func (c *cephrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 }
 
 func (c *cephrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+	klog.Infof("watching cluster ephemeral reports rv=%s", options.ResourceVersion)
 	switch options.ResourceVersion {
 	case "", "0":
 		return c.broadcaster.Watch()
