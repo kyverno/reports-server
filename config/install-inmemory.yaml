@@ -105,7 +105,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: reports-server
-  namespace: reports-server
+  namespace: kube-system
   labels:
     helm.sh/chart: reports-server-0.1.0-alpha.1-n4k.2
     app.kubernetes.io/name: reports-server

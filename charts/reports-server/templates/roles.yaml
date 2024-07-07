@@ -2,7 +2,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "reports-server.fullname" . }}
-  namespace: {{ $.Release.Namespace }}
+  namespace: kube-system
   labels:
     {{- include "reports-server.labels" . | nindent 4 }}
 roleRef:
