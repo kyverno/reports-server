@@ -274,30 +274,29 @@ func (c *cephrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 
 func (c *cephrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
 	klog.Infof("watching cluster ephemeral reports rv=%s", options.ResourceVersion)
-	return c.broadcaster.Watch()
-	// switch options.ResourceVersion {
-	// case "", "0":
-	// 	return c.broadcaster.Watch()
-	// default:
-	// 	break
-	// }
-	// items, err := c.List(ctx, options)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// list, ok := items.(*reportsv1.ClusterEphemeralReportList)
-	// if !ok {
-	// 	return nil, fmt.Errorf("failed to convert runtime object into cluster ephemeral report list")
-	// }
-	// events := make([]watch.Event, len(list.Items))
-	// for i, pol := range list.Items {
-	// 	report := pol.DeepCopy()
-	// 	events[i] = watch.Event{
-	// 		Type:   watch.Added,
-	// 		Object: report,
-	// 	}
-	// }
-	// return c.broadcaster.WatchWithPrefix(events)
+	switch options.ResourceVersion {
+	case "", "0":
+		return c.broadcaster.Watch()
+	default:
+		break
+	}
+	items, err := c.List(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+	list, ok := items.(*reportsv1.ClusterEphemeralReportList)
+	if !ok {
+		return nil, fmt.Errorf("failed to convert runtime object into cluster ephemeral report list")
+	}
+	events := make([]watch.Event, len(list.Items))
+	for i, pol := range list.Items {
+		report := pol.DeepCopy()
+		events[i] = watch.Event{
+			Type:   watch.Added,
+			Object: report,
+		}
+	}
+	return c.broadcaster.WatchWithPrefix(events)
 }
 
 func (c *cephrStore) ConvertToTable(ctx context.Context, object runtime.Object, tableOptions runtime.Object) (*metav1beta1.Table, error) {

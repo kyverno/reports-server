@@ -294,30 +294,29 @@ func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 
 func (p *polrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
 	klog.Infof("watching policy reports rv=%s", options.ResourceVersion)
-	return p.broadcaster.Watch()
-	// switch options.ResourceVersion {
-	// case "", "0":
-	// 	return p.broadcaster.Watch()
-	// default:
-	// 	break
-	// }
-	// items, err := p.List(ctx, options)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// list, ok := items.(*v1alpha2.PolicyReportList)
-	// if !ok {
-	// 	return nil, fmt.Errorf("failed to convert runtime object into policy report list")
-	// }
-	// events := make([]watch.Event, len(list.Items))
-	// for i, pol := range list.Items {
-	// 	report := pol.DeepCopy()
-	// 	events[i] = watch.Event{
-	// 		Type:   watch.Added,
-	// 		Object: report,
-	// 	}
-	// }
-	// return p.broadcaster.WatchWithPrefix(events)
+	switch options.ResourceVersion {
+	case "", "0":
+		return p.broadcaster.Watch()
+	default:
+		break
+	}
+	items, err := p.List(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+	list, ok := items.(*v1alpha2.PolicyReportList)
+	if !ok {
+		return nil, fmt.Errorf("failed to convert runtime object into policy report list")
+	}
+	events := make([]watch.Event, len(list.Items))
+	for i, pol := range list.Items {
+		report := pol.DeepCopy()
+		events[i] = watch.Event{
+			Type:   watch.Added,
+			Object: report,
+		}
+	}
+	return p.broadcaster.WatchWithPrefix(events)
 }
 
 func (p *polrStore) ConvertToTable(ctx context.Context, object runtime.Object, tableOptions runtime.Object) (*metav1beta1.Table, error) {
