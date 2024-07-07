@@ -14,16 +14,14 @@ func allowObjectListWatch(object metav1.ObjectMeta, labelSelector labels.Selecto
 	}
 
 	switch rvmatch {
-	case metav1.ResourceVersionMatchNotOlderThan:
-		if rv < desiredRv {
-			return false, 0, nil
-		}
 	case metav1.ResourceVersionMatchExact:
 		if rv != desiredRv {
 			return false, 0, nil
 		}
 	default:
-		break
+		if rv < desiredRv {
+			return false, 0, nil
+		}
 	}
 
 	if labelSelector == nil {
