@@ -291,16 +291,9 @@ func (c *cephrStore) Watch(ctx context.Context, options *metainternalversion.Lis
 	events := make([]watch.Event, len(list.Items))
 	for i, pol := range list.Items {
 		report := pol.DeepCopy()
-		if report.Generation == 1 || report.Generation == 0 {
-			events[i] = watch.Event{
-				Type:   watch.Added,
-				Object: report,
-			}
-		} else {
-			events[i] = watch.Event{
-				Type:   watch.Modified,
-				Object: report,
-			}
+		events[i] = watch.Event{
+			Type:   watch.Added,
+			Object: report,
 		}
 	}
 	return c.broadcaster.WatchWithPrefix(events)
