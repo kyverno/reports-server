@@ -21,3 +21,15 @@ helm install reports-server --namespace reports-server --create-namespace --wait
 ```
 
 Once the helm chart is installed, API services can be manually updated using `kubectl apply`. Update our [apiservices samples](./config/samples/apiservices.yaml) with the right reports-server name and namespace and apply that manifest.
+
+# Cleaning up etcd
+
+Switching to report-server does not delete existing reports in etcd. Reports-server will only recreate all the existing reports from etcd in its database. We recommend manually deleting keys from etcd using `etcdctl`. 
+
+```bash
+etcdctl delete --prefix --key “/registry/reports.kyverno.io/”
+```
+
+```bash
+etcdctl delete --prefix --key “/registry/wgpolicyk8s.io/”
+```
