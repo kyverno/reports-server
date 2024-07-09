@@ -104,7 +104,7 @@ metrics:
 
   serviceMonitor:
     # -- Enable service monitor for scraping prometheus metrics
-    enabled: true
+    enabled: false
 
     # -- Service monitor additional labels
     additionalLabels: {}
