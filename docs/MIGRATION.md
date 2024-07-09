@@ -20,7 +20,7 @@ helm install reports-server --namespace reports-server --create-namespace --wait
         --set apiServices.enabled=false
 ```
 
-Once the helm chart is installed, API services can be manually updated using `kubectl apply`. Update our [apiservices samples](./config/samples/apiservices.yaml) with the right reports-server name and namespace and apply that manifest.
+Once the helm chart is installed, API services can be manually updated using `kubectl apply`. Update our [apiservices samples](https://github.com/nirmata/reports-server/blob/main/config/samples/apiservices.yaml) with the right reports-server name and namespace and apply that manifest.
 
 # Cleaning up etcd
 
