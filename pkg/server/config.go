@@ -174,17 +174,17 @@ func (c Config) migration(store storage.Interface) error {
 				if err != nil {
 					klog.Error(err)
 				}
-			case watch.Deleted:
-				cpolr := event.Object.(*v1alpha2.ClusterPolicyReport)
-				if cpolr.Annotations != nil {
-					if _, ok := cpolr.Annotations[api.ServedByReportsServerAnnotation]; ok {
-						return
-					}
-				}
-				err := store.ClusterPolicyReports().Delete(context.TODO(), cpolr.Name)
-				if err != nil {
-					klog.Error(err)
-				}
+				// case watch.Deleted:
+				// 	cpolr := event.Object.(*v1alpha2.ClusterPolicyReport)
+				// 	if cpolr.Annotations != nil {
+				// 		if _, ok := cpolr.Annotations[api.ServedByReportsServerAnnotation]; ok {
+				// 			return
+				// 		}
+				// 	}
+				// 	err := store.ClusterPolicyReports().Delete(context.TODO(), cpolr.Name)
+				// 	if err != nil {
+				// 		klog.Error(err)
+				// 	}
 			}
 		}
 	}()
@@ -238,17 +238,17 @@ func (c Config) migration(store storage.Interface) error {
 				if err != nil {
 					klog.Error(err)
 				}
-			case watch.Deleted:
-				polr := event.Object.(*v1alpha2.PolicyReport)
-				if polr.Annotations != nil {
-					if _, ok := polr.Annotations[api.ServedByReportsServerAnnotation]; ok {
-						return
-					}
-				}
-				err := store.PolicyReports().Delete(context.TODO(), polr.Name, polr.Namespace)
-				if err != nil {
-					klog.Error(err)
-				}
+				// case watch.Deleted:
+				// 	polr := event.Object.(*v1alpha2.PolicyReport)
+				// 	if polr.Annotations != nil {
+				// 		if _, ok := polr.Annotations[api.ServedByReportsServerAnnotation]; ok {
+				// 			return
+				// 		}
+				// 	}
+				// 	err := store.PolicyReports().Delete(context.TODO(), polr.Name, polr.Namespace)
+				// 	if err != nil {
+				// 		klog.Error(err)
+				// 	}
 			}
 		}
 	}()
@@ -301,17 +301,17 @@ func (c Config) migration(store storage.Interface) error {
 				if err != nil {
 					klog.Error(err)
 				}
-			case watch.Deleted:
-				cephr := event.Object.(*reportsv1.ClusterEphemeralReport)
-				if cephr.Annotations != nil {
-					if _, ok := cephr.Annotations[api.ServedByReportsServerAnnotation]; ok {
-						return
-					}
-				}
-				err := store.ClusterEphemeralReports().Delete(context.TODO(), cephr.Name)
-				if err != nil {
-					klog.Error(err)
-				}
+				// case watch.Deleted:
+				// 	cephr := event.Object.(*reportsv1.ClusterEphemeralReport)
+				// 	if cephr.Annotations != nil {
+				// 		if _, ok := cephr.Annotations[api.ServedByReportsServerAnnotation]; ok {
+				// 			return
+				// 		}
+				// 	}
+				// 	err := store.ClusterEphemeralReports().Delete(context.TODO(), cephr.Name)
+				// 	if err != nil {
+				// 		klog.Error(err)
+				// 	}
 			}
 		}
 	}()
@@ -363,17 +363,17 @@ func (c Config) migration(store storage.Interface) error {
 				if err != nil {
 					klog.Error(err)
 				}
-			case watch.Deleted:
-				ephr := event.Object.(*reportsv1.EphemeralReport)
-				if ephr.Annotations != nil {
-					if _, ok := ephr.Annotations[api.ServedByReportsServerAnnotation]; ok {
-						return
-					}
-				}
-				err := store.EphemeralReports().Delete(context.TODO(), ephr.Name, ephr.Namespace)
-				if err != nil {
-					klog.Error(err)
-				}
+				// case watch.Deleted:
+				// 	ephr := event.Object.(*reportsv1.EphemeralReport)
+				// 	if ephr.Annotations != nil {
+				// 		if _, ok := ephr.Annotations[api.ServedByReportsServerAnnotation]; ok {
+				// 			return
+				// 		}
+				// 	}
+				// 	err := store.EphemeralReports().Delete(context.TODO(), ephr.Name, ephr.Namespace)
+				// 	if err != nil {
+				// 		klog.Error(err)
+				// 	}
 			}
 		}
 	}()
