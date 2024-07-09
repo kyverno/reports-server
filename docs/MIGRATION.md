@@ -27,9 +27,9 @@ Once the helm chart is installed, API services can be manually updated using `ku
 Switching to report-server does not delete existing reports in etcd. Reports-server will only recreate all the existing reports from etcd in its database. We recommend manually deleting keys from etcd using `etcdctl`. 
 
 ```bash
-etcdctl delete --prefix --key “/registry/reports.kyverno.io/”
+etcdctl del --prefix --key “/registry/reports.kyverno.io/”
 ```
 
 ```bash
-etcdctl delete --prefix --key “/registry/wgpolicyk8s.io/”
+etcdctl del --prefix --key “/registry/wgpolicyk8s.io/”
 ```
