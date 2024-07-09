@@ -289,20 +289,20 @@ spec:
             - mountPath: /tmp
               name: tmp-dir
           livenessProbe:
-            failureThreshold: 3
+            failureThreshold: 10
             httpGet:
               path: /livez
               port: https
               scheme: HTTPS
-            initialDelaySeconds: 90
+            initialDelaySeconds: 20
             periodSeconds: 10
           readinessProbe:
-            failureThreshold: 3
+            failureThreshold: 10
             httpGet:
               path: /readyz
               port: https
               scheme: HTTPS
-            initialDelaySeconds: 100
+            initialDelaySeconds: 30
             periodSeconds: 10
           resources:
             limits: null
@@ -492,6 +492,8 @@ metadata:
     app.kubernetes.io/version: "v0.1.0-alpha.1"
     app.kubernetes.io/managed-by: Helm
     kube-aggregator.kubernetes.io/automanaged: "false"
+  annotations:
+    helm.sh/hook: post-install
 spec:
   group: wgpolicyk8s.io
   groupPriorityMinimum: 100
@@ -514,6 +516,8 @@ metadata:
     app.kubernetes.io/version: "v0.1.0-alpha.1"
     app.kubernetes.io/managed-by: Helm
     kube-aggregator.kubernetes.io/automanaged: "false"
+  annotations:
+    helm.sh/hook: post-install
 spec:
   group: reports.kyverno.io
   groupPriorityMinimum: 100

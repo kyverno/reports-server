@@ -103,6 +103,7 @@ func (p *ephrStore) List(ctx context.Context, options *metainternalversion.ListO
 		}
 	}
 	ephrList.ListMeta.ResourceVersion = strconv.FormatUint(resourceVersion, 10)
+	klog.Infof("filtered list found length: %d", len(ephrList.Items))
 	return ephrList, nil
 }
 
@@ -292,6 +293,7 @@ func (p *ephrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 }
 
 func (p *ephrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+	klog.Infof("watching ephemeral reports rv=%s", options.ResourceVersion)
 	switch options.ResourceVersion {
 	case "", "0":
 		return p.broadcaster.Watch()
@@ -309,16 +311,9 @@ func (p *ephrStore) Watch(ctx context.Context, options *metainternalversion.List
 	events := make([]watch.Event, len(list.Items))
 	for i, pol := range list.Items {
 		report := pol.DeepCopy()
-		if report.Generation == 1 || report.Generation == 0 {
-			events[i] = watch.Event{
-				Type:   watch.Added,
-				Object: report,
-			}
-		} else {
-			events[i] = watch.Event{
-				Type:   watch.Modified,
-				Object: report,
-			}
+		events[i] = watch.Event{
+			Type:   watch.Added,
+			Object: report,
 		}
 	}
 	return p.broadcaster.WatchWithPrefix(events)

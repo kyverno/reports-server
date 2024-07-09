@@ -100,6 +100,7 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 		}
 	}
 	cpolrList.ListMeta.ResourceVersion = strconv.FormatUint(resourceVersion, 10)
+	klog.Infof("filtered list found length: %d", len(cpolrList.Items))
 	return cpolrList, nil
 }
 
@@ -271,6 +272,7 @@ func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 }
 
 func (c *cpolrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+	klog.Infof("watching cluster policy reports rv=%s", options.ResourceVersion)
 	switch options.ResourceVersion {
 	case "", "0":
 		return c.broadcaster.Watch()
@@ -288,16 +290,9 @@ func (c *cpolrStore) Watch(ctx context.Context, options *metainternalversion.Lis
 	events := make([]watch.Event, len(list.Items))
 	for i, pol := range list.Items {
 		report := pol.DeepCopy()
-		if report.Generation == 1 || report.Generation == 0 {
-			events[i] = watch.Event{
-				Type:   watch.Added,
-				Object: report,
-			}
-		} else {
-			events[i] = watch.Event{
-				Type:   watch.Modified,
-				Object: report,
-			}
+		events[i] = watch.Event{
+			Type:   watch.Added,
+			Object: report,
 		}
 	}
 	return c.broadcaster.WatchWithPrefix(events)
