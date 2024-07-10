@@ -172,6 +172,7 @@ spec:
             - --debug
             - --cert-dir=/tmp
             - --secure-port=4443
+            - --authorization-always-allow-paths=/metrics
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

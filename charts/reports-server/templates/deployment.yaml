@@ -51,6 +51,9 @@ spec:
             {{- end }}
             - --cert-dir=/tmp
             - --secure-port=4443
+            {{- if .Values.metrics.enabled }}
+            - --authorization-always-allow-paths=/metrics
+            {{- end }}
           {{- if .Values.config.db.secretName }}
           env:
             - name: DB_HOST
