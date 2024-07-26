@@ -1,6 +1,6 @@
 # reports-server
 
-![Version: 0.1.0-alpha.1-n4k.2](https://img.shields.io/badge/Version-0.1.0--alpha.1--n4k.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.0-alpha.1-n4k.2](https://img.shields.io/badge/AppVersion-v0.1.0--alpha.1--n4k.2-informational?style=flat-square)
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.0](https://img.shields.io/badge/AppVersion-v0.1.0-informational?style=flat-square)
 
 TODO
 
@@ -44,6 +44,13 @@ helm install reports-server --namespace reports-server --create-namespace report
 | securityContext | object | See [values.yaml](values.yaml) | Container security context |
 | livenessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/livez","port":"https","scheme":"HTTPS"},"initialDelaySeconds":20,"periodSeconds":10}` | Liveness probe |
 | readinessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/readyz","port":"https","scheme":"HTTPS"},"initialDelaySeconds":30,"periodSeconds":10}` | Readiness probe |
+| metrics.enabled | bool | `true` | Enable prometheus metrics |
+| metrics.serviceMonitor.enabled | bool | `false` | Enable service monitor for scraping prometheus metrics |
+| metrics.serviceMonitor.additionalLabels | object | `{}` | Service monitor additional labels |
+| metrics.serviceMonitor.interval | string | `""` | Service monitor scrape interval |
+| metrics.serviceMonitor.metricRelabelings | list | `[]` | Service monitor metric relabelings |
+| metrics.serviceMonitor.relabelings | list | `[]` | Service monitor relabelings |
+| metrics.serviceMonitor.scrapeTimeout | string | `""` | Service monitor scrape timeout |
 | resources.limits | string | `nil` | Container resource limits |
 | resources.requests | string | `nil` | Container resource requests |
 | autoscaling.enabled | bool | `false` | Enable autoscaling |
