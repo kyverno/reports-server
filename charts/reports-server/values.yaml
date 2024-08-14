@@ -182,6 +182,11 @@ config:
     # -- The database host will be read from this `key` in the specified Secret, when `db.secretName` is set.
     hostSecretKeyName: "host"
 
+    # -- Database port
+    port: 5432
+    # -- The database port will be read from this `key` in the specified Secret, when `db.secretName` is set.
+    portSecretKeyName: "port"
+
     # -- Database name
     name: reportsdb
     # -- The database name will be read from this `key` in the specified Secret, when `db.secretName` is set.

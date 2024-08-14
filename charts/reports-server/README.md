@@ -67,6 +67,8 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.secretName | string | `""` | If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`. |
 | config.db.host | string | `""` | Database host |
 | config.db.hostSecretKeyName | string | `"host"` | The database host will be read from this `key` in the specified Secret, when `db.secretName` is set. |
+| config.db.port | string | `"port"` | Database port |
+| config.db.portSecretKeyName | string | `"port"` | The database port will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.name | string | `"reportsdb"` | Database name |
 | config.db.dbNameSecretKeyName | string | `"dbname"` | The database name will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.user | string | `"postgres"` | Database user |
