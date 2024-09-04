@@ -14,8 +14,8 @@ maintainers:
     url: https://kyverno.io/
     email: cncf-kyverno-maintainers@lists.cncf.io
 kubeVersion: ">=1.16.0-0"
-# dependencies:
-# - condition: postgresql.enabled
-#   name: cloudnative-pg
-#   version: 0.22.0
-#   repository: https://cloudnative-pg.github.io/charts
+dependencies:
+- condition: postgresql.enabled
+  name: cloudnative-pg
+  version: 0.22.0
+  repository: https://cloudnative-pg.github.io/charts

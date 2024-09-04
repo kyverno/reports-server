@@ -3,6 +3,10 @@
 templating:
   enabled: false
 
+cloudnative-pg:
+  crds:
+    create: false
+
 postgresql:
 
   # -- Deploy postgresql dependency chart

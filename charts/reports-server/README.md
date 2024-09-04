@@ -22,6 +22,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| cloudnative-pg.crds.create | bool | `false` |  |
 | postgresql.enabled | bool | `true` | Deploy postgresql dependency chart |
 | postgresql.auth.postgresPassword | string | `"reports"` |  |
 | postgresql.auth.database | string | `"reportsdb"` |  |
@@ -85,6 +86,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 ## Requirements
 
 Kubernetes: `>=1.16.0-0`
+
+| Repository | Name | Version |
+|------------|------|---------|
+| https://cloudnative-pg.github.io/charts | cloudnative-pg | 0.22.0 |
 
 ## Maintainers
 
