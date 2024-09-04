@@ -19,6 +19,7 @@ import (
 	"k8s.io/component-base/logs"
 	logsapi "k8s.io/component-base/logs/api/v1"
 	_ "k8s.io/component-base/logs/json/register"
+	"k8s.io/klog/v2"
 )
 
 type Options struct {
@@ -162,6 +163,7 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	serverConfig.OpenAPIV3Config.Info.Title = "reports-server"
 	serverConfig.OpenAPIConfig.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0] // TODO(directxman12): remove this once autosetting this doesn't require security definitions
 	serverConfig.OpenAPIV3Config.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0]
+	klog.Info("version", serverConfig.OpenAPIConfig.Info.Version, "v3", serverConfig.OpenAPIV3Config.Info.Version)
 
 	return serverConfig, nil
 }

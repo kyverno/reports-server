@@ -65,13 +65,13 @@ helm install reports-server --namespace reports-server --create-namespace report
 | service.port | int | `443` | Service port |
 | config.debug | bool | `false` | Enable debug (to use inmemorydatabase) |
 | config.db.secretName | string | `""` | If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`. |
-| config.db.host | string | `""` | Database host |
+| config.db.host | string | `"reports-server-cluster-rw.reports-server"` | Database host |
 | config.db.hostSecretKeyName | string | `"host"` | The database host will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.name | string | `"reportsdb"` | Database name |
 | config.db.dbNameSecretKeyName | string | `"dbname"` | The database name will be read from this `key` in the specified Secret, when `db.secretName` is set. |
-| config.db.user | string | `"postgres"` | Database user |
+| config.db.user | string | `"app"` | Database user |
 | config.db.userSecretKeyName | string | `"username"` | The database username will be read from this `key` in the specified Secret, when `db.secretName` is set. |
-| config.db.password | string | `"reports"` | Database password |
+| config.db.password | string | `"password"` | Database password |
 | config.db.passwordSecretKeyName | string | `"password"` | The database password will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.sslmode | string | `"disable"` | Database SSL |
 | config.db.sslrootcert | string | `""` | Database SSL root cert |
@@ -85,10 +85,6 @@ helm install reports-server --namespace reports-server --create-namespace report
 ## Requirements
 
 Kubernetes: `>=1.16.0-0`
-
-| Repository | Name | Version |
-|------------|------|---------|
-| oci://registry-1.docker.io/bitnamicharts | postgresql | 13.4.1 |
 
 ## Maintainers
 
