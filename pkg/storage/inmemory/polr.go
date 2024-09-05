@@ -33,7 +33,7 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyR
 			klog.Infof("value found for prefix:%s, key:%s", namespace, k)
 			v, err := p.db.Get(k)
 			if err != nil {
-				klog.Errorf(err.Error())
+				klog.Errorf("failed to get data from inmemory db: %v", err)
 				return nil, err
 			}
 			res = append(res, *v)

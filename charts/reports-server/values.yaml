@@ -3,6 +3,10 @@
 templating:
   enabled: false
 
+cloudnative-pg:
+  crds:
+    create: false
+
 postgresql:
 
   # -- Deploy postgresql dependency chart
@@ -178,7 +182,7 @@ config:
     secretName: ""
 
     # -- Database host
-    host: ""
+    host: reports-server-cluster-rw.reports-server
     # -- The database host will be read from this `key` in the specified Secret, when `db.secretName` is set.
     hostSecretKeyName: "host"
 
@@ -188,13 +192,13 @@ config:
     dbNameSecretKeyName: "dbname"
 
     # -- Database user
-    user: postgres
+    user: app
 
     # -- The database username will be read from this `key` in the specified Secret, when `db.secretName` is set.
     userSecretKeyName: "username"
 
     # -- Database password
-    password: reports
+    password: password
 
     # -- The database password will be read from this `key` in the specified Secret, when `db.secretName` is set.
     passwordSecretKeyName: "password"

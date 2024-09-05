@@ -16,6 +16,6 @@ maintainers:
 kubeVersion: ">=1.16.0-0"
 dependencies:
 - condition: postgresql.enabled
-  name: postgresql
-  version: 13.4.1
-  repository: oci://registry-1.docker.io/bitnamicharts
+  name: cloudnative-pg
+  version: 0.22.0
+  repository: https://cloudnative-pg.github.io/charts
