@@ -1,3 +1,4 @@
+{{- if .Values.postgresql.enabled }}
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
@@ -28,3 +29,4 @@ type: kubernetes.io/basic-auth
 data:
   username: YXBw
   password: cGFzc3dvcmQ=
+{{- end }}
