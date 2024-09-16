@@ -188,19 +188,19 @@ func (c Config) migration(store storage.Interface) error {
 				if err != nil {
 					klog.Error(err)
 				}
-			case watch.Deleted:
-				// cpolr := event.Object.(*v1alpha2.ClusterPolicyReport)
-				// if cpolr.Annotations != nil {
-				// 	if _, ok := cpolr.Annotations[api.ServedByReportsServerAnnotation]; ok {
-				// 		return
+				// case watch.Deleted:
+				// 	cpolr := event.Object.(*v1alpha2.ClusterPolicyReport)
+				// 	if cpolr.Annotations != nil {
+				// 		if _, ok := cpolr.Annotations[api.ServedByReportsServerAnnotation]; ok {
+				// 			return
+				// 		}
+				// 	} else {
+				// 		cpolr.Annotations = make(map[string]string)
 				// 	}
-				// } else {
-				// 	cpolr.Annotations = make(map[string]string)
-				// }
-				// err := store.ClusterPolicyReports().Delete(context.TODO(), cpolr.Name)
-				// if err != nil {
-				// 	klog.Error(err)
-				// }
+				// 	err := store.ClusterPolicyReports().Delete(context.TODO(), cpolr.Name)
+				// 	if err != nil {
+				// 		klog.Error(err)
+				// 	}
 			}
 		}
 	}()
