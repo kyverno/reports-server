@@ -136,7 +136,7 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 	}
 	if cephr.Name == "" {
 		if cephr.GenerateName == "" {
-			return nil, errors.NewConflict(utils.ClusterEphemeralReportsGR, cephr.Name, fmt.Errorf("name and generate name not provided"))
+			return nil, errors.NewAlreadyExists(utils.ClusterEphemeralReportsGR, cephr.Name)
 		}
 		cephr.Name = nameGenerator.GenerateName(cephr.GenerateName)
 	}

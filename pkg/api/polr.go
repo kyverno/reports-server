@@ -158,7 +158,7 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 	if !isDryRun {
 		r, err := p.createPolr(polr)
 		if err != nil {
-			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create policy report: %s", err.Error()))
+			return nil, errors.NewAlreadyExists(utils.PolicyReportsGR, polr.Name)
 		}
 		if err := p.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
