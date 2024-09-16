@@ -158,7 +158,7 @@ func (p *ephrStore) Create(ctx context.Context, obj runtime.Object, createValida
 	if !isDryRun {
 		r, err := p.createEphr(ephr)
 		if err != nil {
-			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create ephemeral report: %s", err.Error()))
+			return nil, errors.NewAlreadyExists(utils.EphemeralReportsGR, ephr.Name)
 		}
 		if err := p.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
