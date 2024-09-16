@@ -258,9 +258,10 @@ spec:
         - name: reports-server
           args:
             - --dbhost=reports-server-postgresql.reports-server
-            - --dbname=reportsdb
+            - --dbport=5432
             - --dbuser=postgres
             - --dbpassword=reports
+            - --dbname=reportsdb
             - --dbsslmode=disable
             - --dbsslrootcert=
             - --dbsslkey=
