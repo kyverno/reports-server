@@ -72,6 +72,14 @@ Database config is injected into the environment, if a secret ref is set. Otherw
 {{- end }}
 {{- end }}
 
+{{- define "reports-server.dbPort" -}}
+{{- if .Values.config.db.secretName }}
+{{- printf "%s" "$(DB_PORT)" }}
+{{- else }}
+{{- .Values.config.db.port }}
+{{- end }}
+{{- end }}
+
 {{- define "reports-server.dbName" -}}
 {{- if .Values.config.db.secretName }}
 {{- printf "%s" "$(DB_DATABASE)" }}
