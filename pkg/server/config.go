@@ -197,6 +197,7 @@ func (c Config) migration(store storage.Interface) error {
 				// 	} else {
 				// 		cpolr.Annotations = make(map[string]string)
 				// 	}
+				//  cpolr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				// 	err := store.ClusterPolicyReports().Delete(context.TODO(), cpolr.Name)
 				// 	if err != nil {
 				// 		klog.Error(err)
@@ -277,6 +278,7 @@ func (c Config) migration(store storage.Interface) error {
 				// 	} else {
 				// 		polr.Annotations = make(map[string]string)
 				// 	}
+				//  polr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				// 	err := store.PolicyReports().Delete(context.TODO(), polr.Name, polr.Namespace)
 				// 	if err != nil {
 				// 		klog.Error(err)
@@ -356,6 +358,7 @@ func (c Config) migration(store storage.Interface) error {
 				// 	} else {
 				// 		cephr.Annotations = make(map[string]string)
 				// 	}
+				//  cephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				// 	err := store.ClusterEphemeralReports().Delete(context.TODO(), cephr.Name)
 				// 	if err != nil {
 				// 		klog.Error(err)
@@ -434,6 +437,7 @@ func (c Config) migration(store storage.Interface) error {
 				// 	} else {
 				// 		ephr.Annotations = make(map[string]string)
 				// 	}
+				//  ephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				// 	err := store.EphemeralReports().Delete(context.TODO(), ephr.Name, ephr.Namespace)
 				// 	if err != nil {
 				// 		klog.Error(err)
