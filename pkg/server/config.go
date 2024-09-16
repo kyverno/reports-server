@@ -130,6 +130,14 @@ func (c Config) migration(store storage.Interface) error {
 		return nil
 	}
 	for _, c := range cpolrs.Items {
+		if c.Annotations != nil {
+			if _, ok := c.Annotations[api.ServedByReportsServerAnnotation]; ok {
+				continue
+			}
+		} else {
+			c.Annotations = make(map[string]string)
+		}
+		c.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 		err := store.ClusterPolicyReports().Create(context.TODO(), c)
 		if err != nil {
 			return err
@@ -158,7 +166,10 @@ func (c Config) migration(store storage.Interface) error {
 					if _, ok := cpolr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 						return
 					}
+				} else {
+					cpolr.Annotations = make(map[string]string)
 				}
+				cpolr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				err := store.ClusterPolicyReports().Create(context.TODO(), *cpolr)
 				if err != nil {
 					klog.Error(err)
@@ -169,7 +180,10 @@ func (c Config) migration(store storage.Interface) error {
 					if _, ok := cpolr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 						return
 					}
+				} else {
+					cpolr.Annotations = make(map[string]string)
 				}
+				cpolr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				err := store.ClusterPolicyReports().Update(context.TODO(), *cpolr)
 				if err != nil {
 					klog.Error(err)
@@ -180,7 +194,10 @@ func (c Config) migration(store storage.Interface) error {
 				// 		if _, ok := cpolr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 				// 			return
 				// 		}
+				// 	} else {
+				// 		cpolr.Annotations = make(map[string]string)
 				// 	}
+				//  cpolr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				// 	err := store.ClusterPolicyReports().Delete(context.TODO(), cpolr.Name)
 				// 	if err != nil {
 				// 		klog.Error(err)
@@ -194,6 +211,14 @@ func (c Config) migration(store storage.Interface) error {
 		return nil
 	}
 	for _, c := range polrs.Items {
+		if c.Annotations != nil {
+			if _, ok := c.Annotations[api.ServedByReportsServerAnnotation]; ok {
+				continue
+			}
+		} else {
+			c.Annotations = make(map[string]string)
+		}
+		c.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 		err := store.PolicyReports().Create(context.TODO(), c)
 		if err != nil {
 			return err
@@ -222,7 +247,10 @@ func (c Config) migration(store storage.Interface) error {
 					if _, ok := polr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 						return
 					}
+				} else {
+					polr.Annotations = make(map[string]string)
 				}
+				polr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				err := store.PolicyReports().Create(context.TODO(), *polr)
 				if err != nil {
 					klog.Error(err)
@@ -233,7 +261,10 @@ func (c Config) migration(store storage.Interface) error {
 					if _, ok := polr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 						return
 					}
+				} else {
+					polr.Annotations = make(map[string]string)
 				}
+				polr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				err := store.PolicyReports().Update(context.TODO(), *polr)
 				if err != nil {
 					klog.Error(err)
@@ -244,7 +275,10 @@ func (c Config) migration(store storage.Interface) error {
 				// 		if _, ok := polr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 				// 			return
 				// 		}
+				// 	} else {
+				// 		polr.Annotations = make(map[string]string)
 				// 	}
+				//  polr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				// 	err := store.PolicyReports().Delete(context.TODO(), polr.Name, polr.Namespace)
 				// 	if err != nil {
 				// 		klog.Error(err)
@@ -258,6 +292,14 @@ func (c Config) migration(store storage.Interface) error {
 		return nil
 	}
 	for _, c := range cephrs.Items {
+		if c.Annotations != nil {
+			if _, ok := c.Annotations[api.ServedByReportsServerAnnotation]; ok {
+				continue
+			}
+		} else {
+			c.Annotations = make(map[string]string)
+		}
+		c.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 		err := store.ClusterEphemeralReports().Create(context.TODO(), c)
 		if err != nil {
 			return err
@@ -285,7 +327,10 @@ func (c Config) migration(store storage.Interface) error {
 					if _, ok := cephr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 						return
 					}
+				} else {
+					cephr.Annotations = make(map[string]string)
 				}
+				cephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				err := store.ClusterEphemeralReports().Create(context.TODO(), *cephr)
 				if err != nil {
 					klog.Error(err)
@@ -296,7 +341,10 @@ func (c Config) migration(store storage.Interface) error {
 					if _, ok := cephr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 						return
 					}
+				} else {
+					cephr.Annotations = make(map[string]string)
 				}
+				cephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				err := store.ClusterEphemeralReports().Update(context.TODO(), *cephr)
 				if err != nil {
 					klog.Error(err)
@@ -307,7 +355,10 @@ func (c Config) migration(store storage.Interface) error {
 				// 		if _, ok := cephr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 				// 			return
 				// 		}
+				// 	} else {
+				// 		cephr.Annotations = make(map[string]string)
 				// 	}
+				//  cephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				// 	err := store.ClusterEphemeralReports().Delete(context.TODO(), cephr.Name)
 				// 	if err != nil {
 				// 		klog.Error(err)
@@ -320,6 +371,14 @@ func (c Config) migration(store storage.Interface) error {
 		return nil
 	}
 	for _, c := range ephrs.Items {
+		if c.Annotations != nil {
+			if _, ok := c.Annotations[api.ServedByReportsServerAnnotation]; ok {
+				continue
+			}
+		} else {
+			c.Annotations = make(map[string]string)
+		}
+		c.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 		err := store.EphemeralReports().Create(context.TODO(), c)
 		if err != nil {
 			return err
@@ -347,7 +406,10 @@ func (c Config) migration(store storage.Interface) error {
 					if _, ok := ephr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 						return
 					}
+				} else {
+					ephr.Annotations = make(map[string]string)
 				}
+				ephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				err := store.EphemeralReports().Create(context.TODO(), *ephr)
 				if err != nil {
 					klog.Error(err)
@@ -358,7 +420,10 @@ func (c Config) migration(store storage.Interface) error {
 					if _, ok := ephr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 						return
 					}
+				} else {
+					ephr.Annotations = make(map[string]string)
 				}
+				ephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				err := store.EphemeralReports().Update(context.TODO(), *ephr)
 				if err != nil {
 					klog.Error(err)
@@ -369,7 +434,10 @@ func (c Config) migration(store storage.Interface) error {
 				// 		if _, ok := ephr.Annotations[api.ServedByReportsServerAnnotation]; ok {
 				// 			return
 				// 		}
+				// 	} else {
+				// 		ephr.Annotations = make(map[string]string)
 				// 	}
+				//  ephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 				// 	err := store.EphemeralReports().Delete(context.TODO(), ephr.Name, ephr.Namespace)
 				// 	if err != nil {
 				// 		klog.Error(err)
