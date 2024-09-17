@@ -22,16 +22,26 @@ rules:
     - update
     - watch
     - deletecollection
+{{- if .Values.apiServicesManagement.enabled }}
+- apiGroups:
+    - apiregistration.k8s.io
+  resources:
+    - apiservices
+  verbs:
+    - create
 - apiGroups:
     - apiregistration.k8s.io
   resources:
     - apiservices
   verbs:
     - get
-    - create
     - delete
     - update
     - patch
+  resourceNames:
+    - v1.reports.kyverno.io
+    - v1alpha2.wgpolicyk8s.io
+{{- end }}
 - apiGroups:
     - wgpolicyk8s.io
   resources:

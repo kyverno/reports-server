@@ -49,11 +49,19 @@ rules:
   resources:
     - apiservices
   verbs:
-    - get
     - create
+- apiGroups:
+    - apiregistration.k8s.io
+  resources:
+    - apiservices
+  verbs:
+    - get
     - delete
     - update
     - patch
+  resourceNames:
+    - v1.reports.kyverno.io
+    - v1alpha2.wgpolicyk8s.io
 - apiGroups:
     - wgpolicyk8s.io
   resources:
