@@ -23,6 +23,15 @@ rules:
     - watch
     - deletecollection
 - apiGroups:
+    - apiregistration.k8s.io
+  resources:
+    - apiservices
+  verbs:
+    - get
+    - create
+    - delete
+    - update
+- apiGroups:
     - wgpolicyk8s.io
   resources:
     - policyreports
