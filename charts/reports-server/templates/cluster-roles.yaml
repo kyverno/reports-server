@@ -31,6 +31,7 @@ rules:
     - create
     - delete
     - update
+    - patch
 - apiGroups:
     - wgpolicyk8s.io
   resources:
