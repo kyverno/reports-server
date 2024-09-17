@@ -6,7 +6,7 @@ require (
 	github.com/kyverno/kyverno v1.12.0-rc.4
 	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	k8s.io/api v0.29.2
 	k8s.io/apimachinery v0.29.2
 	k8s.io/apiserver v0.29.2
