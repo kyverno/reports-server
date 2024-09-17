@@ -136,7 +136,7 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 	}
 	if cpolr.Name == "" {
 		if cpolr.GenerateName == "" {
-			return nil, errors.NewConflict(utils.ClusterPolicyReportsGR, cpolr.Name, fmt.Errorf("name and generate name not provided"))
+			return nil, errors.NewAlreadyExists(utils.ClusterPolicyReportsGR, cpolr.Name)
 		}
 		cpolr.Name = nameGenerator.GenerateName(cpolr.GenerateName)
 	}
