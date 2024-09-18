@@ -1,4 +1,4 @@
-{{- if .Values.apiServices.enabled }}
+{{- if .Values.apiServicesManagement.installApiServices.enabled }}
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
@@ -20,7 +20,7 @@ spec:
   version: v1alpha2
   versionPriority: 100
 
-{{- if .Values.apiServices.installEphemeralReportsService }}
+{{- if .Values.apiServicesManagement.installApiServices.installEphemeralReportsService }}
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
@@ -43,3 +43,4 @@ spec:
   versionPriority: 100
 {{- end }}
 {{- end }}
+	
