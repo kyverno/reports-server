@@ -96,12 +96,7 @@ jobs:
           set -e
           kubectl create ns reports-server
           export HELM=${{ steps.helm.outputs.helm-path }}
-          make kind-migrate
-      - name: Install api services
-        run: |
-          set -e
-          export HELM=${{ steps.helm.outputs.helm-path }}
-          make kind-apply-api-services
+          make kind-install
       - name: Wait for report server ready
         run: |
           set -e

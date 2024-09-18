@@ -52,6 +52,24 @@ rules:
     - watch
     - deletecollection
 - apiGroups:
+    - apiregistration.k8s.io
+  resources:
+    - apiservices
+  verbs:
+    - create
+- apiGroups:
+    - apiregistration.k8s.io
+  resources:
+    - apiservices
+  verbs:
+    - get
+    - delete
+    - update
+    - patch
+  resourceNames:
+    - v1.reports.kyverno.io
+    - v1alpha2.wgpolicyk8s.io
+- apiGroups:
     - wgpolicyk8s.io
   resources:
     - policyreports
@@ -101,6 +119,26 @@ subjects:
   name: reports-server
   namespace: reports-server
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: reports-server
+  namespace: reports-server
+  labels:
+    helm.sh/chart: reports-server-0.1.0
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/version: "v0.1.0"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+    - ''
+  resources:
+    - pods
+  verbs:
+    - get
+    - list
+---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -116,6 +154,26 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: extension-apiserver-authentication-reader
+subjects:
+- kind: ServiceAccount
+  name: reports-server
+  namespace: reports-server
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: reports-server
+  namespace: reports-server
+  labels:
+    helm.sh/chart: reports-server-0.1.0
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/version: "v0.1.0"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: reports-server
 subjects:
 - kind: ServiceAccount
   name: reports-server

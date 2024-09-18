@@ -26,8 +26,6 @@ helm install reports-server --namespace reports-server --create-namespace report
 | postgresql.enabled | bool | `true` | Deploy postgresql dependency chart |
 | postgresql.auth.postgresPassword | string | `"reports"` |  |
 | postgresql.auth.database | string | `"reportsdb"` |  |
-| apiServices.enabled | bool | `true` | Store reports in reports-server |
-| apiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
 | nameOverride | string | `""` | Name override |
 | fullnameOverride | string | `""` | Full name override |
 | replicaCount | int | `1` | Number of pod replicas |
@@ -78,6 +76,24 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.sslrootcert | string | `""` | Database SSL root cert |
 | config.db.sslkey | string | `""` | Database SSL key |
 | config.db.sslcert | string | `""` | Database SSL cert |
+| apiServicesManagement.enabled | bool | `true` | Create a helm hooks to install and delete api services |
+| apiServicesManagement.installApiServices | object | `{"enabled":false,"installEphemeralReportsService":true}` | Install api services in manifest |
+| apiServicesManagement.installApiServices.enabled | bool | `false` | Store reports in reports-server |
+| apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
+| apiServicesManagement.image.registry | string | `"docker.io"` | Image registry |
+| apiServicesManagement.image.repository | string | `"bitnami/kubectl"` | Image repository |
+| apiServicesManagement.image.tag | string | `"1.30.2"` | Image tag Defaults to `latest` if omitted |
+| apiServicesManagement.image.pullPolicy | string | `nil` | Image pull policy Defaults to image.pullPolicy if omitted |
+| apiServicesManagement.imagePullSecrets | list | `[]` | Image pull secrets |
+| apiServicesManagement.podSecurityContext | object | `{}` | Security context for the pod |
+| apiServicesManagement.nodeSelector | object | `{}` | Node labels for pod assignment |
+| apiServicesManagement.tolerations | list | `[]` | List of node taints to tolerate |
+| apiServicesManagement.podAntiAffinity | object | `{}` | Pod anti affinity constraints. |
+| apiServicesManagement.podAffinity | object | `{}` | Pod affinity constraints. |
+| apiServicesManagement.podLabels | object | `{}` | Pod labels. |
+| apiServicesManagement.podAnnotations | object | `{}` | Pod annotations. |
+| apiServicesManagement.nodeAffinity | object | `{}` | Node affinity constraints. |
+| apiServicesManagement.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsNonRoot":true,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Security context for the hook containers |
 
 ## Source Code
 

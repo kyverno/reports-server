@@ -158,6 +158,7 @@ codegen-helm-docs: ## Generate helm docs
 codegen-install-manifest: $(HELM) ## Create install manifest
 	@echo Generate latest install manifest... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+		--set apiServicesManagement.installApiServices.enabled=true \
 		--set image.tag=latest \
 		--set templating.enabled=true \
  		| $(SED) -e '/^#.*/d' \
@@ -166,6 +167,7 @@ codegen-install-manifest: $(HELM) ## Create install manifest
 codegen-install-manifest-inmemory: $(HELM) ## Create install manifest without postgres
 	@echo Generate latest install manifest... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server/ \
+		--set apiServicesManagement.installApiServices.enabled=true \
 		--set image.tag=latest \
 		--set config.debug=true \
 		--set postgresql.enabled=false \
@@ -244,7 +246,7 @@ kind-migrate: $(HELM) kind-load ## Build image, load it in kind cluster and depl
 		--set image.registry=$(KO_REGISTRY) \
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA) \
-		--set apiServices.enabled=false
+		--set apiServicesManagement.installApiServices.enabled=false
 
 .PHONY: kind-apply-api-services
 kind-apply-api-services: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart

@@ -150,11 +150,6 @@ Build docker images, load images in kind cluster, and deploy helm chart
 make kind-install
 ```
 
-## Migration 
-
-See [MIGRATION.md](./MIGRATION.md)
-
-
 ## Database Configuration
 
 See [DBCONFIG.md](./DBCONFIG.md)
