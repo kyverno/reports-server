@@ -35,7 +35,7 @@ spec:
       {{- end }}
       containers:
         - name: kubectl
-          image: bitnami/kubectl:1.30.2
+          image: "{{ .Values.apiServicesManagement.image.registry }}/{{ .Values.apiServicesManagement.image.repository }}:{{ .Values.apiServicesManagement.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.apiServicesManagement.image.pullPolicy }}
           command:
             - /bin/bash
@@ -43,7 +43,6 @@ spec:
             - |-
               set -euo pipefail
               kubectl wait -n {{ $.Release.Namespace }} pod --for=condition=ready -l app.kubernetes.io/name={{ include "reports-server.fullname" . }} --timeout=120s
-              {{- if .Values.apiServices.enabled }}
               kubectl apply -f - <<EOF
               {
                 "apiVersion": "apiregistration.k8s.io/v1",
@@ -71,7 +70,6 @@ spec:
                 }
               }
               EOF
-              {{- if .Values.apiServices.installEphemeralReportsService }}
               kubectl apply -f - <<EOF
               {
                 "apiVersion": "apiregistration.k8s.io/v1",
@@ -99,8 +97,6 @@ spec:
                 }
               }
               EOF
-              {{- end }}
-              {{- end }}
           {{- with .Values.apiServicesManagement.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}

@@ -14,14 +14,6 @@ postgresql:
 
     database: reportsdb
 
-apiServices:
-
-  # -- Store reports in reports-server
-  enabled: true
-
-  # -- Store ephemeral reports in reports-server
-  installEphemeralReportsService: true
-
 # -- Name override
 nameOverride: ""
 
@@ -220,9 +212,18 @@ apiServicesManagement:
   # -- Create a helm hooks to install and delete api services
   enabled: true
 
+  # -- Install api services in manifest
+  installApiServices:
+
+    # -- Store reports in reports-server
+    enabled: false
+
+    # -- Store ephemeral reports in reports-server
+    installEphemeralReportsService: true
+
   image:
     # -- (string) Image registry
-    registry: ~
+    registry: docker.io
     # -- Image repository
     repository: bitnami/kubectl
     # -- Image tag
