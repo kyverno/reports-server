@@ -112,7 +112,7 @@ jobs:
           set -e
           kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io
       - name: Install Chainsaw
-        uses: kyverno/action-install-chainsaw@82d8e747037f840e0ef9bdd97ecdc617f5535bdc # v0.2.8
+        uses: kyverno/action-install-chainsaw@d1a61148c0437a66760d11d8575332305c2234cb # v0.2.10
       - name: Test with Chainsaw
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
