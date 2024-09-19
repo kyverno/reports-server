@@ -21,10 +21,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
 ---
 apiVersion: v1
@@ -33,10 +33,10 @@ metadata:
   name: app-secret
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
 type: kubernetes.io/basic-auth
 data:
@@ -913,10 +913,10 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: 'true'
     rbac.authorization.k8s.io/aggregate-to-edit: 'true'
     rbac.authorization.k8s.io/aggregate-to-view: 'true'
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1013,10 +1013,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1033,10 +1033,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1053,10 +1053,10 @@ metadata:
   name: reports-server
   namespace: kube-system
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1073,10 +1073,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1113,10 +1113,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -1230,10 +1230,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
 spec:
   strategy:
@@ -1323,10 +1323,10 @@ metadata:
   name: reports-server-cluster
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
 spec:
   instances: 3
@@ -1517,10 +1517,10 @@ metadata:
   name: v1alpha2.wgpolicyk8s.io
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
     kube-aggregator.kubernetes.io/automanaged: "false"
   annotations:
@@ -1541,10 +1541,10 @@ metadata:
   name: v1.reports.kyverno.io
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.2
+    helm.sh/chart: reports-server-0.1.3
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.2"
+    app.kubernetes.io/version: "v0.1.3"
     app.kubernetes.io/managed-by: Helm
     kube-aggregator.kubernetes.io/automanaged: "false"
   annotations:
