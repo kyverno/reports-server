@@ -46,70 +46,66 @@ helm install reports-server -n reports-server --create-namespace --wait ./charts
 
 Reports server default install creates a postgres instance by default, but for production, it is recommended to use an postgres operator such as [CloudNativePG](https://cloudnative-pg.io/). Reports-server can be installed along side CloudNativePG as follows:
 
-Create a namespace for reports-server:
-```bash
-kubectl create ns reports-server
-```
-
-Install CloudNativePG using one of their recommended installation methods:
-```bash
-kubectl apply -f \
-  https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.18/releases/cnpg-1.18.5.yaml
-```
-
-Wait for cloud native pg controller to start:
-
-```bash
-kubectl wait pod --all --for=condition=Ready --namespace=cnpg-system
-```
-
-Create a CloudNativePG postgres cluster:
-```bash
-kubectl create -f config/samples/cnpg-cluster.yaml
-```
-
-<!-- In order to install reports-server with Helm, first add the Reports-server Helm repository: -->
+<!-- Create a namespace for reports-server: -->
 <!-- ```bash -->
-<!-- helm repo add reports-server https://kyverno.github.io/reports-server -->
+<!-- kubectl create ns reports-server -->
 <!-- ``` -->
 <!---->
-<!-- Scan the new repository for charts: -->
+<!-- Install CloudNativePG using one of their recommended installation methods: -->
 <!-- ```bash -->
-<!-- helm repo update -->
+<!-- kubectl apply -f \ -->
+<!--   https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.18/releases/cnpg-1.18.5.yaml -->
 <!-- ``` -->
 <!---->
-<!-- Optionally, show all available chart versions for reports-server. -->
+<!-- Wait for cloud native pg controller to start: -->
 <!---->
 <!-- ```bash -->
-<!-- helm search repo reports-server --l -->
+<!-- kubectl wait pod --all --for=condition=Ready --namespace=cnpg-system -->
 <!-- ``` -->
+<!---->
+<!-- Create a CloudNativePG postgres cluster: -->
+<!-- ```bash -->
+<!-- kubectl create -f config/samples/cnpg-cluster.yaml -->
+<!-- ``` -->
+
+In order to install reports-server with Helm, first add the Reports-server Helm repository:
+```bash
+helm repo add reports-server https://nirmata.github.io/reports-server
+```
+
+Scan the new repository for charts:
+```bash
+helm repo update
+```
+
+Optionally, show all available chart versions for reports-server.
+
+```bash
+helm search repo reports-server --l
+```
+
 Install the reports-server chart:
 
 ```bash
-helm install reports-server -n reports-server --create-namespace --wait ./charts/reports-server \
-        --set postgresql.enabled=false \
-        --set config.db.host=reports-server-cluster-rw.reports-server \
-        --set config.db.name=reportsdb \
-        --set config.db.user=$(kubectl get secret -n reports-server reports-server-cluster-app --template={{.data.username}} | base64 -d) \
-        --set config.db.password=$(kubectl get secret -n reports-server reports-server-cluster-app --template={{.data.password}} | base64 -d)
+helm install reports-server -n reports-server --create-namespace --wait reports-server/reports-server
 ```
-
-To run without cnpg:
-```bash
-helm install reports-server -n reports-server --create-namespace --wait ./charts/reports-server \
-                             --set config.db.name=reportsdb
-```
-NOTE: to check where the reports are stored you can then exec into the postgres pod
-```bash
-kubectl exec -it reports-server-postgresql-0 -n reports-server -- psql -U postgres 
-```
-then connect to the db
-```
-\c reportsdb
-```
-and query for specific data.
-
-
+<!---->
+<!-- To run without cnpg: -->
+<!-- ```bash -->
+<!-- helm install reports-server -n reports-server --create-namespace --wait ./charts/reports-server \ -->
+<!--                              --set config.db.name=reportsdb -->
+<!-- ``` -->
+<!-- NOTE: to check where the reports are stored you can then exec into the postgres pod -->
+<!-- ```bash -->
+<!-- kubectl exec -it reports-server-postgresql-0 -n reports-server -- psql -U postgres  -->
+<!-- ``` -->
+<!-- then connect to the db -->
+<!-- ``` -->
+<!-- \c reportsdb -->
+<!-- ``` -->
+<!-- and query for specific data. -->
+<!---->
+<!---->
 ## With inmemory storage
 Reports server can be installed without any database as well. In this case, reports will be stored in the memory of reports-server pod. You can install reports-server with inmemory configuration as follows:
 
