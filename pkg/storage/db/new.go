@@ -17,7 +17,7 @@ const (
 )
 
 func New(config *PostgresConfig) (api.Storage, error) {
-	klog.Infof("starting postgres db, config: %s", config.String())
+	klog.Infof("starting postgres db")
 	db, err := sql.Open("postgres", config.String())
 	if err != nil {
 		klog.Error("failed to open db", err.Error())
