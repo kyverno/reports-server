@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -32,12 +33,12 @@ func NewPolicyReportStore(db *sql.DB) (api.PolicyReportsInterface, error) {
 	return &polrdb{db: db}, nil
 }
 
-func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyReport, error) {
+func (p *polrdb) List(ctx context.Context, namespace string) ([]*v1alpha2.PolicyReport, error) {
 	p.Lock()
 	defer p.Unlock()
 
 	klog.Infof("listing all values for namespace:%s", namespace)
-	res := make([]v1alpha2.PolicyReport, 0)
+	res := make([]*v1alpha2.PolicyReport, 0)
 	var jsonb string
 	var rows *sql.Rows
 	var err error
@@ -64,14 +65,14 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyR
 			klog.ErrorS(err, "cannot convert jsonb to policyreport")
 			return nil, fmt.Errorf("policyreport list %q: cannot convert jsonb to policyreport: %v", namespace, err)
 		}
-		res = append(res, report)
+		res = append(res, &report)
 	}
 
 	klog.Infof("list found length: %d", len(res))
 	return res, nil
 }
 
-func (p *polrdb) Get(ctx context.Context, name, namespace string) (v1alpha2.PolicyReport, error) {
+func (p *polrdb) Get(ctx context.Context, name, namespace string) (*v1alpha2.PolicyReport, error) {
 	p.Lock()
 	defer p.Unlock()
 
@@ -81,25 +82,29 @@ func (p *polrdb) Get(ctx context.Context, name, namespace string) (v1alpha2.Poli
 	if err := row.Scan(&jsonb); err != nil {
 		klog.ErrorS(err, fmt.Sprintf("policyreport not found name=%s namespace=%s", name, namespace))
 		if err == sql.ErrNoRows {
-			return v1alpha2.PolicyReport{}, fmt.Errorf("policyreport get %s/%s: no such policy report: %v", namespace, name, err)
+			return nil, fmt.Errorf("policyreport get %s/%s: no such policy report: %v", namespace, name, err)
 		}
-		return v1alpha2.PolicyReport{}, fmt.Errorf("policyreport get %s/%s: %v", namespace, name, err)
+		return nil, fmt.Errorf("policyreport get %s/%s: %v", namespace, name, err)
 	}
 	var report v1alpha2.PolicyReport
 	err := json.Unmarshal([]byte(jsonb), &report)
 	if err != nil {
 		klog.ErrorS(err, "cannot convert jsonb to policyreport")
-		return v1alpha2.PolicyReport{}, fmt.Errorf("policyreport list %q: cannot convert jsonb to policyreport: %v", namespace, err)
+		return nil, fmt.Errorf("policyreport list %q: cannot convert jsonb to policyreport: %v", namespace, err)
 	}
-	return report, nil
+	return &report, nil
 }
 
-func (p *polrdb) Create(ctx context.Context, polr v1alpha2.PolicyReport) error {
+func (p *polrdb) Create(ctx context.Context, polr *v1alpha2.PolicyReport) error {
 	p.Lock()
 	defer p.Unlock()
-	klog.Infof("creating entry for key:%s/%s", polr.Name, polr.Namespace)
 
-	jsonb, err := json.Marshal(polr)
+	if polr == nil {
+		return errors.New("invalid policy report")
+	}
+
+	klog.Infof("creating entry for key:%s/%s", polr.Name, polr.Namespace)
+	jsonb, err := json.Marshal(*polr)
 	if err != nil {
 		return err
 	}
@@ -112,11 +117,15 @@ func (p *polrdb) Create(ctx context.Context, polr v1alpha2.PolicyReport) error {
 	return nil
 }
 
-func (p *polrdb) Update(ctx context.Context, polr v1alpha2.PolicyReport) error {
+func (p *polrdb) Update(ctx context.Context, polr *v1alpha2.PolicyReport) error {
 	p.Lock()
 	defer p.Unlock()
 
-	jsonb, err := json.Marshal(polr)
+	if polr == nil {
+		return errors.New("invalid policy report")
+	}
+
+	jsonb, err := json.Marshal(*polr)
 	if err != nil {
 		return err
 	}

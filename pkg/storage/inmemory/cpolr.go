@@ -13,20 +13,20 @@ import (
 
 type cpolrdb struct {
 	sync.Mutex
-	db map[string]v1alpha2.ClusterPolicyReport
+	db map[string]*v1alpha2.ClusterPolicyReport
 }
 
 func (c *cpolrdb) key(name string) string {
 	return fmt.Sprintf("cpolr/%s", name)
 }
 
-func (c *cpolrdb) List(ctx context.Context) ([]v1alpha2.ClusterPolicyReport, error) {
+func (c *cpolrdb) List(ctx context.Context) ([]*v1alpha2.ClusterPolicyReport, error) {
 	c.Lock()
 	defer c.Unlock()
 
 	klog.Infof("listing all values")
 
-	res := make([]v1alpha2.ClusterPolicyReport, 0, len(c.db))
+	res := make([]*v1alpha2.ClusterPolicyReport, 0, len(c.db))
 	for _, val := range c.db {
 		res = append(res, val)
 	}
@@ -35,7 +35,7 @@ func (c *cpolrdb) List(ctx context.Context) ([]v1alpha2.ClusterPolicyReport, err
 	return res, nil
 }
 
-func (c *cpolrdb) Get(ctx context.Context, name string) (v1alpha2.ClusterPolicyReport, error) {
+func (c *cpolrdb) Get(ctx context.Context, name string) (*v1alpha2.ClusterPolicyReport, error) {
 	c.Lock()
 	defer c.Unlock()
 
@@ -46,11 +46,11 @@ func (c *cpolrdb) Get(ctx context.Context, name string) (v1alpha2.ClusterPolicyR
 		return val, nil
 	} else {
 		klog.Errorf("value not found for key:%s", key)
-		return v1alpha2.ClusterPolicyReport{}, errors.NewNotFound(utils.ClusterPolicyReportsGR, key)
+		return nil, errors.NewNotFound(utils.ClusterPolicyReportsGR, key)
 	}
 }
 
-func (c *cpolrdb) Create(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport) error {
+func (c *cpolrdb) Create(ctx context.Context, cpolr *v1alpha2.ClusterPolicyReport) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -66,7 +66,7 @@ func (c *cpolrdb) Create(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport
 	}
 }
 
-func (c *cpolrdb) Update(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport) error {
+func (c *cpolrdb) Update(ctx context.Context, cpolr *v1alpha2.ClusterPolicyReport) error {
 	c.Lock()
 	defer c.Unlock()
 

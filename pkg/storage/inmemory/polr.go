@@ -14,19 +14,19 @@ import (
 
 type polrdb struct {
 	sync.Mutex
-	db map[string]v1alpha2.PolicyReport
+	db map[string]*v1alpha2.PolicyReport
 }
 
 func (p *polrdb) key(name, namespace string) string {
 	return fmt.Sprintf("polr/%s/%s", namespace, name)
 }
 
-func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyReport, error) {
+func (p *polrdb) List(ctx context.Context, namespace string) ([]*v1alpha2.PolicyReport, error) {
 	p.Lock()
 	defer p.Unlock()
 
 	klog.Infof("listing all values for namespace:%s", namespace)
-	res := make([]v1alpha2.PolicyReport, 0)
+	res := make([]*v1alpha2.PolicyReport, 0)
 
 	for k, v := range p.db {
 		if namespace == "" || strings.HasPrefix(strings.TrimPrefix(k, "polr/"), namespace) {
@@ -39,7 +39,7 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyR
 	return res, nil
 }
 
-func (p *polrdb) Get(ctx context.Context, name, namespace string) (v1alpha2.PolicyReport, error) {
+func (p *polrdb) Get(ctx context.Context, name, namespace string) (*v1alpha2.PolicyReport, error) {
 	p.Lock()
 	defer p.Unlock()
 
@@ -50,11 +50,11 @@ func (p *polrdb) Get(ctx context.Context, name, namespace string) (v1alpha2.Poli
 		return val, nil
 	} else {
 		klog.Errorf("value not found for key:%s", key)
-		return v1alpha2.PolicyReport{}, errors.NewNotFound(utils.PolicyReportsGR, key)
+		return nil, errors.NewNotFound(utils.PolicyReportsGR, key)
 	}
 }
 
-func (p *polrdb) Create(ctx context.Context, polr v1alpha2.PolicyReport) error {
+func (p *polrdb) Create(ctx context.Context, polr *v1alpha2.PolicyReport) error {
 	p.Lock()
 	defer p.Unlock()
 
@@ -70,7 +70,7 @@ func (p *polrdb) Create(ctx context.Context, polr v1alpha2.PolicyReport) error {
 	}
 }
 
-func (p *polrdb) Update(ctx context.Context, polr v1alpha2.PolicyReport) error {
+func (p *polrdb) Update(ctx context.Context, polr *v1alpha2.PolicyReport) error {
 	p.Lock()
 	defer p.Unlock()
 

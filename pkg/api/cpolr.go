@@ -335,7 +335,7 @@ func (c *cpolrStore) getCpolr(name string) (*v1alpha2.ClusterPolicyReport, error
 		return nil, errorpkg.Wrapf(err, "could not find cluster policy report in store")
 	}
 
-	return val.DeepCopy(), nil
+	return val, nil
 }
 
 func (c *cpolrStore) listCpolr() (*v1alpha2.ClusterPolicyReportList, error) {
@@ -345,7 +345,11 @@ func (c *cpolrStore) listCpolr() (*v1alpha2.ClusterPolicyReportList, error) {
 	}
 
 	reportList := &v1alpha2.ClusterPolicyReportList{
-		Items: valList,
+		Items: make([]v1alpha2.ClusterPolicyReport, 0, len(valList)),
+	}
+
+	for _, v := range valList {
+		reportList.Items = append(reportList.Items, *v.DeepCopy())
 	}
 
 	klog.Infof("value found of length:%d", len(reportList.Items))
@@ -357,12 +361,12 @@ func (c *cpolrStore) createCpolr(report *v1alpha2.ClusterPolicyReport) (*v1alpha
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
-	return report, c.store.ClusterPolicyReports().Create(context.TODO(), *report)
+	return report, c.store.ClusterPolicyReports().Create(context.TODO(), report)
 }
 
 func (c *cpolrStore) updateCpolr(report *v1alpha2.ClusterPolicyReport, _ *v1alpha2.ClusterPolicyReport) (*v1alpha2.ClusterPolicyReport, error) {
 	report.ResourceVersion = c.store.UseResourceVersion()
-	return report, c.store.ClusterPolicyReports().Update(context.TODO(), *report)
+	return report, c.store.ClusterPolicyReports().Update(context.TODO(), report)
 }
 
 func (c *cpolrStore) deleteCpolr(report *v1alpha2.ClusterPolicyReport) error {
