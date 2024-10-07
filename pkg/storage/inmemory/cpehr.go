@@ -13,20 +13,20 @@ import (
 
 type cephrdb struct {
 	sync.Mutex
-	db map[string]reportsv1.ClusterEphemeralReport
+	db map[string]*reportsv1.ClusterEphemeralReport
 }
 
 func (c *cephrdb) key(name string) string {
 	return fmt.Sprintf("cephr/%s", name)
 }
 
-func (c *cephrdb) List(ctx context.Context) ([]reportsv1.ClusterEphemeralReport, error) {
+func (c *cephrdb) List(ctx context.Context) ([]*reportsv1.ClusterEphemeralReport, error) {
 	c.Lock()
 	defer c.Unlock()
 
 	klog.Infof("listing all values")
 
-	res := make([]reportsv1.ClusterEphemeralReport, 0, len(c.db))
+	res := make([]*reportsv1.ClusterEphemeralReport, 0, len(c.db))
 	for _, val := range c.db {
 		res = append(res, val)
 	}
@@ -35,7 +35,7 @@ func (c *cephrdb) List(ctx context.Context) ([]reportsv1.ClusterEphemeralReport,
 	return res, nil
 }
 
-func (c *cephrdb) Get(ctx context.Context, name string) (reportsv1.ClusterEphemeralReport, error) {
+func (c *cephrdb) Get(ctx context.Context, name string) (*reportsv1.ClusterEphemeralReport, error) {
 	c.Lock()
 	defer c.Unlock()
 
@@ -46,11 +46,11 @@ func (c *cephrdb) Get(ctx context.Context, name string) (reportsv1.ClusterEpheme
 		return val, nil
 	} else {
 		klog.Errorf("value not found for key:%s", key)
-		return reportsv1.ClusterEphemeralReport{}, errors.NewNotFound(utils.ClusterEphemeralReportsGR, key)
+		return nil, errors.NewNotFound(utils.ClusterEphemeralReportsGR, key)
 	}
 }
 
-func (c *cephrdb) Create(ctx context.Context, cephr reportsv1.ClusterEphemeralReport) error {
+func (c *cephrdb) Create(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -66,7 +66,7 @@ func (c *cephrdb) Create(ctx context.Context, cephr reportsv1.ClusterEphemeralRe
 	}
 }
 
-func (c *cephrdb) Update(ctx context.Context, cephr reportsv1.ClusterEphemeralReport) error {
+func (c *cephrdb) Update(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error {
 	c.Lock()
 	defer c.Unlock()
 

@@ -356,7 +356,7 @@ func (p *polrStore) getPolr(name, namespace string) (*v1alpha2.PolicyReport, err
 		return nil, errorpkg.Wrapf(err, "could not find policy report in store")
 	}
 
-	return val.DeepCopy(), nil
+	return val, nil
 }
 
 func (p *polrStore) listPolr(namespace string) (*v1alpha2.PolicyReportList, error) {
@@ -366,7 +366,11 @@ func (p *polrStore) listPolr(namespace string) (*v1alpha2.PolicyReportList, erro
 	}
 
 	reportList := &v1alpha2.PolicyReportList{
-		Items: valList,
+		Items: make([]v1alpha2.PolicyReport, 0, len(valList)),
+	}
+
+	for _, v := range valList {
+		reportList.Items = append(reportList.Items, *v.DeepCopy())
 	}
 
 	klog.Infof("value found of length:%d", len(reportList.Items))
@@ -378,12 +382,12 @@ func (p *polrStore) createPolr(report *v1alpha2.PolicyReport) (*v1alpha2.PolicyR
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
-	return report, p.store.PolicyReports().Create(context.TODO(), *report)
+	return report, p.store.PolicyReports().Create(context.TODO(), report)
 }
 
 func (p *polrStore) updatePolr(report *v1alpha2.PolicyReport, _ *v1alpha2.PolicyReport) (*v1alpha2.PolicyReport, error) {
 	report.ResourceVersion = p.store.UseResourceVersion()
-	return report, p.store.PolicyReports().Update(context.TODO(), *report)
+	return report, p.store.PolicyReports().Update(context.TODO(), report)
 }
 
 func (p *polrStore) deletePolr(report *v1alpha2.PolicyReport) error {

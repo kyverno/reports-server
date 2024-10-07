@@ -29,16 +29,16 @@ type ClusterPolicyReportsInterface interface {
 func New() api.Storage {
 	inMemoryDb := &inMemoryDb{
 		cpolrdb: &cpolrdb{
-			db: make(map[string]v1alpha2.ClusterPolicyReport),
+			db: make(map[string]*v1alpha2.ClusterPolicyReport),
 		},
 		polrdb: &polrdb{
-			db: make(map[string]v1alpha2.PolicyReport),
+			db: make(map[string]*v1alpha2.PolicyReport),
 		},
 		cephrdb: &cephrdb{
-			db: make(map[string]reportsv1.ClusterEphemeralReport),
+			db: make(map[string]*reportsv1.ClusterEphemeralReport),
 		},
 		ephrdb: &ephrdb{
-			db: make(map[string]reportsv1.EphemeralReport),
+			db: make(map[string]*reportsv1.EphemeralReport),
 		},
 	}
 	return inMemoryDb

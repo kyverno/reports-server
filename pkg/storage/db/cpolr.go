@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -27,12 +28,12 @@ func NewClusterPolicyReportStore(db *sql.DB) (api.ClusterPolicyReportsInterface,
 	return &cpolrdb{db: db}, nil
 }
 
-func (c *cpolrdb) List(ctx context.Context) ([]v1alpha2.ClusterPolicyReport, error) {
+func (c *cpolrdb) List(ctx context.Context) ([]*v1alpha2.ClusterPolicyReport, error) {
 	c.Lock()
 	defer c.Unlock()
 
 	klog.Infof("listing all values")
-	res := make([]v1alpha2.ClusterPolicyReport, 0)
+	res := make([]*v1alpha2.ClusterPolicyReport, 0)
 	var jsonb string
 
 	rows, err := c.db.Query("SELECT report FROM clusterpolicyreports")
@@ -52,14 +53,14 @@ func (c *cpolrdb) List(ctx context.Context) ([]v1alpha2.ClusterPolicyReport, err
 			klog.ErrorS(err, "failed to unmarshal clusterpolicyreport")
 			return nil, fmt.Errorf("clusterpolicyreport list: cannot convert jsonb to clusterpolicyreport: %v", err)
 		}
-		res = append(res, report)
+		res = append(res, &report)
 	}
 
 	klog.Infof("list found length: %d", len(res))
 	return res, nil
 }
 
-func (c *cpolrdb) Get(ctx context.Context, name string) (v1alpha2.ClusterPolicyReport, error) {
+func (c *cpolrdb) Get(ctx context.Context, name string) (*v1alpha2.ClusterPolicyReport, error) {
 	c.Lock()
 	defer c.Unlock()
 
@@ -69,25 +70,29 @@ func (c *cpolrdb) Get(ctx context.Context, name string) (v1alpha2.ClusterPolicyR
 	if err := row.Scan(&jsonb); err != nil {
 		klog.ErrorS(err, fmt.Sprintf("clusterpolicyreport not found name=%s", name))
 		if err == sql.ErrNoRows {
-			return v1alpha2.ClusterPolicyReport{}, fmt.Errorf("clusterpolicyreport get %s: no such policy report", name)
+			return nil, fmt.Errorf("clusterpolicyreport get %s: no such policy report", name)
 		}
-		return v1alpha2.ClusterPolicyReport{}, fmt.Errorf("clusterpolicyreport get %s: %v", name, err)
+		return nil, fmt.Errorf("clusterpolicyreport get %s: %v", name, err)
 	}
 	var report v1alpha2.ClusterPolicyReport
 	err := json.Unmarshal([]byte(jsonb), &report)
 	if err != nil {
 		klog.ErrorS(err, "failed to unmarshal report")
-		return v1alpha2.ClusterPolicyReport{}, fmt.Errorf("clusterpolicyreport list: cannot convert jsonb to policyreport: %v", err)
+		return nil, fmt.Errorf("clusterpolicyreport list: cannot convert jsonb to policyreport: %v", err)
 	}
-	return report, nil
+	return &report, nil
 }
 
-func (c *cpolrdb) Create(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport) error {
+func (c *cpolrdb) Create(ctx context.Context, cpolr *v1alpha2.ClusterPolicyReport) error {
 	c.Lock()
 	defer c.Unlock()
-	klog.Infof("creating entry for key:%s", cpolr.Name)
 
-	jsonb, err := json.Marshal(cpolr)
+	if cpolr == nil {
+		return errors.New("invalid cluster policy report")
+	}
+
+	klog.Infof("creating entry for key:%s", cpolr.Name)
+	jsonb, err := json.Marshal(*cpolr)
 	if err != nil {
 		klog.ErrorS(err, "failed to unmarshal cpolr")
 		return err
@@ -101,11 +106,15 @@ func (c *cpolrdb) Create(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport
 	return nil
 }
 
-func (c *cpolrdb) Update(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport) error {
+func (c *cpolrdb) Update(ctx context.Context, cpolr *v1alpha2.ClusterPolicyReport) error {
 	c.Lock()
 	defer c.Unlock()
 
-	jsonb, err := json.Marshal(cpolr)
+	if cpolr == nil {
+		return errors.New("invalid cluster policy report")
+	}
+
+	jsonb, err := json.Marshal(*cpolr)
 	if err != nil {
 		return err
 	}

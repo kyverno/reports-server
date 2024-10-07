@@ -356,7 +356,7 @@ func (p *ephrStore) getEphr(name, namespace string) (*reportsv1.EphemeralReport,
 		return nil, errorpkg.Wrapf(err, "could not find ephemeral report in store")
 	}
 
-	return val.DeepCopy(), nil
+	return val, nil
 }
 
 func (p *ephrStore) listEphr(namespace string) (*reportsv1.EphemeralReportList, error) {
@@ -366,7 +366,11 @@ func (p *ephrStore) listEphr(namespace string) (*reportsv1.EphemeralReportList, 
 	}
 
 	reportList := &reportsv1.EphemeralReportList{
-		Items: valList,
+		Items: make([]reportsv1.EphemeralReport, 0, len(valList)),
+	}
+
+	for _, v := range valList {
+		reportList.Items = append(reportList.Items, *v.DeepCopy())
 	}
 
 	klog.Infof("value found of length:%d", len(reportList.Items))
@@ -378,12 +382,12 @@ func (p *ephrStore) createEphr(report *reportsv1.EphemeralReport) (*reportsv1.Ep
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
-	return report, p.store.EphemeralReports().Create(context.TODO(), *report)
+	return report, p.store.EphemeralReports().Create(context.TODO(), report)
 }
 
 func (p *ephrStore) updateEphr(report *reportsv1.EphemeralReport, _ *reportsv1.EphemeralReport) (*reportsv1.EphemeralReport, error) {
 	report.ResourceVersion = p.store.UseResourceVersion()
-	return report, p.store.EphemeralReports().Update(context.TODO(), *report)
+	return report, p.store.EphemeralReports().Update(context.TODO(), report)
 }
 
 func (p *ephrStore) deleteEphr(report *reportsv1.EphemeralReport) error {
