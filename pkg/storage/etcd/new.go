@@ -30,7 +30,6 @@ func New() (api.Storage, error) {
 		DialTimeout: dialTimeout,
 		Endpoints:   []string{etcdEndpoints},
 	})
-
 	if err != nil {
 		return nil, err
 	}
