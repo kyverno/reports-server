@@ -39,6 +39,7 @@ spec:
           args:
             {{- if .Values.config.debug }}
             - --debug
+            - --etcdDir=/data/etcd
             {{- else }}
             - --dbhost={{ include "reports-server.dbHost" . }}
             - --dbport={{ include "reports-server.dbPort" . }}
@@ -92,6 +93,8 @@ spec:
               containerPort: 4443
               protocol: TCP
           volumeMounts:
+            - mountPath: "/data/etcd"
+              name: task-pv-storage
             - mountPath: /tmp
               name: tmp-dir
           {{- with .Values.livenessProbe }}
@@ -119,3 +122,6 @@ spec:
       volumes:
       - emptyDir: {}
         name: tmp-dir
+      - name: task-pv-storage
+        persistentVolumeClaim:
+          claimName: task-pv-claim

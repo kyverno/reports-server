@@ -67,6 +67,7 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 
 	if o.Debug {
 		go func() {
+			klog.InfoS("starting embedded etcd etcd in directory=%s", o.EtcdDir)
 			err := etcd.StartETCDServer(stopCh, o.EtcdDir)
 			if err != nil {
 				klog.ErrorS(err, "failed to start etcd server")

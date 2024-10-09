@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/klog/v2"
 )
 
 type ObjectStorageNamespaced[T metav1.Object] interface {
@@ -57,13 +58,16 @@ func (o *objectStoreNamespaced[T]) Get(ctx context.Context, name, namespace stri
 	key := o.getKey(name, namespace)
 	resp, err := o.etcdclient.Get(ctx, key)
 	if err != nil {
+		klog.ErrorS(err, "failed to get report kind=%s", o.gvk.String())
 		return obj, err
 	}
+	klog.InfoS("get resp resp=%+v", resp)
 	if len(resp.Kvs) != 1 {
 		return obj, errors.NewNotFound(o.gr, key)
 	}
-	err = json.Unmarshal(resp.Kvs[0].Value, obj)
+	err = json.Unmarshal(resp.Kvs[0].Value, &obj)
 	if err != nil {
+		klog.ErrorS(err, "failed to marshal report kind=%s", o.gvk.String())
 		return obj, errors.NewNotFound(o.gr, key)
 	}
 	return obj, nil
@@ -77,15 +81,17 @@ func (o *objectStoreNamespaced[T]) List(ctx context.Context, namespace string) (
 	key := o.getPrefix()
 	resp, err := o.etcdclient.Get(ctx, key, clientv3.WithPrefix())
 	if err != nil {
+		klog.ErrorS(err, "failed to list report kind=%s", o.gvk.String())
 		return objects, err
 	}
+	klog.InfoS("list resp resp=%+v", resp)
 	if len(resp.Kvs) == 0 {
 		return objects, errors.NewNotFound(o.gr, key)
 	}
 	objects = make([]T, 0, len(resp.Kvs))
 	for _, v := range resp.Kvs {
 		var obj T
-		err = json.Unmarshal(v.Value, obj)
+		err = json.Unmarshal(v.Value, &obj)
 		if err != nil {
 			return objects, errors.NewNotFound(o.gr, key)
 		}
@@ -101,8 +107,10 @@ func (o *objectStoreNamespaced[T]) Create(ctx context.Context, obj T) error {
 	key := o.getKey(obj.GetName(), obj.GetNamespace())
 	resp, err := o.etcdclient.Get(ctx, key)
 	if err != nil {
+		klog.ErrorS(err, "failed to create report kind=%s", o.gvk.String())
 		return err
 	}
+	klog.InfoS("create resp resp=%+v", resp)
 	if len(resp.Kvs) > 0 {
 		return errors.NewAlreadyExists(o.gr, key)
 	}
@@ -126,6 +134,7 @@ func (o *objectStoreNamespaced[T]) Update(ctx context.Context, obj T) error {
 	key := o.getKey(obj.GetName(), obj.GetNamespace())
 	resp, err := o.etcdclient.Get(ctx, key)
 	if err != nil {
+		klog.ErrorS(err, "failed to update report kind=%s", o.gvk.String())
 		return err
 	}
 	if len(resp.Kvs) != 1 {
@@ -151,6 +160,7 @@ func (o *objectStoreNamespaced[T]) Delete(ctx context.Context, name, namespace s
 	key := o.getKey(name, namespace)
 	resp, err := o.etcdclient.Delete(ctx, key)
 	if err != nil {
+		klog.ErrorS(err, "failed to delete report kind=%s", o.gvk.String())
 		return err
 	}
 	if resp.Deleted == 0 {
