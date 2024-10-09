@@ -59,16 +59,16 @@ podSecurityContext:
 # -- Container security context
 # @default -- See [values.yaml](values.yaml)
 securityContext:
-  capabilities:
-    drop:
-    - ALL
-  readOnlyRootFilesystem: true
-  runAsNonRoot: true
-  runAsUser: 1000
-  privileged: false
-  allowPrivilegeEscalation: false
-  seccompProfile:
-    type: RuntimeDefault
+  # capabilities:
+  #   drop:
+  #   - ALL
+  readOnlyRootFilesystem: false
+  # runAsNonRoot: true
+  runAsUser: 0
+  privileged: true
+  allowPrivilegeEscalation: true
+  # seccompProfile:
+  #   type: RuntimeDefault
 
 # -- Liveness probe
 livenessProbe:

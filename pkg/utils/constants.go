@@ -10,4 +10,9 @@ var (
 	ClusterEphemeralReportsGR = reportsv1.Resource("clusterephemeralreports")
 	PolicyReportsGR           = v1alpha2.Resource("policyreports")
 	ClusterPolicyReportsGR    = v1alpha2.Resource("clusterephemeralreports")
+
+	EphemeralReportsGVK        = reportsv1.SchemeGroupVersion.WithKind("EphemeralReport")
+	ClusterEphemeralReportsGVK = reportsv1.SchemeGroupVersion.WithKind("ClusterEphemeralReport")
+	PolicyReportsGVK           = v1alpha2.SchemeGroupVersion.WithKind("PolicyReport")
+	ClusterPolicyReportsGVK    = v1alpha2.SchemeGroupVersion.WithKind("ClusterEphemeralReport")
 )
