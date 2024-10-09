@@ -94,6 +94,9 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp-dir
+            {{- with .Values.extraVolumes.volumeMounts }}
+            {{ toYaml . | nindent 12 | trim }}
+            {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
@@ -119,3 +122,6 @@ spec:
       volumes:
       - emptyDir: {}
         name: tmp-dir
+      {{- with .Values.extraVolumes.volumes }}
+      {{ toYaml . | nindent 6 | trim }}
+      {{- end }}

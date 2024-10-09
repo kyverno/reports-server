@@ -273,3 +273,7 @@ apiServicesManagement:
         - ALL
     seccompProfile:
       type: RuntimeDefault
+
+extraVolumes:
+  volumeMounts: []
+  volumes: []
