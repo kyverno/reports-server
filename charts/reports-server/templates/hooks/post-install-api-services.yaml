@@ -97,6 +97,7 @@ spec:
                 }
               }
               EOF
+              kubectl -n kyverno rollout restart deployment kyverno-reports-controller
           {{- with .Values.apiServicesManagement.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
