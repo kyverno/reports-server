@@ -165,6 +165,10 @@ config:
   # -- Enable debug (to use inmemorydatabase)
   debug: false
 
+  embedded:
+    enabled: true
+    dataDir: ""
+
   db:
     # -- If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`.
     secretName: ""

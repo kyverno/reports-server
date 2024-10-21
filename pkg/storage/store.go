@@ -12,12 +12,12 @@ type Interface interface {
 	api.Storage
 }
 
-func New(debug bool, config *db.PostgresConfig) (Interface, error) {
-	klog.Infof("setting up storage, debug=%v", debug)
+func New(embedded bool, config *db.PostgresConfig) (Interface, error) {
+	klog.Infof("setting up storage, embedded-db=%v", embedded)
 	var storage api.Storage
 	var err error
 
-	if debug {
+	if embedded {
 		storage, err = etcd.New()
 		if err != nil {
 			return nil, err

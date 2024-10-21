@@ -31,7 +31,7 @@ type Options struct {
 	Logging        *logs.Options
 
 	ShowVersion bool
-	Debug       bool
+	Embedded    bool
 	Kubeconfig  string
 
 	// dbopts
@@ -66,7 +66,7 @@ func (o *Options) validate() []error {
 
 func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs := fs.FlagSet("policy server")
-	msfs.BoolVar(&o.Debug, "debug", false, "Use inmemory database for debugging")
+	msfs.BoolVar(&o.Embedded, "debug", false, "Use inmemory database for debugging")
 	msfs.StringVar(&o.EtcdDir, "etcdDir", "", "Directory used for creating etcd server")
 	msfs.BoolVar(&o.ShowVersion, "version", false, "Show version")
 	msfs.StringVar(&o.Kubeconfig, "kubeconfig", o.Kubeconfig, "The path to the kubeconfig used to connect to the Kubernetes API server and the Kubelets (defaults to in-cluster config)")
@@ -127,7 +127,7 @@ func (o Options) ServerConfig() (*server.Config, error) {
 	return &server.Config{
 		Apiserver: apiserver,
 		Rest:      restConfig,
-		Debug:     o.Debug,
+		Embedded:  o.Embedded,
 		DBconfig:  dbconfig,
 	}, nil
 }

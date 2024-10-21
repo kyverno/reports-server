@@ -29,7 +29,7 @@ import (
 type Config struct {
 	Apiserver *genericapiserver.Config
 	Rest      *rest.Config
-	Debug     bool
+	Embedded  bool
 	DBconfig  *db.PostgresConfig
 }
 
@@ -48,16 +48,20 @@ func (c Config) Complete() (*server, error) {
 	}
 	genericServer.Handler.NonGoRestfulMux.HandleFunc("/metrics", metricsHandler)
 
-	store, err := storage.New(c.Debug, c.DBconfig)
+	store, err := storage.New(c.Embedded, c.DBconfig)
 	if err != nil {
 		klog.Error(err)
 		return nil, err
 	}
 
-	klog.Info("performing migration...")
-	if err := c.migration(store); err != nil {
-		klog.Error(err)
-		return nil, err
+	// Embedded runs in a stateful set in high availability deployment
+	// TODO: Add leader election to add embedded
+	if !c.Embedded {
+		klog.Info("performing migration...")
+		if err := c.migration(store); err != nil {
+			klog.Error(err)
+			return nil, err
+		}
 	}
 
 	if err := api.Install(store, genericServer); err != nil {
