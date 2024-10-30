@@ -1,22 +1,25 @@
 package etcd
 
 import (
-	"errors"
+	"crypto/tls"
+	"strings"
 	"time"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/utils"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"go.etcd.io/etcd/server/v3/embed"
-	"k8s.io/klog/v2"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
-var (
-	etcdEndpoints = embed.DefaultListenClientURLs
-	dialTimeout   = 10 * time.Second
-)
+var dialTimeout = 10 * time.Second
+
+type EtcdConfig struct {
+	Endpoints string
+	Insecure  bool
+}
 
 type etcdClient struct {
 	polrClient  ObjectStorageNamespaced[*v1alpha2.PolicyReport]
@@ -25,11 +28,18 @@ type etcdClient struct {
 	cephrClient ObjectStorageCluster[*reportsv1.ClusterEphemeralReport]
 }
 
-func New() (api.Storage, error) {
-	client, err := clientv3.New(clientv3.Config{
+func New(cfg *EtcdConfig) (api.Storage, error) {
+	clientCfg := clientv3.Config{
 		DialTimeout: dialTimeout,
-		Endpoints:   []string{etcdEndpoints},
-	})
+		Endpoints:   strings.Split(cfg.Endpoints, ","),
+	}
+	if cfg.Insecure {
+		clientCfg.TLS = &tls.Config{
+			InsecureSkipVerify: true,
+		}
+		clientCfg.DialOptions = []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	}
+	client, err := clientv3.New(clientCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -60,31 +70,4 @@ func (e *etcdClient) EphemeralReports() api.EphemeralReportsInterface {
 
 func (e *etcdClient) ClusterEphemeralReports() api.ClusterEphemeralReportsInterface {
 	return e.cephrClient
-}
-
-func StartETCDServer(stopCh <-chan struct{}, dir string) error {
-	etcdConfig := embed.NewConfig()
-	etcdConfig.Dir = dir
-	etcd, err := embed.StartEtcd(etcdConfig)
-	if err != nil {
-		return err
-	}
-	defer etcd.Close()
-
-	select {
-	case <-etcd.Server.ReadyNotify():
-		klog.Info("etcd server is running!")
-	case <-time.After(100 * time.Second):
-		etcd.Server.Stop()
-		return errors.New("etcd server timed out and stopped!")
-	}
-
-	select {
-	case <-stopCh:
-		klog.Info("etcd server stopped")
-		return nil
-	case err := <-etcd.Err():
-		klog.Error("error encountered in etcd server", err.Error())
-		return err
-	}
 }

@@ -33,7 +33,7 @@ nodes:
         protocol: TCP
     extraMounts:
       - hostPath: /home/tmp
-        containerPath: /data/etcd
+        containerPath: /data
   - role: worker
   - role: worker
   - role: worker

@@ -6,13 +6,11 @@ import (
 	"os"
 
 	"github.com/kyverno/reports-server/pkg/app/opts"
-	"github.com/kyverno/reports-server/pkg/storage/etcd"
 	"github.com/spf13/cobra"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/logs"
 	"k8s.io/component-base/term"
 	"k8s.io/component-base/version"
-	"k8s.io/klog/v2"
 )
 
 func NewPolicyServer(stopCh <-chan struct{}) *cobra.Command {
@@ -63,17 +61,6 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 	config, err := o.ServerConfig()
 	if err != nil {
 		return err
-	}
-
-	if o.Embedded {
-		go func() {
-			klog.InfoS("starting embedded etcd etcd in directory=%s", o.EtcdDir)
-			err := etcd.StartETCDServer(stopCh, o.EtcdDir)
-			if err != nil {
-				klog.ErrorS(err, "failed to start etcd server")
-				os.Exit(1)
-			}
-		}()
 	}
 
 	s, err := config.Complete()

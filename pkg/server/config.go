@@ -11,6 +11,7 @@ import (
 	"github.com/kyverno/reports-server/pkg/api"
 	"github.com/kyverno/reports-server/pkg/storage"
 	"github.com/kyverno/reports-server/pkg/storage/db"
+	"github.com/kyverno/reports-server/pkg/storage/etcd"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	apimetrics "k8s.io/apiserver/pkg/endpoints/metrics"
@@ -27,10 +28,11 @@ import (
 )
 
 type Config struct {
-	Apiserver *genericapiserver.Config
-	Rest      *rest.Config
-	Embedded  bool
-	DBconfig  *db.PostgresConfig
+	Apiserver  *genericapiserver.Config
+	Rest       *rest.Config
+	Embedded   bool
+	EtcdConfig *etcd.EtcdConfig
+	DBconfig   *db.PostgresConfig
 }
 
 func (c Config) Complete() (*server, error) {
@@ -48,7 +50,7 @@ func (c Config) Complete() (*server, error) {
 	}
 	genericServer.Handler.NonGoRestfulMux.HandleFunc("/metrics", metricsHandler)
 
-	store, err := storage.New(c.Embedded, c.DBconfig)
+	store, err := storage.New(c.Embedded, c.DBconfig, c.EtcdConfig)
 	if err != nil {
 		klog.Error(err)
 		return nil, err
