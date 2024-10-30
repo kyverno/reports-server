@@ -55,33 +55,43 @@ spec:
             {{- if .Values.metrics.enabled }}
             - --authorization-always-allow-paths=/metrics
             {{- end }}
-          {{- if .Values.config.db.secretName }}
+          {{- if or (.Values.config.db.secretName) (.Values.config.db.hostSecretName) (.Values.config.db.portSecretName) (.Values.config.db.dbNameSecretName) (.Values.config.db.userSecretName) (.Values.config.db.passwordSecretName) }}
           env:
+            {{- if or (.Values.config.db.secretName) (.Values.config.db.hostSecretName) }}
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.config.db.hostSecretKeyName }}
-                  name: {{ .Values.config.db.secretName }}
+                  name: {{ .Values.config.db.hostSecretName | default .Values.config.db.secretName }}
+            {{- end}}
+            {{- if or (.Values.config.db.secretName) (.Values.config.db.portSecretName) }}
             - name: DB_PORT
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.config.db.portSecretKeyName }}
-                  name: {{ .Values.config.db.secretName }}
+                  name: {{ .Values.config.db.portSecretName | default .Values.config.db.secretName }}
+            {{- end}}
+            {{- if or (.Values.config.db.secretName) (.Values.config.db.dbNameSecretName) }}
             - name: DB_DATABASE
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.config.db.dbNameSecretKeyName }}
-                  name: {{ .Values.config.db.secretName }}
+                  name: {{ .Values.config.db.dbNameSecretName | default .Values.config.db.secretName }}
+            {{- end}}
+            {{- if or (.Values.config.db.secretName) (.Values.config.db.userSecretName) }}
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.config.db.userSecretKeyName }}
-                  name: {{ .Values.config.db.secretName }}
+                  name: {{ .Values.config.db.userSecretName | default .Values.config.db.secretName }}
+            {{- end}}
+            {{- if or (.Values.config.db.secretName) (.Values.config.db.passwordSecretName) }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.config.db.passwordSecretKeyName }}
-                  name: {{ .Values.config.db.secretName }}
+                  name: {{ .Values.config.db.passwordSecretName | default .Values.config.db.secretName }}
+            {{- end}}
           {{- end}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}

@@ -65,7 +65,7 @@ Create the name of the service account to use
 Database config is injected into the environment, if a secret ref is set. Otherwise, Helm values are used directly.
 */}}
 {{- define "reports-server.dbHost" -}}
-{{- if .Values.config.db.secretName }}
+{{- if or (.Values.config.db.secretName) (.Values.config.db.hostSecretName) }}
 {{- printf "%s" "$(DB_HOST)" }}
 {{- else }}
 {{- default (printf "%s-postgresql.%s" $.Release.Name $.Release.Namespace ) .Values.config.db.host }}
@@ -73,7 +73,7 @@ Database config is injected into the environment, if a secret ref is set. Otherw
 {{- end }}
 
 {{- define "reports-server.dbPort" -}}
-{{- if .Values.config.db.secretName }}
+{{- if or (.Values.config.db.secretName) (.Values.config.db.portSecretName) }}
 {{- printf "%s" "$(DB_PORT)" }}
 {{- else }}
 {{- .Values.config.db.port }}
@@ -81,7 +81,7 @@ Database config is injected into the environment, if a secret ref is set. Otherw
 {{- end }}
 
 {{- define "reports-server.dbName" -}}
-{{- if .Values.config.db.secretName }}
+{{- if or (.Values.config.db.secretName) (.Values.config.db.dbNameSecretName) }}
 {{- printf "%s" "$(DB_DATABASE)" }}
 {{- else }}
 {{- .Values.config.db.name }}
@@ -89,7 +89,7 @@ Database config is injected into the environment, if a secret ref is set. Otherw
 {{- end }}
 
 {{- define "reports-server.dbUser" -}}
-{{- if .Values.config.db.secretName }}
+{{- if or (.Values.config.db.secretName) (.Values.config.db.userSecretName) }}
 {{- printf "%s" "$(DB_USER)" }}
 {{- else }}
 {{- .Values.config.db.user }}
@@ -97,7 +97,7 @@ Database config is injected into the environment, if a secret ref is set. Otherw
 {{- end }}
 
 {{- define "reports-server.dbPassword" -}}
-{{- if .Values.config.db.secretName }}
+{{- if or (.Values.config.db.secretName) (.Values.config.db.passwordSecretName) }}
 {{- printf "%s" "$(DB_PASSWORD)" }}
 {{- else }}
 {{- .Values.config.db.password }}

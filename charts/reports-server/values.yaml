@@ -171,28 +171,36 @@ config:
 
     # -- Database host
     host: ""
-    # -- The database host will be read from this `key` in the specified Secret, when `db.secretName` is set.
+    # -- If set, database host will be read from this Secret. Overrides `db.host` and `db.secretName`.
+    hostSecretName: ""
+    # -- The database host will be read from this `key` in the specified Secret, when `db.secretName` or `db.hostSecretName` is set.
     hostSecretKeyName: "host"
 
     # -- Database port
     port: 5432
-    # -- The database port will be read from this `key` in the specified Secret, when `db.secretName` is set.
+    # -- If set, database port will be read from this Secret. Overrides `db.port` and `db.secretName`.
+    portSecretName: ""
+    # -- The database port will be read from this `key` in the specified Secret, when `db.secretName` or `db.portSecretName` is set.
     portSecretKeyName: "port"
 
     # -- Database name
     name: reportsdb
-    # -- The database name will be read from this `key` in the specified Secret, when `db.secretName` is set.
+    # -- If set, database name will be read from this Secret. Overrides `db.name` and `db.secretName`.
+    dbNameSecretName: ""
+    # -- The database name will be read from this `key` in the specified Secret, when `db.secretName` or `db.dbNameSecretName` is set.
     dbNameSecretKeyName: "dbname"
 
     # -- Database user
     user: postgres
-
-    # -- The database username will be read from this `key` in the specified Secret, when `db.secretName` is set.
+    # -- If set, database user will be read from this Secret. Overrides `db.user` and `db.secretName`.
+    userSecretName: ""
+    # -- The database username will be read from this `key` in the specified Secret, when `db.secretName` or `db.userSecretName` is set.
     userSecretKeyName: "username"
 
     # -- Database password
     password: reports
-
+    # -- If set, database password will be read from this Secret. Overrides `db.password` and `db.secretName`.
+    passwordSecretName: ""
     # -- The database password will be read from this `key` in the specified Secret, when `db.secretName` is set.
     passwordSecretKeyName: "password"
 
