@@ -178,6 +178,7 @@ metadata:
   name: etcd
   namespace: reports-server
   labels:
+    app: etcd-reports-server
     helm.sh/chart: reports-server-0.1.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
@@ -259,10 +260,19 @@ spec:
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics
           securityContext:
-            allowPrivilegeEscalation: true
-            privileged: true
-            readOnlyRootFilesystem: false
-            runAsUser: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-dir
           image: "ghcr.io/kyverno/reports-server:latest"
           imagePullPolicy: IfNotPresent
           ports:
@@ -298,6 +308,7 @@ metadata:
   namespace: reports-server
   name: etcd
   labels:
+    app: etcd-reports-server
     helm.sh/chart: reports-server-0.1.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
@@ -311,7 +322,7 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app: etcd
+      app: etcd-reports-server
   template:
     metadata:
       labels:
@@ -329,7 +340,7 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - etcd
+                  - etcd-reports-server
               topologyKey: "kubernetes.io/hostname"
       containers:
       - name: etcd
