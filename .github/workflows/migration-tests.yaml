@@ -73,7 +73,8 @@ jobs:
       - name: Install kyverno v1.12.4
         run: |
           set -e
-          kubectl create -f https://github.com/kyverno/kyverno/raw/main/config/install-latest-testing.yaml
+          export HELM=${{ steps.helm.outputs.helm-path }}
+          make -c ./kyverno kind-deploy-kyverno
       - name: Wait for kyverno ready
         run: |
           set -e
