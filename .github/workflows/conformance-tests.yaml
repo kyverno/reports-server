@@ -84,7 +84,7 @@ jobs:
           set -e
           set -e
           export HELM=${{ steps.helm.outputs.helm-path }}
-          make -c ./kyverno kind-deploy-kyverno
+          make -C ./kyverno kind-deploy-kyverno
       - name: Wait for kyverno ready
         run: |
           set -e

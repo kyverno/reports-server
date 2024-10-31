@@ -70,11 +70,11 @@ jobs:
         run: |
           set -e
           kind create cluster --image kindest/node:${{ matrix.k8s-version.version }} --config ./.github/kind.yml
-      - name: Install kyverno v1.12.4
+      - name: Install kyverno
         run: |
           set -e
           export HELM=${{ steps.helm.outputs.helm-path }}
-          make -c ./kyverno kind-deploy-kyverno
+          make -C ./kyverno kind-deploy-kyverno
       - name: Wait for kyverno ready
         run: |
           set -e
