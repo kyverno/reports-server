@@ -35,7 +35,7 @@ func New(cfg *EtcdConfig) (api.Storage, error) {
 	}
 	if cfg.Insecure {
 		clientCfg.TLS = &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: true, //nolint:gosec
 		}
 		clientCfg.DialOptions = []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	}
