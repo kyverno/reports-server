@@ -7,6 +7,19 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  name: reports-server-postgresql
+  namespace: "reports-server"
+  labels:
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.4.1
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
   name: reports-server
   namespace: reports-server
   labels:
@@ -15,6 +28,22 @@ metadata:
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.1"
     app.kubernetes.io/managed-by: Helm
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: reports-server-postgresql
+  namespace: "reports-server"
+  labels:
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.4.1
+type: Opaque
+data:
+  postgres-password: "cmVwb3J0cw=="
+  # We don't auto-generate LDAP password when it's not provided as we do for other passwords
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -175,28 +204,61 @@ subjects:
 apiVersion: v1
 kind: Service
 metadata:
-  name: etcd
-  namespace: reports-server
+  name: reports-server-postgresql-hl
+  namespace: "reports-server"
   labels:
-    app: etcd-reports-server
-    helm.sh/chart: reports-server-0.1.1
-    app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.1"
     app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.4.1
+    app.kubernetes.io/component: primary
+  annotations:
+    # Use this annotation in addition to the actual publishNotReadyAddresses
+    # field below because the annotation will stop being respected soon but the
+    # field is broken in some versions of Kubernetes:
+    # https://github.com/kubernetes/kubernetes/issues/58662
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
   type: ClusterIP
   clusterIP: None
-  selector:
-    app: etcd-reports-server
+  # We want all pods in the StatefulSet to have their addresses published for
+  # the sake of the other Postgresql pods even before they're ready, since they
+  # have to be able to talk to each other in order to become ready.
   publishNotReadyAddresses: true
   ports:
-  - name: etcd-client
-    port: 2379
-  - name: etcd-server
-    port: 2380
-  - name: etcd-metrics
-    port: 8080
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/component: primary
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reports-server-postgresql
+  namespace: "reports-server"
+  labels:
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.4.1
+    app.kubernetes.io/component: primary
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+      nodePort: null
+  selector:
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/component: primary
 ---
 apiVersion: v1
 kind: Service
@@ -253,9 +315,15 @@ spec:
       containers:
         - name: reports-server
           args:
-            - --etcd
-            - --etcdSkipTLS
-            - --etcdEndpoints=https://etcd-0.etcd.reports-server:2379,https://etcd-1.etcd.reports-server:2379,https://etcd-2.etcd.reports-server:2379
+            - --dbhost=reports-server-postgresql.reports-server
+            - --dbport=5432
+            - --dbuser=postgres
+            - --dbpassword=reports
+            - --dbname=reportsdb
+            - --dbsslmode=disable
+            - --dbsslrootcert=
+            - --dbsslkey=
+            - --dbsslcert=
             - --cert-dir=/tmp
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics
@@ -305,151 +373,171 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  namespace: reports-server
-  name: etcd
+  name: reports-server-postgresql
+  namespace: "reports-server"
   labels:
-    app: etcd-reports-server
-    helm.sh/chart: reports-server-0.1.1
-    app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.1"
     app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.4.1
+    app.kubernetes.io/component: primary
 spec:
-  serviceName: etcd
-  replicas: 3
-  podManagementPolicy: Parallel
+  replicas: 1
+  serviceName: reports-server-postgresql-hl
   updateStrategy:
+    rollingUpdate: {}
     type: RollingUpdate
   selector:
     matchLabels:
-      app: etcd-reports-server
+      app.kubernetes.io/instance: reports-server
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/component: primary
   template:
     metadata:
+      name: reports-server-postgresql
       labels:
-        app: etcd-reports-server
-      annotations:
-        serviceName: etcd
+        app.kubernetes.io/instance: reports-server
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: postgresql
+        app.kubernetes.io/version: 16.1.0
+        helm.sh/chart: postgresql-13.4.1
+        app.kubernetes.io/component: primary
     spec:
+      serviceAccountName: reports-server-postgresql
+      
+      automountServiceAccountToken: false
       affinity:
+        podAffinity:
+          
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 1
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - etcd-reports-server
-              topologyKey: "kubernetes.io/hostname"
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: reports-server
+                    app.kubernetes.io/name: postgresql
+                    app.kubernetes.io/component: primary
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: Always
+        supplementalGroups: []
+        sysctls: []
+      hostNetwork: false
+      hostIPC: false
       containers:
-      - name: etcd
-        image: quay.io/coreos/etcd:v3.5.15
-        imagePullPolicy: IfNotPresent
-        ports:
-        - name: etcd-client
-          containerPort: 2379
-        - name: etcd-server
-          containerPort: 2380
-        - name: etcd-metrics
-          containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 5
-          successThreshold: 1
-          failureThreshold: 30
-        livenessProbe:
-          httpGet:
-            path: /livez
-            port: 8080
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        env:
-        - name: K8S_NAMESPACE
-          valueFrom:
-            fieldRef:
-             fieldPath: metadata.namespace
-        - name: HOSTNAME
-          valueFrom:
-            fieldRef:
-             fieldPath: metadata.name
-        - name: SERVICE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.annotations['serviceName']
-        - name: ETCDCTL_ENDPOINTS
-          value: $(HOSTNAME).$(SERVICE_NAME):2379
-        ## TLS client configuration for etcdctl in the container.
-        ## These files paths are part of the "etcd-client-certs" volume mount.
-        # - name: ETCDCTL_KEY
-        #   value: /etc/etcd/certs/client/tls.key
-        # - name: ETCDCTL_CERT
-        #   value: /etc/etcd/certs/client/tls.crt
-        # - name: ETCDCTL_CACERT
-        #   value: /etc/etcd/certs/client/ca.crt
-        ##
-        ## Use this URI_SCHEME value for non-TLS clusters.
-        - name: URI_SCHEME
-          value: "http"
-        ## TLS: Use this URI_SCHEME for TLS clusters.
-        # - name: URI_SCHEME
-        # value: "https"
-        command:
-        - /usr/local/bin/etcd
-        args:
-        - --name=$(HOSTNAME)
-        - --data-dir=/data
-        - --wal-dir=/data/wal
-        - --listen-peer-urls=$(URI_SCHEME)://0.0.0.0:2380
-        - --listen-client-urls=$(URI_SCHEME)://0.0.0.0:2379
-        - --advertise-client-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):2379
-        - --initial-cluster-state=new
-        - --initial-cluster-token=etcd-$(K8S_NAMESPACE)
-        - --initial-cluster=etcd-0=$(URI_SCHEME)://etcd-0.$(SERVICE_NAME):2380,etcd-1=$(URI_SCHEME)://etcd-1.$(SERVICE_NAME):2380,etcd-2=$(URI_SCHEME)://etcd-2.$(SERVICE_NAME):2380
-        - --initial-advertise-peer-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):2380
-        - --listen-metrics-urls=http://0.0.0.0:8080
-        # - --auto-compaction-mode=periodic
-        # - --auto-compaction-retention=10m
-        # - --client-cert-auth
-        # - --trusted-ca-file=$(ETCDCTL_CACERT)
-        # - --cert-file=$(ETCDCTL_CERT)
-        # - --key-file=$(ETCDCTL_KEY)
-        # - --peer-client-cert-auth
-        # - --peer-trusted-ca-file=/etc/etcd/certs/server/ca.crt
-        # - --peer-cert-file=/etc/etcd/certs/server/tls.crt
-        # - --peer-key-file=/etc/etcd/certs/server/tls.key
-        volumeMounts:
-        - name: etcd-data
-          mountPath: /data
-        # - name: etcd-client-tls
-        #   mountPath: "/etc/etcd/certs/client"
-        #   readOnly: true
-        # - name: etcd-server-tls
-        #   mountPath: "/etc/etcd/certs/server"
-        #   readOnly: true
+        - name: postgresql
+          image: docker.io/bitnami/postgresql:16.1.0-debian-11-r22
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: "/bitnami/postgresql"
+            - name: PGDATA
+              value: "/bitnami/postgresql/data"
+            # Authentication
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: reports-server-postgresql
+                  key: postgres-password
+            - name: POSTGRES_DATABASE
+              value: "reportsdb"
+            # Replication
+            # Initdb
+            # Standby
+            # LDAP
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
+            # TLS
+            - name: POSTGRESQL_ENABLE_TLS
+              value: "no"
+            # Audit
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "false"
+            - name: POSTGRESQL_LOG_CONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_LOG_DISCONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+              value: "off"
+            # Others
+            - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+              value: "error"
+            - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+              value: "pgaudit"
+          ports:
+            - name: tcp-postgresql
+              containerPort: 5432
+          livenessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "postgres" -d "dbname=reportsdb" -h 127.0.0.1 -p 5432
+          readinessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - -e
+                - |
+                  exec pg_isready -U "postgres" -d "dbname=reportsdb" -h 127.0.0.1 -p 5432
+                  [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
+          resources:
+            limits: {}
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+            - name: data
+              mountPath: /bitnami/postgresql
       volumes:
-      # - name: etcd-client-tls
-      #   secret:
-      #     secretName: etcd-client-tls
-      #     optional: false
-      # - name: etcd-server-tls
-      #   secret:
-      #     secretName: etcd-server-tls
-      #     optional: false
+        - name: dshm
+          emptyDir:
+            medium: Memory
   volumeClaimTemplates:
-  - metadata:
-      name: etcd-data
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 1Gi
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService

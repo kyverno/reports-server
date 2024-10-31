@@ -6,7 +6,7 @@ templating:
 postgresql:
 
   # -- Deploy postgresql dependency chart
-  enabled: false
+  enabled: true
 
   auth:
 
@@ -163,8 +163,9 @@ service:
 config:
 
   etcd:
-    enabled: true
+    enabled: false
     endpoints: ~
+    insecure: true
 
   db:
     # -- If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`.

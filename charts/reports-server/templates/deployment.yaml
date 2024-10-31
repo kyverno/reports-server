@@ -39,7 +39,9 @@ spec:
           args:
             {{- if .Values.config.etcd.enabled }}
             - --etcd
+            {{- if .Values.config.etcd.insecure }}
             - --etcdSkipTLS
+            {{- end }}
             - --etcdEndpoints=https://etcd-0.etcd.{{ $.Release.Namespace }}:2379,https://etcd-1.etcd.{{ $.Release.Namespace }}:2379,https://etcd-2.etcd.{{ $.Release.Namespace }}:2379
             {{- else }}
             - --dbhost={{ include "reports-server.dbHost" . }}
