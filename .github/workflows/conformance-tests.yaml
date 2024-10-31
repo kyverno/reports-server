@@ -82,7 +82,11 @@ jobs:
       - name: Install latest kyverno
         run: |
           set -e
-          kubectl create -f https://github.com/kyverno/kyverno/raw/main/config/install-latest-testing.yaml
+          set -e
+          export HELM=${{ steps.helm.outputs.helm-path }}
+          helm repo add kyverno https://kyverno.github.io/kyverno/
+          kubectl create namespace kyverno
+          helm install kyverno --namespace kyverno kyverno/kyverno --set features.policyExceptions.enabled=true --set features.policyExceptions.namespace='*'
       - name: Wait for kyverno ready
         run: |
           set -e

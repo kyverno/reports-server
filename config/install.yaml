@@ -338,15 +338,15 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-dir
           image: "ghcr.io/kyverno/reports-server:latest"
           imagePullPolicy: IfNotPresent
           ports:
             - name: https
               containerPort: 4443
               protocol: TCP
-          volumeMounts:
-            - mountPath: /tmp
-              name: tmp-dir
           livenessProbe:
             failureThreshold: 10
             httpGet:

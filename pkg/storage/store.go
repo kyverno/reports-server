@@ -3,7 +3,7 @@ package storage
 import (
 	"github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/storage/db"
-	"github.com/kyverno/reports-server/pkg/storage/inmemory"
+	"github.com/kyverno/reports-server/pkg/storage/etcd"
 	"k8s.io/klog/v2"
 )
 
@@ -12,21 +12,25 @@ type Interface interface {
 	api.Storage
 }
 
-func New(debug bool, config *db.PostgresConfig) (Interface, error) {
-	klog.Infof("setting up storage, debug=%v", debug)
-	if debug {
-		return &store{
-			db:         inmemory.New(),
-			versioning: NewVersioning(),
-		}, nil
+func New(embedded bool, config *db.PostgresConfig, etcdCfg *etcd.EtcdConfig) (Interface, error) {
+	klog.Infof("setting up storage, embedded-db=%v, etcdconfig=%+v", embedded, etcdCfg)
+	var storage api.Storage
+	var err error
+
+	if embedded {
+		storage, err = etcd.New(etcdCfg)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		storage, err = db.New(config)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	db, err := db.New(config)
-	if err != nil {
-		return nil, err
-	}
 	return &store{
-		db:         db,
+		db:         storage,
 		versioning: NewVersioning(),
 	}, nil
 }

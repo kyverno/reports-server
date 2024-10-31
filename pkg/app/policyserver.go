@@ -62,6 +62,7 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
+
 	s, err := config.Complete()
 	if err != nil {
 		return err

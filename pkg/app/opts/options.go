@@ -9,6 +9,7 @@ import (
 	generatedopenapi "github.com/kyverno/reports-server/pkg/api/generated/openapi"
 	"github.com/kyverno/reports-server/pkg/server"
 	"github.com/kyverno/reports-server/pkg/storage/db"
+	"github.com/kyverno/reports-server/pkg/storage/etcd"
 	openapinamer "k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
@@ -31,10 +32,12 @@ type Options struct {
 	Logging        *logs.Options
 
 	ShowVersion bool
-	Debug       bool
+	Etcd        bool
 	Kubeconfig  string
 
 	// dbopts
+	EtcdConfig    etcd.EtcdConfig
+	EtcdDir       string
 	DBHost        string
 	DBPort        int
 	DBUser        string
@@ -65,7 +68,9 @@ func (o *Options) validate() []error {
 
 func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs := fs.FlagSet("policy server")
-	msfs.BoolVar(&o.Debug, "debug", false, "Use inmemory database for debugging")
+	msfs.BoolVar(&o.Etcd, "etcd", false, "Use embedded etcd database")
+	msfs.StringVar(&o.EtcdConfig.Endpoints, "etcdEndpoints", "", "Enpoints used for connect to etcd server")
+	msfs.BoolVar(&o.EtcdConfig.Insecure, "etcdSkipTLS", true, "Skip TLS verification when connecting to etcd")
 	msfs.BoolVar(&o.ShowVersion, "version", false, "Show version")
 	msfs.StringVar(&o.Kubeconfig, "kubeconfig", o.Kubeconfig, "The path to the kubeconfig used to connect to the Kubernetes API server and the Kubelets (defaults to in-cluster config)")
 	msfs.StringVar(&o.DBHost, "dbhost", "reportsdb.kyverno", "Host url of postgres instance")
@@ -123,10 +128,11 @@ func (o Options) ServerConfig() (*server.Config, error) {
 	}
 
 	return &server.Config{
-		Apiserver: apiserver,
-		Rest:      restConfig,
-		Debug:     o.Debug,
-		DBconfig:  dbconfig,
+		Apiserver:  apiserver,
+		Rest:       restConfig,
+		Embedded:   o.Etcd,
+		EtcdConfig: &o.EtcdConfig,
+		DBconfig:   dbconfig,
 	}, nil
 }
 
