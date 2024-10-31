@@ -84,7 +84,9 @@ jobs:
           set -e
           set -e
           export HELM=${{ steps.helm.outputs.helm-path }}
-          make -C ./kyverno kind-deploy-kyverno
+          helm repo add kyverno https://kyverno.github.io/kyverno/
+          kubectl create namespace kyverno
+          helm install kyverno --namespace kyverno kyverno/kyverno
       - name: Wait for kyverno ready
         run: |
           set -e
