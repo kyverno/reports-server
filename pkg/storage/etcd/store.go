@@ -86,7 +86,7 @@ func (o *objectStoreNamespaced[T]) List(ctx context.Context, namespace string) (
 	}
 	klog.InfoS("list resp resp=%+v", resp)
 	if len(resp.Kvs) == 0 {
-		return objects, errors.NewNotFound(o.gr, key)
+		return objects, nil
 	}
 	objects = make([]T, 0, len(resp.Kvs))
 	for _, v := range resp.Kvs {
