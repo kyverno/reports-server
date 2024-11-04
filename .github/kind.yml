@@ -31,6 +31,9 @@ nodes:
       - containerPort: 443
         hostPort: 443
         protocol: TCP
+    extraMounts:
+      - hostPath: /home/tmp
+        containerPath: /data
   - role: worker
   - role: worker
   - role: worker

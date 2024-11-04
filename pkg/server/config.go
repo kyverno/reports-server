@@ -11,6 +11,7 @@ import (
 	"github.com/kyverno/reports-server/pkg/api"
 	"github.com/kyverno/reports-server/pkg/storage"
 	"github.com/kyverno/reports-server/pkg/storage/db"
+	"github.com/kyverno/reports-server/pkg/storage/etcd"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	apimetrics "k8s.io/apiserver/pkg/endpoints/metrics"
@@ -28,10 +29,11 @@ import (
 )
 
 type Config struct {
-	Apiserver *genericapiserver.Config
-	Rest      *rest.Config
-	Debug     bool
-	DBconfig  *db.PostgresConfig
+	Apiserver  *genericapiserver.Config
+	Rest       *rest.Config
+	Embedded   bool
+	EtcdConfig *etcd.EtcdConfig
+	DBconfig   *db.PostgresConfig
 }
 
 func (c Config) Complete() (*server, error) {
@@ -53,16 +55,20 @@ func (c Config) Complete() (*server, error) {
 	if err != nil {
 		return nil, err
 	}
-	store, err := storage.New(c.Debug, c.DBconfig, id)
+	store, err := storage.New(c.Embedded, c.DBconfig, id, c.EtcdConfig)
 	if err != nil {
 		klog.Error(err)
 		return nil, err
 	}
 
-	klog.Info("performing migration...")
-	if err := c.migration(store); err != nil {
-		klog.Error(err)
-		return nil, err
+	// Embedded runs in a stateful set in high availability deployment
+	// TODO: Add leader election to add embedded
+	if !c.Embedded {
+		klog.Info("performing migration...")
+		if err := c.migration(store); err != nil {
+			klog.Error(err)
+			return nil, err
+		}
 	}
 
 	if err := api.Install(store, genericServer); err != nil {
@@ -138,7 +144,7 @@ func (c Config) migration(store storage.Interface) error {
 			c.Annotations = make(map[string]string)
 		}
 		c.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-		err := store.ClusterPolicyReports().Create(context.TODO(), c)
+		err := store.ClusterPolicyReports().Create(context.TODO(), &c)
 		if err != nil {
 			return err
 		}
@@ -170,7 +176,7 @@ func (c Config) migration(store storage.Interface) error {
 					cpolr.Annotations = make(map[string]string)
 				}
 				cpolr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-				err := store.ClusterPolicyReports().Create(context.TODO(), *cpolr)
+				err := store.ClusterPolicyReports().Create(context.TODO(), cpolr)
 				if err != nil {
 					klog.Error(err)
 				}
@@ -184,7 +190,7 @@ func (c Config) migration(store storage.Interface) error {
 					cpolr.Annotations = make(map[string]string)
 				}
 				cpolr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-				err := store.ClusterPolicyReports().Update(context.TODO(), *cpolr)
+				err := store.ClusterPolicyReports().Update(context.TODO(), cpolr)
 				if err != nil {
 					klog.Error(err)
 				}
@@ -219,7 +225,7 @@ func (c Config) migration(store storage.Interface) error {
 			c.Annotations = make(map[string]string)
 		}
 		c.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-		err := store.PolicyReports().Create(context.TODO(), c)
+		err := store.PolicyReports().Create(context.TODO(), &c)
 		if err != nil {
 			return err
 		}
@@ -251,7 +257,7 @@ func (c Config) migration(store storage.Interface) error {
 					polr.Annotations = make(map[string]string)
 				}
 				polr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-				err := store.PolicyReports().Create(context.TODO(), *polr)
+				err := store.PolicyReports().Create(context.TODO(), polr)
 				if err != nil {
 					klog.Error(err)
 				}
@@ -265,7 +271,7 @@ func (c Config) migration(store storage.Interface) error {
 					polr.Annotations = make(map[string]string)
 				}
 				polr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-				err := store.PolicyReports().Update(context.TODO(), *polr)
+				err := store.PolicyReports().Update(context.TODO(), polr)
 				if err != nil {
 					klog.Error(err)
 				}
@@ -300,7 +306,7 @@ func (c Config) migration(store storage.Interface) error {
 			c.Annotations = make(map[string]string)
 		}
 		c.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-		err := store.ClusterEphemeralReports().Create(context.TODO(), c)
+		err := store.ClusterEphemeralReports().Create(context.TODO(), &c)
 		if err != nil {
 			return err
 		}
@@ -331,7 +337,7 @@ func (c Config) migration(store storage.Interface) error {
 					cephr.Annotations = make(map[string]string)
 				}
 				cephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-				err := store.ClusterEphemeralReports().Create(context.TODO(), *cephr)
+				err := store.ClusterEphemeralReports().Create(context.TODO(), cephr)
 				if err != nil {
 					klog.Error(err)
 				}
@@ -345,7 +351,7 @@ func (c Config) migration(store storage.Interface) error {
 					cephr.Annotations = make(map[string]string)
 				}
 				cephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-				err := store.ClusterEphemeralReports().Update(context.TODO(), *cephr)
+				err := store.ClusterEphemeralReports().Update(context.TODO(), cephr)
 				if err != nil {
 					klog.Error(err)
 				}
@@ -379,7 +385,7 @@ func (c Config) migration(store storage.Interface) error {
 			c.Annotations = make(map[string]string)
 		}
 		c.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-		err := store.EphemeralReports().Create(context.TODO(), c)
+		err := store.EphemeralReports().Create(context.TODO(), &c)
 		if err != nil {
 			return err
 		}
@@ -410,7 +416,7 @@ func (c Config) migration(store storage.Interface) error {
 					ephr.Annotations = make(map[string]string)
 				}
 				ephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-				err := store.EphemeralReports().Create(context.TODO(), *ephr)
+				err := store.EphemeralReports().Create(context.TODO(), ephr)
 				if err != nil {
 					klog.Error(err)
 				}
@@ -424,7 +430,7 @@ func (c Config) migration(store storage.Interface) error {
 					ephr.Annotations = make(map[string]string)
 				}
 				ephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-				err := store.EphemeralReports().Update(context.TODO(), *ephr)
+				err := store.EphemeralReports().Update(context.TODO(), ephr)
 				if err != nil {
 					klog.Error(err)
 				}

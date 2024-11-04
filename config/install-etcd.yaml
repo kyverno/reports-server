@@ -10,10 +10,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -24,10 +24,10 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: 'true'
     rbac.authorization.k8s.io/aggregate-to-edit: 'true'
     rbac.authorization.k8s.io/aggregate-to-view: 'true'
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -105,10 +105,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -125,10 +125,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -145,10 +145,10 @@ metadata:
   name: reports-server
   namespace: kube-system
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -165,10 +165,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -182,13 +182,39 @@ subjects:
 apiVersion: v1
 kind: Service
 metadata:
+  name: etcd
+  namespace: reports-server
+  labels:
+    app: etcd-reports-server
+    helm.sh/chart: reports-server-0.1.4-alpha.0
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: etcd-reports-server
+  publishNotReadyAddresses: true
+  ports:
+  - name: etcd-client
+    port: 2379
+  - name: etcd-server
+    port: 2380
+  - name: etcd-metrics
+    port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -207,10 +233,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   strategy:
@@ -234,7 +260,9 @@ spec:
       containers:
         - name: reports-server
           args:
-            - --debug
+            - --etcd
+            - --etcdSkipTLS
+            - --etcdEndpoints=https://etcd-0.etcd.reports-server:2379,https://etcd-1.etcd.reports-server:2379,https://etcd-2.etcd.reports-server:2379
             - --cert-dir=/tmp
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics
@@ -249,15 +277,15 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-dir
           image: "ghcr.io/nirmata/reports-server:latest"
           imagePullPolicy: IfNotPresent
           ports:
             - name: https
               containerPort: 4443
               protocol: TCP
-          volumeMounts:
-            - mountPath: /tmp
-              name: tmp-dir
           livenessProbe:
             failureThreshold: 10
             httpGet:
@@ -281,16 +309,165 @@ spec:
       - emptyDir: {}
         name: tmp-dir
 ---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: reports-server
+  name: etcd
+  labels:
+    app: etcd-reports-server
+    helm.sh/chart: reports-server-0.1.4-alpha.0
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  serviceName: etcd
+  replicas: 3
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: etcd-reports-server
+  template:
+    metadata:
+      labels:
+        app: etcd-reports-server
+      annotations:
+        serviceName: etcd
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - etcd-reports-server
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: etcd
+        image: quay.io/coreos/etcd:v3.5.15
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: etcd-client
+          containerPort: 2379
+        - name: etcd-server
+          containerPort: 2380
+        - name: etcd-metrics
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 30
+        livenessProbe:
+          httpGet:
+            path: /livez
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        env:
+        - name: K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+             fieldPath: metadata.namespace
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+             fieldPath: metadata.name
+        - name: SERVICE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['serviceName']
+        - name: ETCDCTL_ENDPOINTS
+          value: $(HOSTNAME).$(SERVICE_NAME):2379
+        ## TLS client configuration for etcdctl in the container.
+        ## These files paths are part of the "etcd-client-certs" volume mount.
+        # - name: ETCDCTL_KEY
+        #   value: /etc/etcd/certs/client/tls.key
+        # - name: ETCDCTL_CERT
+        #   value: /etc/etcd/certs/client/tls.crt
+        # - name: ETCDCTL_CACERT
+        #   value: /etc/etcd/certs/client/ca.crt
+        ##
+        ## Use this URI_SCHEME value for non-TLS clusters.
+        - name: URI_SCHEME
+          value: "http"
+        ## TLS: Use this URI_SCHEME for TLS clusters.
+        # - name: URI_SCHEME
+        # value: "https"
+        command:
+        - /usr/local/bin/etcd
+        args:
+        - --name=$(HOSTNAME)
+        - --data-dir=/data
+        - --wal-dir=/data/wal
+        - --listen-peer-urls=$(URI_SCHEME)://0.0.0.0:2380
+        - --listen-client-urls=$(URI_SCHEME)://0.0.0.0:2379
+        - --advertise-client-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):2379
+        - --initial-cluster-state=new
+        - --initial-cluster-token=etcd-$(K8S_NAMESPACE)
+        - --initial-cluster=etcd-0=$(URI_SCHEME)://etcd-0.$(SERVICE_NAME):2380,etcd-1=$(URI_SCHEME)://etcd-1.$(SERVICE_NAME):2380,etcd-2=$(URI_SCHEME)://etcd-2.$(SERVICE_NAME):2380
+        - --initial-advertise-peer-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):2380
+        - --listen-metrics-urls=http://0.0.0.0:8080
+        # - --auto-compaction-mode=periodic
+        # - --auto-compaction-retention=10m
+        # - --client-cert-auth
+        # - --trusted-ca-file=$(ETCDCTL_CACERT)
+        # - --cert-file=$(ETCDCTL_CERT)
+        # - --key-file=$(ETCDCTL_KEY)
+        # - --peer-client-cert-auth
+        # - --peer-trusted-ca-file=/etc/etcd/certs/server/ca.crt
+        # - --peer-cert-file=/etc/etcd/certs/server/tls.crt
+        # - --peer-key-file=/etc/etcd/certs/server/tls.key
+        volumeMounts:
+        - name: etcd-data
+          mountPath: /data
+        # - name: etcd-client-tls
+        #   mountPath: "/etc/etcd/certs/client"
+        #   readOnly: true
+        # - name: etcd-server-tls
+        #   mountPath: "/etc/etcd/certs/server"
+        #   readOnly: true
+      volumes:
+      # - name: etcd-client-tls
+      #   secret:
+      #     secretName: etcd-client-tls
+      #     optional: false
+      # - name: etcd-server-tls
+      #   secret:
+      #     secretName: etcd-server-tls
+      #     optional: false
+  volumeClaimTemplates:
+  - metadata:
+      name: etcd-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
   name: v1alpha2.wgpolicyk8s.io
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
     kube-aggregator.kubernetes.io/automanaged: "false"
   annotations:
@@ -311,10 +488,10 @@ metadata:
   name: v1.reports.kyverno.io
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
     kube-aggregator.kubernetes.io/automanaged: "false"
   annotations:

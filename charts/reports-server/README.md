@@ -1,6 +1,6 @@
 # reports-server
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.3](https://img.shields.io/badge/AppVersion-v0.1.3-informational?style=flat-square)
+![Version: 0.1.4-alpha.0](https://img.shields.io/badge/Version-0.1.4--alpha.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.4-alpha.0](https://img.shields.io/badge/AppVersion-v0.1.4--alpha.0-informational?style=flat-square)
 
 TODO
 
@@ -23,7 +23,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | cloudnative-pg.crds.create | bool | `false` |  |
-| postgresql.enabled | bool | `true` | Deploy postgresql dependency chart |
+| postgresql.enabled | bool | `false` | Deploy postgresql dependency chart |
 | postgresql.auth.postgresPassword | string | `"reports"` |  |
 | postgresql.auth.database | string | `"reportsdb"` |  |
 | nameOverride | string | `""` | Name override |
@@ -62,7 +62,9 @@ helm install reports-server --namespace reports-server --create-namespace report
 | affinity | object | `{}` | Affinity |
 | service.type | string | `"ClusterIP"` | Service type |
 | service.port | int | `443` | Service port |
-| config.debug | bool | `false` | Enable debug (to use inmemorydatabase) |
+| config.etcd.enabled | bool | `true` |  |
+| config.etcd.endpoints | string | `nil` |  |
+| config.etcd.insecure | bool | `true` |  |
 | config.db.secretName | string | `""` | If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`. |
 | config.db.host | string | `"reports-server-cluster-rw.reports-server"` | Database host |
 | config.db.hostSecretKeyName | string | `"host"` | The database host will be read from this `key` in the specified Secret, when `db.secretName` is set. |

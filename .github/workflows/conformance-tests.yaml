@@ -86,7 +86,11 @@ jobs:
       - name: Install latest kyverno
         run: |
           set -e
-          kubectl create -f https://github.com/kyverno/kyverno/raw/main/config/install-latest-testing.yaml
+          set -e
+          export HELM=${{ steps.helm.outputs.helm-path }}
+          helm repo add kyverno https://kyverno.github.io/kyverno/
+          kubectl create namespace kyverno
+          helm install kyverno --namespace kyverno kyverno/kyverno --set features.policyExceptions.enabled=true --set features.policyExceptions.namespace='*'
       - name: Wait for kyverno ready
         run: |
           set -e
@@ -96,7 +100,7 @@ jobs:
           set -e
           kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io
       - name: Install Chainsaw
-        uses: kyverno/action-install-chainsaw@d1a61148c0437a66760d11d8575332305c2234cb # v0.2.10
+        uses: kyverno/action-install-chainsaw@d311eacde764f806c9658574ff64c9c3b21f8397 # v0.2.11
       - name: Test with Chainsaw
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

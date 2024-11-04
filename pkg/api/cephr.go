@@ -336,7 +336,7 @@ func (c *cephrStore) getCephr(name string) (*reportsv1.ClusterEphemeralReport, e
 		return nil, errorpkg.Wrapf(err, "could not find cluster ephemeral report in store")
 	}
 
-	return val.DeepCopy(), nil
+	return val, nil
 }
 
 func (c *cephrStore) listCephr() (*reportsv1.ClusterEphemeralReportList, error) {
@@ -346,7 +346,11 @@ func (c *cephrStore) listCephr() (*reportsv1.ClusterEphemeralReportList, error) 
 	}
 
 	reportList := &reportsv1.ClusterEphemeralReportList{
-		Items: valList,
+		Items: make([]reportsv1.ClusterEphemeralReport, 0, len(valList)),
+	}
+
+	for _, v := range valList {
+		reportList.Items = append(reportList.Items, *v.DeepCopy())
 	}
 
 	klog.Infof("value found of length:%d", len(reportList.Items))
@@ -358,12 +362,12 @@ func (c *cephrStore) createCephr(report *reportsv1.ClusterEphemeralReport) (*rep
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
-	return report, c.store.ClusterEphemeralReports().Create(context.TODO(), *report)
+	return report, c.store.ClusterEphemeralReports().Create(context.TODO(), report)
 }
 
 func (c *cephrStore) updateCephr(report *reportsv1.ClusterEphemeralReport, _ *reportsv1.ClusterEphemeralReport) (*reportsv1.ClusterEphemeralReport, error) {
 	report.ResourceVersion = c.store.UseResourceVersion()
-	return report, c.store.ClusterEphemeralReports().Update(context.TODO(), *report)
+	return report, c.store.ClusterEphemeralReports().Update(context.TODO(), report)
 }
 
 func (c *cephrStore) deleteCephr(report *reportsv1.ClusterEphemeralReport) error {

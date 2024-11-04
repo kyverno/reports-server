@@ -2,8 +2,6 @@
 
 Reports-server has multiple methods for installation: YAML manifest and Helm Chart.YAML manifest is the recommended method to install reports server when kyverno or policy reports CRDs are already installed in the cluster. Helm chart is the most flexible method as it offers a wide range of configurations.
 
-If kyverno is already installed in the cluster, follow the [migration guide](#migration).
-
 There are three configuration to install reports server:
 1. Reports server with managed postgres: Use a centralised postgres database outside of the cluster
 2. Reports server with incluster postgres: Create a postgres instance in the cluster

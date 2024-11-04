@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -39,12 +40,12 @@ func NewEphemeralReportStore(db *sql.DB, clusterId string) (api.EphemeralReports
 	return &ephrdb{db: db, clusterId: clusterId}, nil
 }
 
-func (p *ephrdb) List(ctx context.Context, namespace string) ([]reportsv1.EphemeralReport, error) {
+func (p *ephrdb) List(ctx context.Context, namespace string) ([]*reportsv1.EphemeralReport, error) {
 	p.Lock()
 	defer p.Unlock()
 
 	klog.Infof("listing all values for namespace:%s", namespace)
-	res := make([]reportsv1.EphemeralReport, 0)
+	res := make([]*reportsv1.EphemeralReport, 0)
 	var jsonb string
 	var rows *sql.Rows
 	var err error
@@ -70,14 +71,14 @@ func (p *ephrdb) List(ctx context.Context, namespace string) ([]reportsv1.Epheme
 			klog.ErrorS(err, "cannot convert jsonb to ephemeralreport")
 			return nil, fmt.Errorf("ephemeralreport list %q: cannot convert jsonb to ephemeralreport: %v", namespace, err)
 		}
-		res = append(res, report)
+		res = append(res, &report)
 	}
 
 	klog.Infof("list found length: %d", len(res))
 	return res, nil
 }
 
-func (p *ephrdb) Get(ctx context.Context, name, namespace string) (reportsv1.EphemeralReport, error) {
+func (p *ephrdb) Get(ctx context.Context, name, namespace string) (*reportsv1.EphemeralReport, error) {
 	p.Lock()
 	defer p.Unlock()
 
@@ -87,25 +88,29 @@ func (p *ephrdb) Get(ctx context.Context, name, namespace string) (reportsv1.Eph
 	if err := row.Scan(&jsonb); err != nil {
 		klog.ErrorS(err, fmt.Sprintf("ephemeralreport not found name=%s namespace=%s", name, namespace))
 		if err == sql.ErrNoRows {
-			return reportsv1.EphemeralReport{}, fmt.Errorf("ephemeralreport get %s/%s: no such ephemeral report: %v", namespace, name, err)
+			return nil, fmt.Errorf("ephemeralreport get %s/%s: no such ephemeral report: %v", namespace, name, err)
 		}
-		return reportsv1.EphemeralReport{}, fmt.Errorf("ephemeralreport get %s/%s: %v", namespace, name, err)
+		return nil, fmt.Errorf("ephemeralreport get %s/%s: %v", namespace, name, err)
 	}
 	var report reportsv1.EphemeralReport
 	err := json.Unmarshal([]byte(jsonb), &report)
 	if err != nil {
 		klog.ErrorS(err, "cannot convert jsonb to ephemeralreport")
-		return reportsv1.EphemeralReport{}, fmt.Errorf("ephemeralreport list %q: cannot convert jsonb to ephemeralreport: %v", namespace, err)
+		return nil, fmt.Errorf("ephemeralreport list %q: cannot convert jsonb to ephemeralreport: %v", namespace, err)
 	}
-	return report, nil
+	return &report, nil
 }
 
-func (p *ephrdb) Create(ctx context.Context, polr reportsv1.EphemeralReport) error {
+func (p *ephrdb) Create(ctx context.Context, polr *reportsv1.EphemeralReport) error {
 	p.Lock()
 	defer p.Unlock()
-	klog.Infof("creating entry for key:%s/%s", polr.Name, polr.Namespace)
 
-	jsonb, err := json.Marshal(polr)
+	if polr == nil {
+		return errors.New("invalid ephemeral report")
+	}
+
+	klog.Infof("creating entry for key:%s/%s", polr.Name, polr.Namespace)
+	jsonb, err := json.Marshal(*polr)
 	if err != nil {
 		return err
 	}
@@ -118,11 +123,15 @@ func (p *ephrdb) Create(ctx context.Context, polr reportsv1.EphemeralReport) err
 	return nil
 }
 
-func (p *ephrdb) Update(ctx context.Context, polr reportsv1.EphemeralReport) error {
+func (p *ephrdb) Update(ctx context.Context, polr *reportsv1.EphemeralReport) error {
 	p.Lock()
 	defer p.Unlock()
 
-	jsonb, err := json.Marshal(polr)
+	if polr == nil {
+		return errors.New("invalid ephemeral report")
+	}
+
+	jsonb, err := json.Marshal(*polr)
 	if err != nil {
 		return err
 	}

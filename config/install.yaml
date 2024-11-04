@@ -7,903 +7,14 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: reports-server-cloudnative-pg
-  labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
-    app.kubernetes.io/managed-by: Helm
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: app-secret
-  namespace: reports-server
-  labels:
-    helm.sh/chart: reports-server-0.1.3
-    app.kubernetes.io/name: reports-server
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
-    app.kubernetes.io/managed-by: Helm
-type: kubernetes.io/basic-auth
-data:
-  username: YXBw
-  password: cGFzc3dvcmQ=
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cnpg-controller-manager-config
-  labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
-    app.kubernetes.io/managed-by: Helm
-data:
-  {}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cnpg-default-monitoring
-  labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
-    app.kubernetes.io/managed-by: Helm
-    cnpg.io/reload: ""
-data:
-  queries:
-    |
-      backends:
-        query: |
-         SELECT sa.datname
-             , sa.usename
-             , sa.application_name
-             , states.state
-             , COALESCE(sa.count, 0) AS total
-             , COALESCE(sa.max_tx_secs, 0) AS max_tx_duration_seconds
-             FROM ( VALUES ('active')
-                 , ('idle')
-                 , ('idle in transaction')
-                 , ('idle in transaction (aborted)')
-                 , ('fastpath function call')
-                 , ('disabled')
-                 ) AS states(state)
-             LEFT JOIN (
-                 SELECT datname
-                     , state
-                     , usename
-                     , COALESCE(application_name, '') AS application_name
-                     , COUNT(*)
-                     , COALESCE(EXTRACT (EPOCH FROM (max(now() - xact_start))), 0) AS max_tx_secs
-                 FROM pg_catalog.pg_stat_activity
-                 GROUP BY datname, state, usename, application_name
-             ) sa ON states.state = sa.state
-             WHERE sa.usename IS NOT NULL
-        metrics:
-          - datname:
-              usage: "LABEL"
-              description: "Name of the database"
-          - usename:
-              usage: "LABEL"
-              description: "Name of the user"
-          - application_name:
-              usage: "LABEL"
-              description: "Name of the application"
-          - state:
-              usage: "LABEL"
-              description: "State of the backend"
-          - total:
-              usage: "GAUGE"
-              description: "Number of backends"
-          - max_tx_duration_seconds:
-              usage: "GAUGE"
-              description: "Maximum duration of a transaction in seconds"
-    
-      backends_waiting:
-        query: |
-         SELECT count(*) AS total
-         FROM pg_catalog.pg_locks blocked_locks
-         JOIN pg_catalog.pg_locks blocking_locks
-           ON blocking_locks.locktype = blocked_locks.locktype
-           AND blocking_locks.database IS NOT DISTINCT FROM blocked_locks.database
-           AND blocking_locks.relation IS NOT DISTINCT FROM blocked_locks.relation
-           AND blocking_locks.page IS NOT DISTINCT FROM blocked_locks.page
-           AND blocking_locks.tuple IS NOT DISTINCT FROM blocked_locks.tuple
-           AND blocking_locks.virtualxid IS NOT DISTINCT FROM blocked_locks.virtualxid
-           AND blocking_locks.transactionid IS NOT DISTINCT FROM blocked_locks.transactionid
-           AND blocking_locks.classid IS NOT DISTINCT FROM blocked_locks.classid
-           AND blocking_locks.objid IS NOT DISTINCT FROM blocked_locks.objid
-           AND blocking_locks.objsubid IS NOT DISTINCT FROM blocked_locks.objsubid
-           AND blocking_locks.pid != blocked_locks.pid
-         JOIN pg_catalog.pg_stat_activity blocking_activity ON blocking_activity.pid = blocking_locks.pid
-         WHERE NOT blocked_locks.granted
-        metrics:
-          - total:
-              usage: "GAUGE"
-              description: "Total number of backends that are currently waiting on other queries"
-    
-      pg_database:
-        query: |
-          SELECT datname
-            , pg_catalog.pg_database_size(datname) AS size_bytes
-            , pg_catalog.age(datfrozenxid) AS xid_age
-            , pg_catalog.mxid_age(datminmxid) AS mxid_age
-          FROM pg_catalog.pg_database
-          WHERE datallowconn
-        metrics:
-          - datname:
-              usage: "LABEL"
-              description: "Name of the database"
-          - size_bytes:
-              usage: "GAUGE"
-              description: "Disk space used by the database"
-          - xid_age:
-              usage: "GAUGE"
-              description: "Number of transactions from the frozen XID to the current one"
-          - mxid_age:
-              usage: "GAUGE"
-              description: "Number of multiple transactions (Multixact) from the frozen XID to the current one"
-    
-      pg_postmaster:
-        query: |
-          SELECT EXTRACT(EPOCH FROM pg_postmaster_start_time) AS start_time
-          FROM pg_catalog.pg_postmaster_start_time()
-        metrics:
-          - start_time:
-              usage: "GAUGE"
-              description: "Time at which postgres started (based on epoch)"
-    
-      pg_replication:
-        query: "SELECT CASE WHEN (
-                  NOT pg_catalog.pg_is_in_recovery()
-                  OR pg_catalog.pg_last_wal_receive_lsn() = pg_catalog.pg_last_wal_replay_lsn())
-                THEN 0
-                ELSE GREATEST (0,
-                  EXTRACT(EPOCH FROM (now() - pg_catalog.pg_last_xact_replay_timestamp())))
-                END AS lag,
-                pg_catalog.pg_is_in_recovery() AS in_recovery,
-                EXISTS (TABLE pg_stat_wal_receiver) AS is_wal_receiver_up,
-                (SELECT count(*) FROM pg_catalog.pg_stat_replication) AS streaming_replicas"
-        metrics:
-          - lag:
-              usage: "GAUGE"
-              description: "Replication lag behind primary in seconds"
-          - in_recovery:
-              usage: "GAUGE"
-              description: "Whether the instance is in recovery"
-          - is_wal_receiver_up:
-              usage: "GAUGE"
-              description: "Whether the instance wal_receiver is up"
-          - streaming_replicas:
-              usage: "GAUGE"
-              description: "Number of streaming replicas connected to the instance"
-    
-      pg_replication_slots:
-        query: |
-          SELECT slot_name,
-            slot_type,
-            database,
-            active,
-            (CASE pg_catalog.pg_is_in_recovery()
-              WHEN TRUE THEN pg_catalog.pg_wal_lsn_diff(pg_catalog.pg_last_wal_receive_lsn(), restart_lsn)
-              ELSE pg_catalog.pg_wal_lsn_diff(pg_catalog.pg_current_wal_lsn(), restart_lsn)
-            END) as pg_wal_lsn_diff
-          FROM pg_catalog.pg_replication_slots
-          WHERE NOT temporary
-        metrics:
-          - slot_name:
-              usage: "LABEL"
-              description: "Name of the replication slot"
-          - slot_type:
-              usage: "LABEL"
-              description: "Type of the replication slot"
-          - database:
-              usage: "LABEL"
-              description: "Name of the database"
-          - active:
-              usage: "GAUGE"
-              description: "Flag indicating whether the slot is active"
-          - pg_wal_lsn_diff:
-              usage: "GAUGE"
-              description: "Replication lag in bytes"
-    
-      pg_stat_archiver:
-        query: |
-          SELECT archived_count
-            , failed_count
-            , COALESCE(EXTRACT(EPOCH FROM (now() - last_archived_time)), -1) AS seconds_since_last_archival
-            , COALESCE(EXTRACT(EPOCH FROM (now() - last_failed_time)), -1) AS seconds_since_last_failure
-            , COALESCE(EXTRACT(EPOCH FROM last_archived_time), -1) AS last_archived_time
-            , COALESCE(EXTRACT(EPOCH FROM last_failed_time), -1) AS last_failed_time
-            , COALESCE(CAST(CAST('x'||pg_catalog.right(pg_catalog.split_part(last_archived_wal, '.', 1), 16) AS pg_catalog.bit(64)) AS pg_catalog.int8), -1) AS last_archived_wal_start_lsn
-            , COALESCE(CAST(CAST('x'||pg_catalog.right(pg_catalog.split_part(last_failed_wal, '.', 1), 16) AS pg_catalog.bit(64)) AS pg_catalog.int8), -1) AS last_failed_wal_start_lsn
-            , EXTRACT(EPOCH FROM stats_reset) AS stats_reset_time
-          FROM pg_catalog.pg_stat_archiver
-        metrics:
-          - archived_count:
-              usage: "COUNTER"
-              description: "Number of WAL files that have been successfully archived"
-          - failed_count:
-              usage: "COUNTER"
-              description: "Number of failed attempts for archiving WAL files"
-          - seconds_since_last_archival:
-              usage: "GAUGE"
-              description: "Seconds since the last successful archival operation"
-          - seconds_since_last_failure:
-              usage: "GAUGE"
-              description: "Seconds since the last failed archival operation"
-          - last_archived_time:
-              usage: "GAUGE"
-              description: "Epoch of the last time WAL archiving succeeded"
-          - last_failed_time:
-              usage: "GAUGE"
-              description: "Epoch of the last time WAL archiving failed"
-          - last_archived_wal_start_lsn:
-              usage: "GAUGE"
-              description: "Archived WAL start LSN"
-          - last_failed_wal_start_lsn:
-              usage: "GAUGE"
-              description: "Last failed WAL LSN"
-          - stats_reset_time:
-              usage: "GAUGE"
-              description: "Time at which these statistics were last reset"
-    
-      pg_stat_bgwriter:
-        runonserver: "<17.0.0"
-        query: |
-          SELECT checkpoints_timed
-            , checkpoints_req
-            , checkpoint_write_time
-            , checkpoint_sync_time
-            , buffers_checkpoint
-            , buffers_clean
-            , maxwritten_clean
-            , buffers_backend
-            , buffers_backend_fsync
-            , buffers_alloc
-          FROM pg_catalog.pg_stat_bgwriter
-        metrics:
-          - checkpoints_timed:
-              usage: "COUNTER"
-              description: "Number of scheduled checkpoints that have been performed"
-          - checkpoints_req:
-              usage: "COUNTER"
-              description: "Number of requested checkpoints that have been performed"
-          - checkpoint_write_time:
-              usage: "COUNTER"
-              description: "Total amount of time that has been spent in the portion of checkpoint processing where files are written to disk, in milliseconds"
-          - checkpoint_sync_time:
-              usage: "COUNTER"
-              description: "Total amount of time that has been spent in the portion of checkpoint processing where files are synchronized to disk, in milliseconds"
-          - buffers_checkpoint:
-              usage: "COUNTER"
-              description: "Number of buffers written during checkpoints"
-          - buffers_clean:
-              usage: "COUNTER"
-              description: "Number of buffers written by the background writer"
-          - maxwritten_clean:
-              usage: "COUNTER"
-              description: "Number of times the background writer stopped a cleaning scan because it had written too many buffers"
-          - buffers_backend:
-              usage: "COUNTER"
-              description: "Number of buffers written directly by a backend"
-          - buffers_backend_fsync:
-              usage: "COUNTER"
-              description: "Number of times a backend had to execute its own fsync call (normally the background writer handles those even when the backend does its own write)"
-          - buffers_alloc:
-              usage: "COUNTER"
-              description: "Number of buffers allocated"
-    
-      pg_stat_bgwriter_17:
-        runonserver: ">=17.0.0"
-        name: pg_stat_bgwriter
-        query: |
-          SELECT buffers_clean
-            , maxwritten_clean
-            , buffers_alloc
-            , EXTRACT(EPOCH FROM stats_reset) AS stats_reset_time
-          FROM pg_catalog.pg_stat_bgwriter
-        metrics:
-          - buffers_clean:
-              usage: "COUNTER"
-              description: "Number of buffers written by the background writer"
-          - maxwritten_clean:
-              usage: "COUNTER"
-              description: "Number of times the background writer stopped a cleaning scan because it had written too many buffers"
-          - buffers_alloc:
-              usage: "COUNTER"
-              description: "Number of buffers allocated"
-          - stats_reset_time:
-              usage: "GAUGE"
-              description: "Time at which these statistics were last reset"
-    
-      pg_stat_checkpointer:
-        runonserver: ">=17.0.0"
-        query: |
-          SELECT num_timed AS checkpoints_timed
-            , num_requested AS checkpoints_req
-            , restartpoints_timed
-            , restartpoints_req
-            , restartpoints_done
-            , write_time
-            , sync_time
-            , buffers_written
-            , EXTRACT(EPOCH FROM stats_reset) AS stats_reset_time
-          FROM pg_catalog.pg_stat_checkpointer
-        metrics:
-          - checkpoints_timed:
-              usage: "COUNTER"
-              description: "Number of scheduled checkpoints that have been performed"
-          - checkpoints_req:
-              usage: "COUNTER"
-              description: "Number of requested checkpoints that have been performed"
-          - restartpoints_timed:
-              usage: "COUNTER"
-              description: "Number of scheduled restartpoints due to timeout or after a failed attempt to perform it"
-          - restartpoints_req:
-              usage: "COUNTER"
-              description: "Number of requested restartpoints that have been performed"
-          - restartpoints_done:
-              usage: "COUNTER"
-              description: "Number of restartpoints that have been performed"
-          - write_time:
-              usage: "COUNTER"
-              description: "Total amount of time that has been spent in the portion of processing checkpoints and restartpoints where files are written to disk, in milliseconds"
-          - sync_time:
-              usage: "COUNTER"
-              description: "Total amount of time that has been spent in the portion of processing checkpoints and restartpoints where files are synchronized to disk, in milliseconds"
-          - buffers_written:
-              usage: "COUNTER"
-              description: "Number of buffers written during checkpoints and restartpoints"
-          - stats_reset_time:
-              usage: "GAUGE"
-              description: "Time at which these statistics were last reset"
-    
-      pg_stat_database:
-        query: |
-          SELECT datname
-            , xact_commit
-            , xact_rollback
-            , blks_read
-            , blks_hit
-            , tup_returned
-            , tup_fetched
-            , tup_inserted
-            , tup_updated
-            , tup_deleted
-            , conflicts
-            , temp_files
-            , temp_bytes
-            , deadlocks
-            , blk_read_time
-            , blk_write_time
-          FROM pg_catalog.pg_stat_database
-        metrics:
-          - datname:
-              usage: "LABEL"
-              description: "Name of this database"
-          - xact_commit:
-              usage: "COUNTER"
-              description: "Number of transactions in this database that have been committed"
-          - xact_rollback:
-              usage: "COUNTER"
-              description: "Number of transactions in this database that have been rolled back"
-          - blks_read:
-              usage: "COUNTER"
-              description: "Number of disk blocks read in this database"
-          - blks_hit:
-              usage: "COUNTER"
-              description: "Number of times disk blocks were found already in the buffer cache, so that a read was not necessary (this only includes hits in the PostgreSQL buffer cache, not the operating system's file system cache)"
-          - tup_returned:
-              usage: "COUNTER"
-              description: "Number of rows returned by queries in this database"
-          - tup_fetched:
-              usage: "COUNTER"
-              description: "Number of rows fetched by queries in this database"
-          - tup_inserted:
-              usage: "COUNTER"
-              description: "Number of rows inserted by queries in this database"
-          - tup_updated:
-              usage: "COUNTER"
-              description: "Number of rows updated by queries in this database"
-          - tup_deleted:
-              usage: "COUNTER"
-              description: "Number of rows deleted by queries in this database"
-          - conflicts:
-              usage: "COUNTER"
-              description: "Number of queries canceled due to conflicts with recovery in this database"
-          - temp_files:
-              usage: "COUNTER"
-              description: "Number of temporary files created by queries in this database"
-          - temp_bytes:
-              usage: "COUNTER"
-              description: "Total amount of data written to temporary files by queries in this database"
-          - deadlocks:
-              usage: "COUNTER"
-              description: "Number of deadlocks detected in this database"
-          - blk_read_time:
-              usage: "COUNTER"
-              description: "Time spent reading data file blocks by backends in this database, in milliseconds"
-          - blk_write_time:
-              usage: "COUNTER"
-              description: "Time spent writing data file blocks by backends in this database, in milliseconds"
-    
-      pg_stat_replication:
-        primary: true
-        query: |
-         SELECT usename
-           , COALESCE(application_name, '') AS application_name
-           , COALESCE(client_addr::text, '') AS client_addr
-           , COALESCE(client_port::text, '') AS client_port
-           , EXTRACT(EPOCH FROM backend_start) AS backend_start
-           , COALESCE(pg_catalog.age(backend_xmin), 0) AS backend_xmin_age
-           , pg_catalog.pg_wal_lsn_diff(pg_catalog.pg_current_wal_lsn(), sent_lsn) AS sent_diff_bytes
-           , pg_catalog.pg_wal_lsn_diff(pg_catalog.pg_current_wal_lsn(), write_lsn) AS write_diff_bytes
-           , pg_catalog.pg_wal_lsn_diff(pg_catalog.pg_current_wal_lsn(), flush_lsn) AS flush_diff_bytes
-           , COALESCE(pg_catalog.pg_wal_lsn_diff(pg_catalog.pg_current_wal_lsn(), replay_lsn),0) AS replay_diff_bytes
-           , COALESCE((EXTRACT(EPOCH FROM write_lag)),0)::float AS write_lag_seconds
-           , COALESCE((EXTRACT(EPOCH FROM flush_lag)),0)::float AS flush_lag_seconds
-           , COALESCE((EXTRACT(EPOCH FROM replay_lag)),0)::float AS replay_lag_seconds
-         FROM pg_catalog.pg_stat_replication
-        metrics:
-          - usename:
-              usage: "LABEL"
-              description: "Name of the replication user"
-          - application_name:
-              usage: "LABEL"
-              description: "Name of the application"
-          - client_addr:
-              usage: "LABEL"
-              description: "Client IP address"
-          - client_port:
-              usage: "LABEL"
-              description: "Client TCP port"
-          - backend_start:
-              usage: "COUNTER"
-              description: "Time when this process was started"
-          - backend_xmin_age:
-              usage: "COUNTER"
-              description: "The age of this standby's xmin horizon"
-          - sent_diff_bytes:
-              usage: "GAUGE"
-              description: "Difference in bytes from the last write-ahead log location sent on this connection"
-          - write_diff_bytes:
-              usage: "GAUGE"
-              description: "Difference in bytes from the last write-ahead log location written to disk by this standby server"
-          - flush_diff_bytes:
-              usage: "GAUGE"
-              description: "Difference in bytes from the last write-ahead log location flushed to disk by this standby server"
-          - replay_diff_bytes:
-              usage: "GAUGE"
-              description: "Difference in bytes from the last write-ahead log location replayed into the database on this standby server"
-          - write_lag_seconds:
-              usage: "GAUGE"
-              description: "Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written it"
-          - flush_lag_seconds:
-              usage: "GAUGE"
-              description: "Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written and flushed it"
-          - replay_lag_seconds:
-              usage: "GAUGE"
-              description: "Time elapsed between flushing recent WAL locally and receiving notification that this standby server has written, flushed and applied it"
-    
-      pg_settings:
-        query: |
-          SELECT name,
-          CASE setting WHEN 'on' THEN '1' WHEN 'off' THEN '0' ELSE setting END AS setting
-          FROM pg_catalog.pg_settings
-          WHERE vartype IN ('integer', 'real', 'bool')
-          ORDER BY 1
-        metrics:
-          - name:
-              usage: "LABEL"
-              description: "Name of the setting"
-          - setting:
-              usage: "GAUGE"
-              description: "Setting value"
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: reports-server-cloudnative-pg
-  labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
-    app.kubernetes.io/managed-by: Helm
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - configmaps/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
-- apiGroups:
-  - ""
-  resources:
-  - nodes
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - persistentvolumeclaims
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - pods/exec
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - pods/status
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - secrets/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - serviceaccounts
-  verbs:
-  - create
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - services
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - admissionregistration.k8s.io
-  resources:
-  - mutatingwebhookconfigurations
-  verbs:
-  - get
-  - patch
-- apiGroups:
-  - admissionregistration.k8s.io
-  resources:
-  - validatingwebhookconfigurations
-  verbs:
-  - get
-  - patch
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - batch
-  resources:
-  - jobs
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - watch
-- apiGroups:
-  - coordination.k8s.io
-  resources:
-  - leases
-  verbs:
-  - create
-  - get
-  - update
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - podmonitors
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - watch
-- apiGroups:
-  - policy
-  resources:
-  - poddisruptionbudgets
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - backups
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - backups/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - clusterimagecatalogs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - clusters
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - clusters/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - clusters/status
-  verbs:
-  - get
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - imagecatalogs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - poolers
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - poolers/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - poolers/status
-  verbs:
-  - get
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - scheduledbackups
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - scheduledbackups/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - rolebindings
-  verbs:
-  - create
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - roles
-  verbs:
-  - create
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - snapshot.storage.k8s.io
-  resources:
-  - volumesnapshots
-  verbs:
-  - create
-  - get
-  - list
-  - patch
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: reports-server-cloudnative-pg-view
-  labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
-    app.kubernetes.io/managed-by: Helm
-rules:
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - backups
-  - clusters
-  - poolers
-  - scheduledbackups
-  verbs:
-  - get
-  - list
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: reports-server-cloudnative-pg-edit
-  labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
-    app.kubernetes.io/managed-by: Helm
-rules:
-- apiGroups:
-  - postgresql.cnpg.io
-  resources:
-  - backups
-  - clusters
-  - poolers
-  - scheduledbackups
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - patch
-  - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -913,10 +24,10 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: 'true'
     rbac.authorization.k8s.io/aggregate-to-edit: 'true'
     rbac.authorization.k8s.io/aggregate-to-view: 'true'
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -989,34 +100,15 @@ rules:
   verbs:
     - create
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: reports-server-cloudnative-pg
-  labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
-    app.kubernetes.io/managed-by: Helm
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: reports-server-cloudnative-pg
-subjects:
-- kind: ServiceAccount
-  name: reports-server-cloudnative-pg
-  namespace: reports-server
----
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1033,10 +125,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1053,10 +145,10 @@ metadata:
   name: reports-server
   namespace: kube-system
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1073,10 +165,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1090,22 +182,28 @@ subjects:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cnpg-webhook-service
+  name: etcd
+  namespace: reports-server
   labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
+    app: etcd-reports-server
+    helm.sh/chart: reports-server-0.1.4-alpha.0
+    app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
-  ports:
-  - port: 443
-    targetPort: webhook-server
-    name: webhook-server
+  clusterIP: None
   selector:
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
+    app: etcd-reports-server
+  publishNotReadyAddresses: true
+  ports:
+  - name: etcd-client
+    port: 2379
+  - name: etcd-server
+    port: 2380
+  - name: etcd-metrics
+    port: 8080
 ---
 apiVersion: v1
 kind: Service
@@ -1113,10 +211,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -1132,108 +230,13 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: reports-server-cloudnative-pg
-  labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
-    app.kubernetes.io/managed-by: Helm
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: cloudnative-pg
-      app.kubernetes.io/instance: reports-server
-  template:
-    metadata:
-      annotations:
-        checksum/config: 1ca573cbe9e62b16546981e9bdf391a41623abf066bffb9fd1dc75c4ef1999dd
-      labels:
-        app.kubernetes.io/name: cloudnative-pg
-        app.kubernetes.io/instance: reports-server
-    spec:
-      containers:
-      - args:
-        - controller
-        - --leader-elect
-        - --config-map-name=cnpg-controller-manager-config
-        - --webhook-port=9443
-        command:
-        - /manager
-        env:
-        - name: OPERATOR_IMAGE_NAME
-          value: "ghcr.io/cloudnative-pg/cloudnative-pg:1.24.0"
-        - name: OPERATOR_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: MONITORING_QUERIES_CONFIGMAP
-          value: "cnpg-default-monitoring"
-        image: "ghcr.io/cloudnative-pg/cloudnative-pg:1.24.0"
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /readyz
-            port: 9443
-            scheme: HTTPS
-          initialDelaySeconds: 3
-        name: manager
-        ports:
-        - containerPort: 8080
-          name: metrics
-          protocol: TCP
-        - containerPort: 9443
-          name: webhook-server
-          protocol: TCP
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: 9443
-            scheme: HTTPS
-          initialDelaySeconds: 3
-        resources:
-          {}
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-          runAsGroup: 10001
-          runAsUser: 10001
-          seccompProfile:
-            type: RuntimeDefault
-        volumeMounts:
-        - mountPath: /controller
-          name: scratch-data
-        - mountPath: /run/secrets/cnpg.io/webhook
-          name: webhook-certificates
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
-      serviceAccountName: reports-server-cloudnative-pg
-      terminationGracePeriodSeconds: 10
-      volumes:
-      - emptyDir: {}
-        name: scratch-data
-      - name: webhook-certificates
-        secret:
-          defaultMode: 420
-          optional: true
-          secretName: cnpg-webhook-cert
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   strategy:
@@ -1257,14 +260,9 @@ spec:
       containers:
         - name: reports-server
           args:
-            - --dbhost=reports-server-cluster-rw.reports-server
-            - --dbname=reportsdb
-            - --dbuser=app
-            - --dbpassword=password
-            - --dbsslmode=disable
-            - --dbsslrootcert=
-            - --dbsslkey=
-            - --dbsslcert=
+            - --etcd
+            - --etcdSkipTLS
+            - --etcdEndpoints=https://etcd-0.etcd.reports-server:2379,https://etcd-1.etcd.reports-server:2379,https://etcd-2.etcd.reports-server:2379
             - --cert-dir=/tmp
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics
@@ -1279,15 +277,15 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-dir
           image: "ghcr.io/nirmata/reports-server:latest"
           imagePullPolicy: IfNotPresent
           ports:
             - name: https
               containerPort: 4443
               protocol: TCP
-          volumeMounts:
-            - mountPath: /tmp
-              name: tmp-dir
           livenessProbe:
             failureThreshold: 10
             httpGet:
@@ -1311,205 +309,154 @@ spec:
       - emptyDir: {}
         name: tmp-dir
 ---
----
----
----
----
----
----
-apiVersion: postgresql.cnpg.io/v1
-kind: Cluster
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
-  name: reports-server-cluster
   namespace: reports-server
+  name: etcd
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    app: etcd-reports-server
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
 spec:
-  instances: 3
-  primaryUpdateStrategy: unsupervised
-  bootstrap:
-    initdb:
-      database: reportsdb
-      owner: app
-      secret:
-        name: app-secret
-  storage:
-    size: 10Gi
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: MutatingWebhookConfiguration
-metadata:
-  name: cnpg-mutating-webhook-configuration
-  labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
-    app.kubernetes.io/managed-by: Helm
-webhooks:
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: cnpg-webhook-service
-      namespace: reports-server
-      path: /mutate-postgresql-cnpg-io-v1-backup
-      port: 443
-  failurePolicy: Fail
-  name: mbackup.cnpg.io
-  rules:
-  - apiGroups:
-    - postgresql.cnpg.io
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - backups
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: cnpg-webhook-service
-      namespace: reports-server
-      path: /mutate-postgresql-cnpg-io-v1-cluster
-      port: 443
-  failurePolicy: Fail
-  name: mcluster.cnpg.io
-  rules:
-  - apiGroups:
-    - postgresql.cnpg.io
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - clusters
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: cnpg-webhook-service
-      namespace: reports-server
-      path: /mutate-postgresql-cnpg-io-v1-scheduledbackup
-      port: 443
-  failurePolicy: Fail
-  name: mscheduledbackup.cnpg.io
-  rules:
-  - apiGroups:
-    - postgresql.cnpg.io
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - scheduledbackups
-  sideEffects: None
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingWebhookConfiguration
-metadata:
-  name: cnpg-validating-webhook-configuration
-  labels:
-    helm.sh/chart: cloudnative-pg-0.22.0
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "1.24.0"
-    app.kubernetes.io/managed-by: Helm
-webhooks:
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: cnpg-webhook-service
-      namespace: reports-server
-      path: /validate-postgresql-cnpg-io-v1-backup
-      port: 443
-  failurePolicy: Fail
-  name: vbackup.cnpg.io
-  rules:
-  - apiGroups:
-    - postgresql.cnpg.io
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - backups
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: cnpg-webhook-service
-      namespace: reports-server
-      path: /validate-postgresql-cnpg-io-v1-cluster
-      port: 443
-  failurePolicy: Fail
-  name: vcluster.cnpg.io
-  rules:
-  - apiGroups:
-    - postgresql.cnpg.io
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - clusters
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: cnpg-webhook-service
-      namespace: reports-server
-      path: /validate-postgresql-cnpg-io-v1-scheduledbackup
-      port: 443
-  failurePolicy: Fail
-  name: vscheduledbackup.cnpg.io
-  rules:
-  - apiGroups:
-    - postgresql.cnpg.io
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - scheduledbackups
-  sideEffects: None
-- admissionReviewVersions:
-    - v1
-  clientConfig:
-    service:
-      name: cnpg-webhook-service
-      namespace: reports-server
-      path: /validate-postgresql-cnpg-io-v1-pooler
-      port: 443
-  failurePolicy: Fail
-  name: vpooler.cnpg.io
-  rules:
-    - apiGroups:
-        - postgresql.cnpg.io
-      apiVersions:
-        - v1
-      operations:
-        - CREATE
-        - UPDATE
+  serviceName: etcd
+  replicas: 3
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: etcd-reports-server
+  template:
+    metadata:
+      labels:
+        app: etcd-reports-server
+      annotations:
+        serviceName: etcd
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - etcd-reports-server
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: etcd
+        image: quay.io/coreos/etcd:v3.5.15
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: etcd-client
+          containerPort: 2379
+        - name: etcd-server
+          containerPort: 2380
+        - name: etcd-metrics
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 30
+        livenessProbe:
+          httpGet:
+            path: /livez
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        env:
+        - name: K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+             fieldPath: metadata.namespace
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+             fieldPath: metadata.name
+        - name: SERVICE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['serviceName']
+        - name: ETCDCTL_ENDPOINTS
+          value: $(HOSTNAME).$(SERVICE_NAME):2379
+        ## TLS client configuration for etcdctl in the container.
+        ## These files paths are part of the "etcd-client-certs" volume mount.
+        # - name: ETCDCTL_KEY
+        #   value: /etc/etcd/certs/client/tls.key
+        # - name: ETCDCTL_CERT
+        #   value: /etc/etcd/certs/client/tls.crt
+        # - name: ETCDCTL_CACERT
+        #   value: /etc/etcd/certs/client/ca.crt
+        ##
+        ## Use this URI_SCHEME value for non-TLS clusters.
+        - name: URI_SCHEME
+          value: "http"
+        ## TLS: Use this URI_SCHEME for TLS clusters.
+        # - name: URI_SCHEME
+        # value: "https"
+        command:
+        - /usr/local/bin/etcd
+        args:
+        - --name=$(HOSTNAME)
+        - --data-dir=/data
+        - --wal-dir=/data/wal
+        - --listen-peer-urls=$(URI_SCHEME)://0.0.0.0:2380
+        - --listen-client-urls=$(URI_SCHEME)://0.0.0.0:2379
+        - --advertise-client-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):2379
+        - --initial-cluster-state=new
+        - --initial-cluster-token=etcd-$(K8S_NAMESPACE)
+        - --initial-cluster=etcd-0=$(URI_SCHEME)://etcd-0.$(SERVICE_NAME):2380,etcd-1=$(URI_SCHEME)://etcd-1.$(SERVICE_NAME):2380,etcd-2=$(URI_SCHEME)://etcd-2.$(SERVICE_NAME):2380
+        - --initial-advertise-peer-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):2380
+        - --listen-metrics-urls=http://0.0.0.0:8080
+        # - --auto-compaction-mode=periodic
+        # - --auto-compaction-retention=10m
+        # - --client-cert-auth
+        # - --trusted-ca-file=$(ETCDCTL_CACERT)
+        # - --cert-file=$(ETCDCTL_CERT)
+        # - --key-file=$(ETCDCTL_KEY)
+        # - --peer-client-cert-auth
+        # - --peer-trusted-ca-file=/etc/etcd/certs/server/ca.crt
+        # - --peer-cert-file=/etc/etcd/certs/server/tls.crt
+        # - --peer-key-file=/etc/etcd/certs/server/tls.key
+        volumeMounts:
+        - name: etcd-data
+          mountPath: /data
+        # - name: etcd-client-tls
+        #   mountPath: "/etc/etcd/certs/client"
+        #   readOnly: true
+        # - name: etcd-server-tls
+        #   mountPath: "/etc/etcd/certs/server"
+        #   readOnly: true
+      volumes:
+      # - name: etcd-client-tls
+      #   secret:
+      #     secretName: etcd-client-tls
+      #     optional: false
+      # - name: etcd-server-tls
+      #   secret:
+      #     secretName: etcd-server-tls
+      #     optional: false
+  volumeClaimTemplates:
+  - metadata:
+      name: etcd-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
       resources:
-        - poolers
-  sideEffects: None
+        requests:
+          storage: 1Gi
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
@@ -1517,10 +464,10 @@ metadata:
   name: v1alpha2.wgpolicyk8s.io
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
     kube-aggregator.kubernetes.io/automanaged: "false"
   annotations:
@@ -1541,10 +488,10 @@ metadata:
   name: v1.reports.kyverno.io
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.3
+    helm.sh/chart: reports-server-0.1.4-alpha.0
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/version: "v0.1.4-alpha.0"
     app.kubernetes.io/managed-by: Helm
     kube-aggregator.kubernetes.io/automanaged: "false"
   annotations:

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -34,12 +35,12 @@ func NewClusterEphemeralReportStore(db *sql.DB, clusterId string) (api.ClusterEp
 	return &cephr{db: db, clusterId: clusterId}, nil
 }
 
-func (c *cephr) List(ctx context.Context) ([]reportsv1.ClusterEphemeralReport, error) {
+func (c *cephr) List(ctx context.Context) ([]*reportsv1.ClusterEphemeralReport, error) {
 	c.Lock()
 	defer c.Unlock()
 
 	klog.Infof("listing all values")
-	res := make([]reportsv1.ClusterEphemeralReport, 0)
+	res := make([]*reportsv1.ClusterEphemeralReport, 0)
 	var jsonb string
 
 	rows, err := c.db.Query("SELECT report FROM clusterephemeralreports WHERE (clusterId = $1)", c.clusterId)
@@ -59,14 +60,14 @@ func (c *cephr) List(ctx context.Context) ([]reportsv1.ClusterEphemeralReport, e
 			klog.ErrorS(err, "failed to unmarshal clusterephemeralreports")
 			return nil, fmt.Errorf("clusterephemeralreports list: cannot convert jsonb to clusterephemeralreports: %v", err)
 		}
-		res = append(res, report)
+		res = append(res, &report)
 	}
 
 	klog.Infof("list found length: %d", len(res))
 	return res, nil
 }
 
-func (c *cephr) Get(ctx context.Context, name string) (reportsv1.ClusterEphemeralReport, error) {
+func (c *cephr) Get(ctx context.Context, name string) (*reportsv1.ClusterEphemeralReport, error) {
 	c.Lock()
 	defer c.Unlock()
 
@@ -76,25 +77,29 @@ func (c *cephr) Get(ctx context.Context, name string) (reportsv1.ClusterEphemera
 	if err := row.Scan(&jsonb); err != nil {
 		klog.ErrorS(err, fmt.Sprintf("clusterephemeralreport not found name=%s", name))
 		if err == sql.ErrNoRows {
-			return reportsv1.ClusterEphemeralReport{}, fmt.Errorf("clusterephemeralreport get %s: no such ephemeral report", name)
+			return nil, fmt.Errorf("clusterephemeralreport get %s: no such ephemeral report", name)
 		}
-		return reportsv1.ClusterEphemeralReport{}, fmt.Errorf("clusterephemeralreport get %s: %v", name, err)
+		return nil, fmt.Errorf("clusterephemeralreport get %s: %v", name, err)
 	}
 	var report reportsv1.ClusterEphemeralReport
 	err := json.Unmarshal([]byte(jsonb), &report)
 	if err != nil {
 		klog.ErrorS(err, "failed to unmarshal report")
-		return reportsv1.ClusterEphemeralReport{}, fmt.Errorf("clusterephemeralreport list: cannot convert jsonb to ephemeralreport: %v", err)
+		return nil, fmt.Errorf("clusterephemeralreport list: cannot convert jsonb to ephemeralreport: %v", err)
 	}
-	return report, nil
+	return &report, nil
 }
 
-func (c *cephr) Create(ctx context.Context, cephr reportsv1.ClusterEphemeralReport) error {
+func (c *cephr) Create(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error {
 	c.Lock()
 	defer c.Unlock()
-	klog.Infof("creating entry for key:%s", cephr.Name)
 
-	jsonb, err := json.Marshal(cephr)
+	if cephr == nil {
+		return errors.New("invalid cluster ephemeral report")
+	}
+
+	klog.Infof("creating entry for key:%s", cephr.Name)
+	jsonb, err := json.Marshal(*cephr)
 	if err != nil {
 		klog.ErrorS(err, "failed to unmarshal cephr")
 		return err
@@ -108,11 +113,15 @@ func (c *cephr) Create(ctx context.Context, cephr reportsv1.ClusterEphemeralRepo
 	return nil
 }
 
-func (c *cephr) Update(ctx context.Context, cephr reportsv1.ClusterEphemeralReport) error {
+func (c *cephr) Update(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error {
 	c.Lock()
 	defer c.Unlock()
 
-	jsonb, err := json.Marshal(cephr)
+	if cephr == nil {
+		return errors.New("invalid cluster ephemeral report")
+	}
+
+	jsonb, err := json.Marshal(*cephr)
 	if err != nil {
 		return err
 	}

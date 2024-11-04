@@ -21,12 +21,12 @@ func (p *polrdb) key(name, namespace string) string {
 	return fmt.Sprintf("polr/%s/%s", namespace, name)
 }
 
-func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyReport, error) {
+func (p *polrdb) List(ctx context.Context, namespace string) ([]*v1alpha2.PolicyReport, error) {
 	p.Lock()
 	defer p.Unlock()
 
 	klog.Infof("listing all values for namespace:%s", namespace)
-	res := make([]v1alpha2.PolicyReport, 0)
+	res := make([]*v1alpha2.PolicyReport, 0)
 
 	for _, k := range p.db.Keys() {
 		if namespace == "" || strings.HasPrefix(k, fmt.Sprintf("polr/%s/", namespace)) {
@@ -36,7 +36,7 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyR
 				klog.Errorf("failed to get data from inmemory db: %v", err)
 				return nil, err
 			}
-			res = append(res, *v)
+			res = append(res, v)
 		}
 	}
 
@@ -44,7 +44,7 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]v1alpha2.PolicyR
 	return res, nil
 }
 
-func (p *polrdb) Get(ctx context.Context, name, namespace string) (v1alpha2.PolicyReport, error) {
+func (p *polrdb) Get(ctx context.Context, name, namespace string) (*v1alpha2.PolicyReport, error) {
 	p.Lock()
 	defer p.Unlock()
 
@@ -52,14 +52,14 @@ func (p *polrdb) Get(ctx context.Context, name, namespace string) (v1alpha2.Poli
 	klog.Infof("getting value for key:%s", key)
 	if val, _ := p.db.Get(key); val != nil {
 		klog.Infof("value found for key:%s", key)
-		return *val, nil
+		return val, nil
 	} else {
 		klog.Errorf("value not found for key:%s", key)
-		return v1alpha2.PolicyReport{}, errors.NewNotFound(utils.PolicyReportsGR, key)
+		return nil, errors.NewNotFound(utils.PolicyReportsGR, key)
 	}
 }
 
-func (p *polrdb) Create(ctx context.Context, polr v1alpha2.PolicyReport) error {
+func (p *polrdb) Create(ctx context.Context, polr *v1alpha2.PolicyReport) error {
 	p.Lock()
 	defer p.Unlock()
 
@@ -70,11 +70,11 @@ func (p *polrdb) Create(ctx context.Context, polr v1alpha2.PolicyReport) error {
 		return errors.NewAlreadyExists(utils.PolicyReportsGR, key)
 	} else {
 		klog.Infof("entry created for key:%s", key)
-		return p.db.Store(key, polr)
+		return p.db.Store(key, *polr)
 	}
 }
 
-func (p *polrdb) Update(ctx context.Context, polr v1alpha2.PolicyReport) error {
+func (p *polrdb) Update(ctx context.Context, polr *v1alpha2.PolicyReport) error {
 	p.Lock()
 	defer p.Unlock()
 
@@ -85,7 +85,7 @@ func (p *polrdb) Update(ctx context.Context, polr v1alpha2.PolicyReport) error {
 		return errors.NewNotFound(utils.PolicyReportsGR, key)
 	} else {
 		klog.Infof("entry updated for key:%s", key)
-		return p.db.Store(key, polr)
+		return p.db.Store(key, *polr)
 	}
 }
 

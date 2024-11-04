@@ -37,8 +37,12 @@ spec:
       containers:
         - name: reports-server
           args:
-            {{- if .Values.config.debug }}
-            - --debug
+            {{- if .Values.config.etcd.enabled }}
+            - --etcd
+            {{- if .Values.config.etcd.insecure }}
+            - --etcdSkipTLS
+            {{- end }}
+            - --etcdEndpoints=https://etcd-0.etcd.{{ $.Release.Namespace }}:2379,https://etcd-1.etcd.{{ $.Release.Namespace }}:2379,https://etcd-2.etcd.{{ $.Release.Namespace }}:2379
             {{- else }}
             - --dbhost={{ include "reports-server.dbHost" . }}
             - --dbname={{ include "reports-server.dbName" . }}
@@ -79,15 +83,15 @@ spec:
           {{- end}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-dir
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: https
               containerPort: 4443
               protocol: TCP
-          volumeMounts:
-            - mountPath: /tmp
-              name: tmp-dir
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

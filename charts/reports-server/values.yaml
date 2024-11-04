@@ -10,7 +10,7 @@ cloudnative-pg:
 postgresql:
 
   # -- Deploy postgresql dependency chart
-  enabled: true
+  enabled: false
 
   auth:
 
@@ -166,8 +166,10 @@ service:
 
 config:
 
-  # -- Enable debug (to use inmemorydatabase)
-  debug: false
+  etcd:
+    enabled: true
+    endpoints: ~
+    insecure: true
 
   db:
     # -- If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`.
