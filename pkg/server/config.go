@@ -56,14 +56,10 @@ func (c Config) Complete() (*server, error) {
 		return nil, err
 	}
 
-	// Embedded runs in a stateful set in high availability deployment
-	// TODO: Add leader election to add embedded
-	if !c.Embedded {
-		klog.Info("performing migration...")
-		if err := c.migration(store); err != nil {
-			klog.Error(err)
-			return nil, err
-		}
+	klog.Info("performing migration...")
+	if err := c.migration(store); err != nil {
+		klog.Error(err)
+		return nil, err
 	}
 
 	if err := api.Install(store, genericServer); err != nil {
