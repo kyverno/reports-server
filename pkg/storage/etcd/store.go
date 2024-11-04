@@ -38,16 +38,15 @@ func NewObjectStoreNamespaced[T metav1.Object](client clientv3.KV, gvk schema.Gr
 	}
 }
 
-func (o *objectStoreNamespaced[T]) getPrefix() string {
+func (o *objectStoreNamespaced[T]) getPrefix(namespace string) string {
+	if len(namespace) != 0 {
+		return fmt.Sprintf("%s/%s/%s/%s/", o.gvk.Group, o.gvk.Version, o.gvk.Kind, namespace)
+	}
 	return fmt.Sprintf("%s/%s/%s/", o.gvk.Group, o.gvk.Version, o.gvk.Kind)
 }
 
 func (o *objectStoreNamespaced[T]) getKey(name, namespace string) string {
-	if o.namespaced {
-		return fmt.Sprintf("%s %s/%s", o.getPrefix(), namespace, name)
-	} else {
-		return fmt.Sprintf("%s %s", o.getPrefix(), name)
-	}
+	return fmt.Sprintf("%s%s", o.getPrefix(namespace), name)
 }
 
 func (o *objectStoreNamespaced[T]) Get(ctx context.Context, name, namespace string) (T, error) {
@@ -78,7 +77,7 @@ func (o *objectStoreNamespaced[T]) List(ctx context.Context, namespace string) (
 	defer o.Unlock()
 
 	var objects []T
-	key := o.getPrefix()
+	key := o.getPrefix(namespace)
 	resp, err := o.etcdclient.Get(ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		klog.ErrorS(err, "failed to list report kind=%s", o.gvk.String())
