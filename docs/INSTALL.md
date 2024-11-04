@@ -79,13 +79,15 @@ helm repo update
 Optionally, show all available chart versions for reports-server.
 
 ```bash
-helm search repo reports-server --l
+helm search repo reports-server --devel
 ```
 
 Install the reports-server chart:
 
 ```bash
-helm install reports-server -n reports-server --create-namespace --wait reports-server/reports-server
+helm install reports-server -n reports-server --create-namespace --wait reports-server/reports-server \
+		--set config.etcd.enabled=false \
+		--set postgresql.enabled=true
 ```
 <!---->
 <!-- To run without cnpg: -->
@@ -104,8 +106,8 @@ helm install reports-server -n reports-server --create-namespace --wait reports-
 <!-- and query for specific data. -->
 <!---->
 <!---->
-## With inmemory storage
-Reports server can be installed without any database as well. In this case, reports will be stored in the memory of reports-server pod. You can install reports-server with inmemory configuration as follows:
+## With embedded etcd storage
+Reports server can be installed with embedded etcd as well. In this case, reports will be stored in an HA etcd instance. You can install reports-server with etcd database  as follows:
 
 <!-- In order to install reports-server with Helm, first add the Reports-server Helm repository: -->
 <!-- ```bash -->
@@ -126,9 +128,7 @@ Reports server can be installed without any database as well. In this case, repo
 Install the reports-server chart:
 
 ```bash
-helm install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
-        --set config.debug=true \
-        --set postgresql.enabled=false
+helm install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server
 ```
 ### Testing
 
