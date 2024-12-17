@@ -28,7 +28,7 @@ helm repo update
 Optionally, show all available chart versions for reports-server.
 
 ```bash
-helm search repo reports-server --l
+helm search repo reports-server -
 ```
 
 Create a namespace and install the reports-server chart:
