@@ -115,7 +115,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          cd ./kyverno/test/conformance/chainsaw && chainsaw test --config ./../../../../.chainsaw.yaml --include-test-regex '^chainsaw$/${{ matrix.tests }}' --exclude-test-regex '^chainsaw$/^reports$/^admission$/^label$'
+          cd ./kyverno/test/conformance/chainsaw/reports && chainsaw test --config ./../../../../../.chainsaw.yaml --exclude-test-regex '^chainsaw$/^test-long-resource-labels$'
       - name: Debug failure
         if: failure()
         uses: ./.github/actions/failure-logs
