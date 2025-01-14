@@ -25,7 +25,7 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  namespace: {{ include "reports-server.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
   name: etcd
   labels:
     app: etcd-reports-server
