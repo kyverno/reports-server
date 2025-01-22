@@ -2,7 +2,7 @@ package utils
 
 import (
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	"k8s.io/api/resource/v1alpha2"
+	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
 var (
