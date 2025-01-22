@@ -1,8 +1,8 @@
 apiVersion: v2
 name: reports-server
 type: application
-version: 0.1.6-rc.1
-appVersion: v0.1.6-rc.1
+version: 0.1.6
+appVersion: v0.1.6
 keywords:
   - kubernetes
   - policy reports storage
