@@ -59,8 +59,13 @@ spec:
             {{- if .Values.metrics.enabled }}
             - --authorization-always-allow-paths=/metrics
             {{- end }}
-          {{- if .Values.config.db.secretName }}
           env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: '1'
+          {{- if .Values.config.db.secretName }}
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
