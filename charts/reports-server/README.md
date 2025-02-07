@@ -56,6 +56,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 | autoscaling.maxReplicas | int | `100` | Max number of replicas |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation |
 | autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target Memory utilisation |
+| pdb | object | `{"enabled":true,"maxUnavailable":"50%","minAvailable":null}` | Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica |
+| pdb.enabled | bool | `true` | Enable PodDisruptionBudget |
+| pdb.minAvailable | string | `nil` | minAvailable pods for PDB, cannot be used together with maxUnavailable |
+| pdb.maxUnavailable | string | `"50%"` | maxUnavailable pods for PDB, will take precedence over minAvailable if both are defined |
 | nodeSelector | object | `{}` | Node selector |
 | tolerations | list | `[]` | Tolerations |
 | affinity | object | `{}` | Affinity |
