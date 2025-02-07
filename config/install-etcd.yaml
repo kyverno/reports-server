@@ -259,6 +259,12 @@ spec:
             - --cert-dir=/tmp
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: '1'
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
