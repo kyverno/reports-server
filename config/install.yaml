@@ -4,6 +4,17 @@ kind: Namespace
 metadata:
   name: reports-server
 ---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: reports-server
+  namespace: reports-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: reports-server
+  maxUnavailable: 50%
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
