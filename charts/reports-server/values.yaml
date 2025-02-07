@@ -56,6 +56,9 @@ podAnnotations: {}
 podSecurityContext:
   fsGroup: 2000
 
+# -- Provide additional environment variables to the pods. Map with the same format as kubernetes deployment spec's env.
+podEnv: {}
+
 # -- Container security context
 # @default -- See [values.yaml](values.yaml)
 securityContext:

@@ -39,6 +39,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | serviceAccount.name | string | `""` | Service account name (required if `serviceAccount.create` is `false`) |
 | podAnnotations | object | `{}` | Pod annotations |
 | podSecurityContext | object | `{"fsGroup":2000}` | Pod security context |
+| podEnv | object | `{}` | Provide additional environment variables to the pods. Map with the same format as kubernetes deployment spec's env. |
 | securityContext | object | See [values.yaml](values.yaml) | Container security context |
 | livenessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/livez","port":"https","scheme":"HTTPS"},"initialDelaySeconds":20,"periodSeconds":10}` | Liveness probe |
 | readinessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/readyz","port":"https","scheme":"HTTPS"},"initialDelaySeconds":30,"periodSeconds":10}` | Readiness probe |

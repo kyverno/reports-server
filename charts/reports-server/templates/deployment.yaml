@@ -1,3 +1,4 @@
+{{- $env := .Values.podEnv }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -59,8 +60,16 @@ spec:
             {{- if .Values.metrics.enabled }}
             - --authorization-always-allow-paths=/metrics
             {{- end }}
-          {{- if .Values.config.db.secretName }}
           env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: '1'
+          {{- with $env }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.config.db.secretName }}
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
