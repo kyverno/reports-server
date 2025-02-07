@@ -45,11 +45,11 @@ spec:
             {{- end }}
             - --etcdEndpoints=https://etcd-0.etcd.{{ $.Release.Namespace }}:2379,https://etcd-1.etcd.{{ $.Release.Namespace }}:2379,https://etcd-2.etcd.{{ $.Release.Namespace }}:2379
             {{- else }}
-            - --dbhost=${DB_HOST}
-            - --dbport=${DB_PORT}
-            - --dbuser=${DB_USER}
-            - --dbpassword=${DB_PASSWORD}
-            - --dbname=${DB_DATABASE}
+            - --dbhost=$(DB_HOST)
+            - --dbport=$(DB_PORT)
+            - --dbuser=$(DB_USER)
+            - --dbpassword=$(DB_PASSWORD)
+            - --dbname=$(DB_DATABASE)
             - --dbsslmode={{ .Values.config.db.sslmode }}
             - --dbsslrootcert={{ .Values.config.db.sslrootcert }}
             - --dbsslkey={{ .Values.config.db.sslkey }}

@@ -326,11 +326,11 @@ spec:
       containers:
         - name: reports-server
           args:
-            - --dbhost=${DB_HOST}
-            - --dbport=${DB_PORT}
-            - --dbuser=${DB_USER}
-            - --dbpassword=${DB_PASSWORD}
-            - --dbname=${DB_DATABASE}
+            - --dbhost=$(DB_HOST)
+            - --dbport=$(DB_PORT)
+            - --dbuser=$(DB_USER)
+            - --dbpassword=$(DB_PASSWORD)
+            - --dbname=$(DB_DATABASE)
             - --dbsslmode=disable
             - --dbsslrootcert=
             - --dbsslkey=
