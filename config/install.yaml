@@ -326,11 +326,11 @@ spec:
       containers:
         - name: reports-server
           args:
-            - --dbhost=reports-server-postgresql.reports-server
-            - --dbport=5432
-            - --dbuser=postgres
-            - --dbpassword=reports
-            - --dbname=reportsdb
+            - --dbhost=${DB_HOST}
+            - --dbport=${DB_PORT}
+            - --dbuser=${DB_USER}
+            - --dbpassword=${DB_PASSWORD}
+            - --dbname=${DB_DATABASE}
             - --dbsslmode=disable
             - --dbsslrootcert=
             - --dbsslkey=
@@ -344,6 +344,16 @@ spec:
                 resourceFieldRef:
                   resource: limits.memory
                   divisor: '1'
+            - name: DB_HOST
+              value: "reports-server-postgresql.reports-server"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_DATABASE
+              value: "reportsdb"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              value: "reports"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
