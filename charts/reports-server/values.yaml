@@ -144,6 +144,16 @@ autoscaling:
   # -- Target Memory utilisation
   targetMemoryUtilizationPercentage: ~
 
+
+# -- Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica
+pdb:
+  # -- Enable PodDisruptionBudget
+  enabled: true
+  # -- minAvailable pods for PDB, cannot be used together with maxUnavailable
+  minAvailable: ~
+  # -- maxUnavailable pods for PDB, will take precedence over minAvailable if both are defined
+  maxUnavailable: 50%
+
 # -- Node selector
 nodeSelector: {}
 
