@@ -54,6 +54,10 @@ spec:
             - --dbsslrootcert={{ .Values.config.db.sslrootcert }}
             - --dbsslkey={{ .Values.config.db.sslkey }}
             - --dbsslcert={{ .Values.config.db.sslcert }}
+            - --servicename={{ include "reports-server.fullname" . }}
+            - --servicens={{ $.Release.Namespace }}
+            - --storereports={{ .Values.apiServicesManagement.installApiServices.enabled }}
+            - --storeephemeralreports={{ .Values.apiServicesManagement.installApiServices.installEphemeralReportsService }}
             {{- end }}
             - --cert-dir=/tmp
             - --secure-port=4443

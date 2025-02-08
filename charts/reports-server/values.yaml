@@ -227,14 +227,14 @@ config:
     sslcert: ""
 
 apiServicesManagement:
-  # -- Create a helm hooks to install and delete api services
+  # -- Create a helm hooks delete api services on uninstall
   enabled: true
 
   # -- Install api services in manifest
   installApiServices:
 
     # -- Store reports in reports-server
-    enabled: false
+    enabled: true
 
     # -- Store ephemeral reports in reports-server
     installEphemeralReportsService: true
