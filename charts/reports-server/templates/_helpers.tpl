@@ -62,37 +62,60 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Database config is injected into the environment, if a secret ref is set. Otherwise, Helm values are used directly.
+Database config is injected into the environment and passed to the command line from there, if secretName is set, the values will be read from there .
 */}}
 {{- define "reports-server.dbHost" -}}
-{{- if .Values.config.db.secretName }}
-{{- printf "%s" "$(DB_HOST)" }}
-{{- else }}
-{{- default (printf "%s-postgresql.%s" $.Release.Name $.Release.Namespace ) .Values.config.db.host }}
+{{- if .Values.config.db.secretName -}}
+valueFrom:
+  secretKeyRef:
+    key: {{ .Values.config.db.hostSecretKeyName }}
+    name: {{ .Values.config.db.secretName }}
+{{- else -}}
+value: {{ default (printf "%s-postgresql.%s" $.Release.Name $.Release.Namespace ) .Values.config.db.host | quote }}
+{{- end }}
+{{- end }}
+
+{{- define "reports-server.dbPort" -}}
+{{- if .Values.config.db.secretName -}}
+valueFrom:
+  secretKeyRef:
+    key: {{ .Values.config.db.portSecretKeyName }}
+    name: {{ .Values.config.db.secretName }}
+{{- else -}}
+value: {{ .Values.config.db.port | quote }}
 {{- end }}
 {{- end }}
 
 {{- define "reports-server.dbName" -}}
-{{- if .Values.config.db.secretName }}
-{{- printf "%s" "$(DB_DATABASE)" }}
-{{- else }}
-{{- .Values.config.db.name }}
+{{- if .Values.config.db.secretName -}}
+valueFrom:
+  secretKeyRef:
+    key: {{ .Values.config.db.dbNameSecretKeyName }}
+    name: {{ .Values.config.db.secretName }}
+{{- else -}}
+value: {{ .Values.config.db.name | quote }}
 {{- end }}
 {{- end }}
 
 {{- define "reports-server.dbUser" -}}
-{{- if .Values.config.db.secretName }}
-{{- printf "%s" "$(DB_USER)" }}
-{{- else }}
-{{- .Values.config.db.user }}
+{{- if .Values.config.db.secretName -}}
+valueFrom:
+  secretKeyRef:
+    key: {{ .Values.config.db.userSecretKeyName }}
+    name: {{ .Values.config.db.secretName }}
+{{- else -}}
+value: {{ .Values.config.db.user | quote }}
 {{- end }}
 {{- end }}
 
 {{- define "reports-server.dbPassword" -}}
-{{- if .Values.config.db.secretName }}
-{{- printf "%s" "$(DB_PASSWORD)" }}
-{{- else }}
-{{- .Values.config.db.password }}
+{{- if .Values.config.db.secretName -}}
+valueFrom:
+  secretKeyRef:
+    key: {{ .Values.config.db.passwordSecretKeyName }}
+    name: {{ .Values.config.db.secretName }}
+{{- else -}}
+value: {{ .Values.config.db.password | quote }}
 {{- end }}
 {{- end }}
 

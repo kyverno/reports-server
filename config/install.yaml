@@ -271,9 +271,15 @@ spec:
       containers:
         - name: reports-server
           args:
-            - --etcd
-            - --etcdSkipTLS
-            - --etcdEndpoints=https://etcd-0.etcd.reports-server:2379,https://etcd-1.etcd.reports-server:2379,https://etcd-2.etcd.reports-server:2379
+            - --dbhost=$(DB_HOST)
+            - --dbport=$(DB_PORT)
+            - --dbuser=$(DB_USER)
+            - --dbpassword=$(DB_PASSWORD)
+            - --dbname=$(DB_DATABASE)
+            - --dbsslmode=disable
+            - --dbsslrootcert=
+            - --dbsslkey=
+            - --dbsslcert=
             - --cert-dir=/tmp
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics
@@ -283,6 +289,16 @@ spec:
                 resourceFieldRef:
                   resource: limits.memory
                   divisor: '1'
+            - name: DB_HOST
+              value: "reports-server-postgresql.reports-server"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_DATABASE
+              value: "reportsdb"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              value: "reports"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
