@@ -276,6 +276,16 @@ spec:
                 resourceFieldRef:
                   resource: limits.memory
                   divisor: '1'
+            - name: DB_HOST
+              value: "reports-server-postgresql.reports-server"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_DATABASE
+              value: "reportsdb"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              value: "reports"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
