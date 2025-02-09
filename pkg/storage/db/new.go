@@ -42,38 +42,19 @@ func New(config *PostgresConfig) (api.Storage, error) {
 
 	klog.Info("successfully connected to db")
 
-	klog.Info("starting reports store")
-	polrstore, err := NewPolicyReportStore(db)
+	err = RunDatabaseMigration(db, config.DBname)
 	if err != nil {
-		klog.Error("failed to start policy report store", err.Error())
-		return nil, err
-	}
-
-	cpolrstore, err := NewClusterPolicyReportStore(db)
-	if err != nil {
-		klog.Error("failed to start cluster policy report store", err.Error())
-		return nil, err
-	}
-
-	ephrstore, err := NewEphemeralReportStore(db)
-	if err != nil {
-		klog.Error("failed to start policy report store", err.Error())
-		return nil, err
-	}
-
-	cephrstore, err := NewClusterEphemeralReportStore(db)
-	if err != nil {
-		klog.Error("failed to start cluster policy report store", err.Error())
+		klog.Error("failed to perform db migration", err.Error())
 		return nil, err
 	}
 
 	klog.Info("successfully setup storage")
 	return &postgresstore{
 		db:         db,
-		polrstore:  polrstore,
-		cpolrstore: cpolrstore,
-		ephrstore:  ephrstore,
-		cephrstore: cephrstore,
+		polrstore:  &polrdb{db: db},
+		cpolrstore: &cpolrdb{db: db},
+		ephrstore:  &ephrdb{db: db},
+		cephrstore: &cephr{db: db},
 	}, nil
 }
 

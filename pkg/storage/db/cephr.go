@@ -9,23 +9,12 @@ import (
 	"sync"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	"github.com/kyverno/reports-server/pkg/storage/api"
 	"k8s.io/klog/v2"
 )
 
 type cephr struct {
 	sync.Mutex
 	db *sql.DB
-}
-
-func NewClusterEphemeralReportStore(db *sql.DB) (api.ClusterEphemeralReportsInterface, error) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS clusterephemeralreports (name VARCHAR NOT NULL, report JSONB NOT NULL, PRIMARY KEY(name))")
-	if err != nil {
-		klog.ErrorS(err, "failed to create table")
-		return nil, err
-	}
-
-	return &cephr{db: db}, nil
 }
 
 func (c *cephr) List(ctx context.Context) ([]*reportsv1.ClusterEphemeralReport, error) {

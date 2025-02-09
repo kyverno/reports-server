@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/kyverno/reports-server/pkg/storage/api"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
@@ -16,21 +15,6 @@ import (
 type polrdb struct {
 	sync.Mutex
 	db *sql.DB
-}
-
-func NewPolicyReportStore(db *sql.DB) (api.PolicyReportsInterface, error) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS policyreports (name VARCHAR NOT NULL, namespace VARCHAR NOT NULL, report JSONB NOT NULL, PRIMARY KEY(name, namespace))")
-	if err != nil {
-		klog.ErrorS(err, "failed to create table")
-		return nil, err
-	}
-
-	_, err = db.Exec("CREATE INDEX IF NOT EXISTS policyreportnamespace ON policyreports(namespace)")
-	if err != nil {
-		klog.ErrorS(err, "failed to create index")
-		return nil, err
-	}
-	return &polrdb{db: db}, nil
 }
 
 func (p *polrdb) List(ctx context.Context, namespace string) ([]*v1alpha2.PolicyReport, error) {

@@ -9,5 +9,6 @@ RUN GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-w -s" -o reports-s
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 COPY --from=build reports-server reports-server
+COPY --from=build pkg/storage/db/migrations migrations
 USER 65534
 ENTRYPOINT ["/reports-server"]
