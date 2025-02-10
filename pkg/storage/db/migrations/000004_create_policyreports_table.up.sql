@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS policyreports (name VARCHAR NOT NULL, namespace VARCHAR NOT NULL, report JSONB NOT NULL, PRIMARY KEY(name, namespace));
+CREATE INDEX IF NOT EXISTS policyreportnamespace ON policyreports(namespace);

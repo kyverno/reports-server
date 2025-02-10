@@ -9,28 +9,12 @@ import (
 	"sync"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	"github.com/kyverno/reports-server/pkg/storage/api"
 	"k8s.io/klog/v2"
 )
 
 type ephrdb struct {
 	sync.Mutex
 	db *sql.DB
-}
-
-func NewEphemeralReportStore(db *sql.DB) (api.EphemeralReportsInterface, error) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS ephemeralreports (name VARCHAR NOT NULL, namespace VARCHAR NOT NULL, report JSONB NOT NULL, PRIMARY KEY(name, namespace))")
-	if err != nil {
-		klog.ErrorS(err, "failed to create table")
-		return nil, err
-	}
-
-	_, err = db.Exec("CREATE INDEX IF NOT EXISTS ephemeralreportnamespace ON ephemeralreports(namespace)")
-	if err != nil {
-		klog.ErrorS(err, "failed to create index")
-		return nil, err
-	}
-	return &ephrdb{db: db}, nil
 }
 
 func (p *ephrdb) List(ctx context.Context, namespace string) ([]*reportsv1.EphemeralReport, error) {

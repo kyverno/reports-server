@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/kyverno/reports-server/pkg/storage/api"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
@@ -16,16 +15,6 @@ import (
 type cpolrdb struct {
 	sync.Mutex
 	db *sql.DB
-}
-
-func NewClusterPolicyReportStore(db *sql.DB) (api.ClusterPolicyReportsInterface, error) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS clusterpolicyreports (name VARCHAR NOT NULL, report JSONB NOT NULL, PRIMARY KEY(name))")
-	if err != nil {
-		klog.ErrorS(err, "failed to create table")
-		return nil, err
-	}
-
-	return &cpolrdb{db: db}, nil
 }
 
 func (c *cpolrdb) List(ctx context.Context) ([]*v1alpha2.ClusterPolicyReport, error) {
