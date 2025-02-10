@@ -12,7 +12,7 @@ type Interface interface {
 	api.Storage
 }
 
-func New(embedded bool, config *db.PostgresConfig, etcdCfg *etcd.EtcdConfig) (Interface, error) {
+func New(embedded bool, config *db.PostgresConfig, etcdCfg *etcd.EtcdConfig, clusterUID string, clusterName string) (Interface, error) {
 	klog.Infof("setting up storage, embedded-db=%v, etcdconfig=%+v", embedded, etcdCfg)
 	var storage api.Storage
 	var err error
@@ -23,7 +23,7 @@ func New(embedded bool, config *db.PostgresConfig, etcdCfg *etcd.EtcdConfig) (In
 			return nil, err
 		}
 	} else {
-		storage, err = db.New(config)
+		storage, err = db.New(config, clusterUID, clusterName)
 		if err != nil {
 			return nil, err
 		}

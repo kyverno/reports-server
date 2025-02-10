@@ -14,7 +14,8 @@ import (
 
 type polrdb struct {
 	sync.Mutex
-	db *sql.DB
+	db         *sql.DB
+	clusterUID string
 }
 
 func (p *polrdb) List(ctx context.Context, namespace string) ([]*v1alpha2.PolicyReport, error) {
@@ -28,9 +29,9 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]*v1alpha2.Policy
 	var err error
 
 	if len(namespace) == 0 {
-		rows, err = p.db.Query("SELECT report FROM policyreports")
+		rows, err = p.db.Query("SELECT report FROM policyreports WHERE cluster_id = $1", p.clusterUID)
 	} else {
-		rows, err = p.db.Query("SELECT report FROM policyreports WHERE namespace = $1", namespace)
+		rows, err = p.db.Query("SELECT report FROM policyreports WHERE cluster_id = $1 AND namespace = $2", p.clusterUID, namespace)
 	}
 
 	if err != nil {
@@ -62,7 +63,7 @@ func (p *polrdb) Get(ctx context.Context, name, namespace string) (*v1alpha2.Pol
 
 	var jsonb string
 
-	row := p.db.QueryRow("SELECT report FROM policyreports WHERE (namespace = $1) AND (name = $2)", namespace, name)
+	row := p.db.QueryRow("SELECT report FROM policyreports WHERE cluster_id = $1 AND name = $2 AND namespace = $3", p.clusterUID, name, namespace)
 	if err := row.Scan(&jsonb); err != nil {
 		klog.ErrorS(err, fmt.Sprintf("policyreport not found name=%s namespace=%s", name, namespace))
 		if err == sql.ErrNoRows {
@@ -93,7 +94,7 @@ func (p *polrdb) Create(ctx context.Context, polr *v1alpha2.PolicyReport) error 
 		return err
 	}
 
-	_, err = p.db.Exec("INSERT INTO policyreports (name, namespace, report) VALUES ($1, $2, $3)", polr.Name, polr.Namespace, string(jsonb))
+	_, err = p.db.Exec("INSERT INTO policyreports (name, namespace, report, cluster_id) VALUES ($1, $2, $3, $4) ON CONFLICT (name, namespace, cluster_id) DO UPDATE SET report = $3", polr.Name, polr.Namespace, string(jsonb), p.clusterUID)
 	if err != nil {
 		klog.ErrorS(err, "failed to create policy report")
 		return fmt.Errorf("create policyreport: %v", err)
@@ -114,7 +115,7 @@ func (p *polrdb) Update(ctx context.Context, polr *v1alpha2.PolicyReport) error 
 		return err
 	}
 
-	_, err = p.db.Exec("UPDATE policyreports SET report = $1 WHERE (namespace = $2) AND (name = $3)", string(jsonb), polr.Namespace, polr.Name)
+	_, err = p.db.Exec("UPDATE policyreports SET report = $1 WHERE cluster_id = $2 AND namespace = $3 AND name = $4", string(jsonb), p.clusterUID, polr.Namespace, polr.Name)
 	if err != nil {
 		klog.ErrorS(err, "failed to update policy report")
 		return fmt.Errorf("update policyreport: %v", err)
@@ -126,7 +127,7 @@ func (p *polrdb) Delete(ctx context.Context, name, namespace string) error {
 	p.Lock()
 	defer p.Unlock()
 
-	_, err := p.db.Exec("DELETE FROM policyreports WHERE (namespace = $1) AND (name = $2)", namespace, name)
+	_, err := p.db.Exec("DELETE FROM policyreports WHERE cluster_id = $1 AND namespace = $2 AND name = $3", p.clusterUID, namespace, name)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete policy report")
 		return fmt.Errorf("delete policyreport: %v", err)

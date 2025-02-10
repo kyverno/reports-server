@@ -34,6 +34,7 @@ type Options struct {
 	ShowVersion bool
 	Etcd        bool
 	Kubeconfig  string
+	ClusterName string
 
 	// dbopts
 	EtcdConfig    etcd.EtcdConfig
@@ -68,6 +69,7 @@ func (o *Options) validate() []error {
 
 func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs := fs.FlagSet("policy server")
+	msfs.StringVar(&o.ClusterName, "clustername", "", "Optional name for cluster database records")
 	msfs.BoolVar(&o.Etcd, "etcd", false, "Use embedded etcd database")
 	msfs.StringVar(&o.EtcdConfig.Endpoints, "etcdEndpoints", "", "Enpoints used for connect to etcd server")
 	msfs.BoolVar(&o.EtcdConfig.Insecure, "etcdSkipTLS", true, "Skip TLS verification when connecting to etcd")
@@ -128,11 +130,12 @@ func (o Options) ServerConfig() (*server.Config, error) {
 	}
 
 	return &server.Config{
-		Apiserver:  apiserver,
-		Rest:       restConfig,
-		Embedded:   o.Etcd,
-		EtcdConfig: &o.EtcdConfig,
-		DBconfig:   dbconfig,
+		Apiserver:   apiserver,
+		Rest:        restConfig,
+		Embedded:    o.Etcd,
+		EtcdConfig:  &o.EtcdConfig,
+		DBconfig:    dbconfig,
+		ClusterName: o.ClusterName,
 	}, nil
 }
 

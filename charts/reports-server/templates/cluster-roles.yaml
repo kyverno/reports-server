@@ -22,6 +22,12 @@ rules:
     - update
     - watch
     - deletecollection
+- apiGroups:
+    - ""
+  resources:
+    - namespaces
+  verbs:
+    - get
 {{- if .Values.apiServicesManagement.enabled }}
 - apiGroups:
     - apiregistration.k8s.io

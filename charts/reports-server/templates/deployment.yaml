@@ -60,6 +60,7 @@ spec:
             {{- if .Values.metrics.enabled }}
             - --authorization-always-allow-paths=/metrics
             {{- end }}
+            - --clustername={{ .Values.clusterName }}
           env:
             - name: GOMEMLIMIT
               valueFrom:

@@ -14,7 +14,8 @@ import (
 
 type cpolrdb struct {
 	sync.Mutex
-	db *sql.DB
+	db         *sql.DB
+	clusterUID string
 }
 
 func (c *cpolrdb) List(ctx context.Context) ([]*v1alpha2.ClusterPolicyReport, error) {
@@ -25,7 +26,7 @@ func (c *cpolrdb) List(ctx context.Context) ([]*v1alpha2.ClusterPolicyReport, er
 	res := make([]*v1alpha2.ClusterPolicyReport, 0)
 	var jsonb string
 
-	rows, err := c.db.Query("SELECT report FROM clusterpolicyreports")
+	rows, err := c.db.Query("SELECT report FROM clusterpolicyreports WHERE cluster_id = $1", c.clusterUID)
 	if err != nil {
 		klog.ErrorS(err, "failed to list clusterpolicyreports")
 		return nil, fmt.Errorf("clusterpolicyreport list: %v", err)
@@ -55,7 +56,7 @@ func (c *cpolrdb) Get(ctx context.Context, name string) (*v1alpha2.ClusterPolicy
 
 	var jsonb string
 
-	row := c.db.QueryRow("SELECT report FROM clusterpolicyreports WHERE (name = $1)", name)
+	row := c.db.QueryRow("SELECT report FROM clusterpolicyreports WHERE cluster_id = $1 AND name = $2", c.clusterUID, name)
 	if err := row.Scan(&jsonb); err != nil {
 		klog.ErrorS(err, fmt.Sprintf("clusterpolicyreport not found name=%s", name))
 		if err == sql.ErrNoRows {
@@ -87,9 +88,9 @@ func (c *cpolrdb) Create(ctx context.Context, cpolr *v1alpha2.ClusterPolicyRepor
 		return err
 	}
 
-	_, err = c.db.Exec("INSERT INTO clusterpolicyreports (name, report) VALUES ($1, $2)", cpolr.Name, string(jsonb))
+	_, err = c.db.Exec("INSERT INTO clusterpolicyreports (name, report, cluster_id) VALUES ($1, $2, $3) ON CONFLICT (name, cluster_id) DO UPDATE SET report = $2", cpolr.Name, string(jsonb), c.clusterUID)
 	if err != nil {
-		klog.ErrorS(err, "failed to crate cpolr")
+		klog.ErrorS(err, "failed to create cpolr")
 		return fmt.Errorf("create clusterpolicyreport: %v", err)
 	}
 	return nil
@@ -108,7 +109,7 @@ func (c *cpolrdb) Update(ctx context.Context, cpolr *v1alpha2.ClusterPolicyRepor
 		return err
 	}
 
-	_, err = c.db.Exec("UPDATE clusterpolicyreports SET report = $1 WHERE (name = $2)", string(jsonb), cpolr.Name)
+	_, err = c.db.Exec("UPDATE clusterpolicyreports SET report = $1 WHERE cluster_id = $2 AND name = $3", string(jsonb), c.clusterUID, cpolr.Name)
 	if err != nil {
 		klog.ErrorS(err, "failed to updates cpolr")
 		return fmt.Errorf("update clusterpolicyreport: %v", err)
@@ -120,7 +121,7 @@ func (c *cpolrdb) Delete(ctx context.Context, name string) error {
 	c.Lock()
 	defer c.Unlock()
 
-	_, err := c.db.Exec("DELETE FROM clusterpolicyreports WHERE (name = $1)", name)
+	_, err := c.db.Exec("DELETE FROM clusterpolicyreports WHERE cluster_id = $1 AND name = $2", c.clusterUID, name)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete cpolr")
 		return fmt.Errorf("delete clusterpolicyreport: %v", err)

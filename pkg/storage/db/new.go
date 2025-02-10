@@ -16,7 +16,7 @@ const (
 	sleepDuration = 15 * time.Second
 )
 
-func New(config *PostgresConfig) (api.Storage, error) {
+func New(config *PostgresConfig, clusterUID string, clusterName string) (api.Storage, error) {
 	klog.Infof("starting postgres db")
 	db, err := sql.Open("postgres", config.String())
 	if err != nil {
@@ -48,13 +48,25 @@ func New(config *PostgresConfig) (api.Storage, error) {
 		return nil, err
 	}
 
+	err = createOrUpdateClusterRecord(db, clusterUID, clusterName)
+	if err != nil {
+		klog.Error("failed to update cluster record", err.Error())
+		return nil, err
+	}
+
+	err = populateClusterUIDLegacyRecords(db, clusterUID)
+	if err != nil {
+		klog.Error("failed to update legacy records", err.Error())
+		return nil, err
+	}
+
 	klog.Info("successfully setup storage")
 	return &postgresstore{
 		db:         db,
-		polrstore:  &polrdb{db: db},
-		cpolrstore: &cpolrdb{db: db},
-		ephrstore:  &ephrdb{db: db},
-		cephrstore: &cephr{db: db},
+		polrstore:  &polrdb{db: db, clusterUID: clusterUID},
+		cpolrstore: &cpolrdb{db: db, clusterUID: clusterUID},
+		ephrstore:  &ephrdb{db: db, clusterUID: clusterUID},
+		cephrstore: &cephr{db: db, clusterUID: clusterUID},
 	}, nil
 }
 
@@ -106,4 +118,29 @@ func (p PostgresConfig) String() string {
 	return fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=%s sslrootcert=%s sslkey=%s sslcert=%s",
 		p.Host, p.Port, p.User, p.Password, p.DBname, p.SSLMode, p.SSLRootCert, p.SSLKey, p.SSLCert)
+}
+
+func createOrUpdateClusterRecord(db *sql.DB, clusterUID string, clusterName string) error {
+	_, err := db.Query("INSERT INTO clusters (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2", clusterUID, clusterName)
+	return err
+}
+
+func populateClusterUIDLegacyRecords(db *sql.DB, clusterUID string) error {
+	_, err := db.Query("UPDATE clusterephemeralreports SET cluster_id = $1 WHERE cluster_id IS NULL", clusterUID)
+	if err != nil {
+		return err
+	}
+	_, err = db.Query("UPDATE clusterpolicyreports SET cluster_id = $1 WHERE cluster_id IS NULL", clusterUID)
+	if err != nil {
+		return err
+	}
+	_, err = db.Query("UPDATE ephemeralreports SET cluster_id = $1 WHERE cluster_id IS NULL", clusterUID)
+	if err != nil {
+		return err
+	}
+	_, err = db.Query("UPDATE policyreports SET cluster_id = $1 WHERE cluster_id IS NULL", clusterUID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

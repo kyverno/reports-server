@@ -23,6 +23,9 @@ fullnameOverride: ""
 # -- Number of pod replicas
 replicaCount: 1
 
+# -- Optional cluster name, used to easily identify database records when querying the database directly
+clusterName: ""
+
 image:
   # -- Image registry
   registry: ghcr.io

@@ -1,0 +1,12 @@
+ALTER TABLE clusterephemeralreports DROP CONSTRAINT clusterephemeralreports_pkey;
+ALTER TABLE clusterephemeralreports ADD PRIMARY KEY (name);
+ALTER TABLE clusterpolicyreports DROP CONSTRAINT clusterpolicyreports_pkey;
+ALTER TABLE clusterpolicyreports ADD PRIMARY KEY (name);
+ALTER TABLE ephemeralreports DROP CONSTRAINT ephemeralreports_pkey;
+ALTER TABLE ephemeralreports ADD PRIMARY KEY (name, namespace);
+CREATE INDEX IF NOT EXISTS ephemeralreportsnamespace ON ephemeralreports(namespace);
+DROP INDEX IF EXISTS ephemeralreports_namespace;
+ALTER TABLE policyreports DROP CONSTRAINT policyreports_pkey;
+ALTER TABLE policyreports ADD PRIMARY KEY (name, namespace);
+CREATE INDEX IF NOT EXISTS policyreportsnamespace ON policyreports(namespace);
+DROP INDEX IF EXISTS policyreports_namespace;
