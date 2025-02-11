@@ -22,14 +22,14 @@ jobs:
       fail-fast: false
       matrix:
         k8s-version:
+          - name: v1.28
+            version: v1.28.15
           - name: v1.29
             version: v1.29.12
           - name: v1.30
             version: v1.30.8
           - name: v1.31
             version: v1.31.4
-          - name: v1.32
-            version: v1.32.1
         tests:
           - ^reports$
     runs-on: ubuntu-latest
