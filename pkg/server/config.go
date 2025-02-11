@@ -16,6 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	apimetrics "k8s.io/apiserver/pkg/endpoints/metrics"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	watchtools "k8s.io/client-go/tools/watch"
@@ -28,11 +29,12 @@ import (
 )
 
 type Config struct {
-	Apiserver  *genericapiserver.Config
-	Rest       *rest.Config
-	Embedded   bool
-	EtcdConfig *etcd.EtcdConfig
-	DBconfig   *db.PostgresConfig
+	Apiserver   *genericapiserver.Config
+	Rest        *rest.Config
+	Embedded    bool
+	EtcdConfig  *etcd.EtcdConfig
+	DBconfig    *db.PostgresConfig
+	ClusterName string
 }
 
 func (c Config) Complete() (*server, error) {
@@ -50,7 +52,13 @@ func (c Config) Complete() (*server, error) {
 	}
 	genericServer.Handler.NonGoRestfulMux.HandleFunc("/metrics", metricsHandler)
 
-	store, err := storage.New(c.Embedded, c.DBconfig, c.EtcdConfig)
+	clusterUID, err := c.getClusterUID()
+	if err != nil {
+		klog.Error(err)
+		return nil, err
+	}
+
+	store, err := storage.New(c.Embedded, c.DBconfig, c.EtcdConfig, clusterUID, c.ClusterName)
 	if err != nil {
 		klog.Error(err)
 		return nil, err
@@ -433,4 +441,17 @@ func (c Config) migration(store storage.Interface) error {
 	}
 	// use leave some versions for resources added using watchers
 	return store.SetResourceVersion(fmt.Sprint((rv + 9999)))
+}
+
+// getClusterUID obtains the UID of the kube-system namespace
+func (c Config) getClusterUID() (string, error) {
+	client, err := kubernetes.NewForConfig(c.Rest)
+	if err != nil {
+		return "", err
+	}
+	kubeSystem, err := client.CoreV1().Namespaces().Get(context.TODO(), "kube-system", metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	return string(kubeSystem.GetUID()), nil
 }

@@ -14,7 +14,8 @@ import (
 
 type ephrdb struct {
 	sync.Mutex
-	db *sql.DB
+	db         *sql.DB
+	clusterUID string
 }
 
 func (p *ephrdb) List(ctx context.Context, namespace string) ([]*reportsv1.EphemeralReport, error) {
@@ -28,9 +29,9 @@ func (p *ephrdb) List(ctx context.Context, namespace string) ([]*reportsv1.Ephem
 	var err error
 
 	if len(namespace) == 0 {
-		rows, err = p.db.Query("SELECT report FROM ephemeralreports")
+		rows, err = p.db.Query("SELECT report FROM ephemeralreports WHERE cluster_id = $1", p.clusterUID)
 	} else {
-		rows, err = p.db.Query("SELECT report FROM ephemeralreports WHERE namespace = $1", namespace)
+		rows, err = p.db.Query("SELECT report FROM ephemeralreports WHERE cluster_id = $1 AND namespace = $2", p.clusterUID, namespace)
 	}
 	if err != nil {
 		klog.ErrorS(err, "ephemeralreport list: ")
@@ -61,7 +62,7 @@ func (p *ephrdb) Get(ctx context.Context, name, namespace string) (*reportsv1.Ep
 
 	var jsonb string
 
-	row := p.db.QueryRow("SELECT report FROM ephemeralreports WHERE (namespace = $1) AND (name = $2)", namespace, name)
+	row := p.db.QueryRow("SELECT report FROM ephemeralreports WHERE cluster_id = $1 AND name = $2 AND namespace = $3", p.clusterUID, name, namespace)
 	if err := row.Scan(&jsonb); err != nil {
 		klog.ErrorS(err, fmt.Sprintf("ephemeralreport not found name=%s namespace=%s", name, namespace))
 		if err == sql.ErrNoRows {
@@ -92,7 +93,7 @@ func (p *ephrdb) Create(ctx context.Context, polr *reportsv1.EphemeralReport) er
 		return err
 	}
 
-	_, err = p.db.Exec("INSERT INTO ephemeralreports (name, namespace, report) VALUES ($1, $2, $3)", polr.Name, polr.Namespace, string(jsonb))
+	_, err = p.db.Exec("INSERT INTO ephemeralreports (name, namespace, report, cluster_id) VALUES ($1, $2, $3, $4) ON CONFLICT (name, namespace, cluster_id) DO UPDATE SET report = $3", polr.Name, polr.Namespace, string(jsonb), p.clusterUID)
 	if err != nil {
 		klog.ErrorS(err, "failed to create ephemeral report")
 		return fmt.Errorf("create ephemeralreport: %v", err)
@@ -113,7 +114,7 @@ func (p *ephrdb) Update(ctx context.Context, polr *reportsv1.EphemeralReport) er
 		return err
 	}
 
-	_, err = p.db.Exec("UPDATE ephemeralreports SET report = $1 WHERE (namespace = $2) AND (name = $3)", string(jsonb), polr.Namespace, polr.Name)
+	_, err = p.db.Exec("UPDATE ephemeralreports SET report = $1 WHERE cluster_id = $2 AND namespace = $3 AND name = $4", string(jsonb), p.clusterUID, polr.Namespace, polr.Name)
 	if err != nil {
 		klog.ErrorS(err, "failed to update ephemeral report")
 		return fmt.Errorf("update ephemeralreport: %v", err)
@@ -125,7 +126,7 @@ func (p *ephrdb) Delete(ctx context.Context, name, namespace string) error {
 	p.Lock()
 	defer p.Unlock()
 
-	_, err := p.db.Exec("DELETE FROM ephemeralreports WHERE (namespace = $1) AND (name = $2)", namespace, name)
+	_, err := p.db.Exec("DELETE FROM ephemeralreports WHERE cluster_id = $1 AND namespace = $2 AND name = $3", p.clusterUID, namespace, name)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete ephemeral report")
 		return fmt.Errorf("delete ephemeralreport: %v", err)

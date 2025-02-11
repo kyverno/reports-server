@@ -85,6 +85,12 @@ rules:
     - watch
     - deletecollection
 - apiGroups:
+    - ""
+  resources:
+    - namespaces
+  verbs:
+    - get
+- apiGroups:
     - apiregistration.k8s.io
   resources:
     - apiservices
@@ -338,6 +344,7 @@ spec:
             - --cert-dir=/tmp
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics
+            - --clustername=
           env:
             - name: GOMEMLIMIT
               valueFrom:

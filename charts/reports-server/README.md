@@ -28,6 +28,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | nameOverride | string | `""` | Name override |
 | fullnameOverride | string | `""` | Full name override |
 | replicaCount | int | `1` | Number of pod replicas |
+| clusterName | string | `""` | Optional cluster name, used to easily identify database records when querying the database directly |
 | image.registry | string | `"ghcr.io"` | Image registry |
 | image.repository | string | `"kyverno/reports-server"` | Image repository |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
