@@ -1,8 +1,13 @@
 apiVersion: wgpolicyk8s.io/v1alpha2
 kind: PolicyReport
 metadata:
-  name: test-3
+  name: test
   namespace: default
+  # ownerReferences:
+  # - apiVersion: v1
+  #   kind: Pod
+  #   name: test-pod
+  #   uid: 6c737f35-260c-4e4f-8516-61a125c9fb78
 results:
 - message: validation rule 'call-aws-signer-extension' passed.
   policy: validate-images
@@ -16,8 +21,8 @@ results:
 scope:
   apiVersion: v1
   kind: Pod
-  name: test-pod-3
-  namespace: default
+  name: test-pod
+  namespace: test-ns
   uid: 6c737f35-260c-4e4f-8516-61a125c9fb78
 summary:
   error: 0
@@ -25,4 +30,3 @@ summary:
   pass: 1
   skip: 0
   warn: 0
-

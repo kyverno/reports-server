@@ -126,19 +126,19 @@ func createOrUpdateClusterRecord(db *sql.DB, clusterUID string, clusterName stri
 }
 
 func populateClusterUIDLegacyRecords(db *sql.DB, clusterUID string) error {
-	_, err := db.Query("UPDATE clusterephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err := db.Query("UPDATE clusterephemeralreports SET cluster_id = $1 WHERE cluster_id IS NULL", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.Query("UPDATE clusterpolicyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.Query("UPDATE clusterpolicyreports SET cluster_id = $1 WHERE cluster_id IS NULL", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.Query("UPDATE ephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.Query("UPDATE ephemeralreports SET cluster_id = $1 WHERE cluster_id IS NULL", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.Query("UPDATE policyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.Query("UPDATE policyreports SET cluster_id = $1 WHERE cluster_id IS NULL", clusterUID)
 	if err != nil {
 		return err
 	}
