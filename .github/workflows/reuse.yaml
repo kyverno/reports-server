@@ -1,0 +1,244 @@
+name: Create Publish and Sign Docker Image for FIPS Compliance
+on:
+  workflow_call:
+    inputs:
+      publish_command:
+        required: true
+        type: string
+      digest_command:
+        required: true
+        type: string
+      image_name:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+      main:
+        type: string
+    secrets:
+      registry_username:
+        required: true
+      registry_password:
+        required: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+    - name: Detect Runner Architecture
+      run: |
+        ARCH=$(uname -m)
+        echo "Detected architecture: $ARCH"
+        echo "ARCH=$ARCH" >> $GITHUB_ENV
+
+    - name: Print Disk & Memory Usage (Before Cleanup)
+      run: |
+        echo "==== Disk Usage Before Cleanup ($ARCH) ===="
+        df -h
+        echo "==== Memory Usage Before Cleanup ($ARCH) ===="
+        free -h
+        echo "==== Docker Disk Usage Before Cleanup ($ARCH) ===="
+        docker system df
+
+    - name: Cleanup Space on Runner
+      run: |
+        echo "Running cleanup for $ARCH..."
+
+        # Remove unnecessary packages
+        sudo apt-get autoremove -y
+        sudo apt-get clean
+
+        # Remove dangling Docker images & containers
+        # docker system prune -af --volumes
+
+        # Remove cached Go modules
+        go clean -modcache
+
+        # Remove unnecessary system logs
+        sudo journalctl --vacuum-time=1s
+
+        # Remove npm cache (if applicable)
+        rm -rf ~/.npm
+        rm -rf ~/.cache
+
+        # Extra cleanup for ARM64 (if needed)
+        if [[ "$ARCH" == "aarch64" ]]; then
+          echo "Applying additional cleanup for ARM64..."
+          # Add ARM64-specific cleanup commands here if needed
+        fi
+
+    - name: Print Disk & Memory Usage (After Cleanup)
+      run: |
+        echo "==== Disk Usage After Cleanup ($ARCH) ===="
+        df -h
+        echo "==== Memory Usage After Cleanup ($ARCH) ===="
+        free -h
+        echo "==== Docker Disk Usage After Cleanup ($ARCH) ===="
+        docker system df
+
+    - name: Checkout release
+      if: ${{ inputs.tag == 'release'}}
+      uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2.4.0
+      with:
+        fetch-depth: 0
+
+    - name: Checkout image
+      if: ${{ inputs.tag == 'image'}}
+      uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2.4.0
+
+    - name: Unshallow
+      if: ${{ inputs.tag == 'image'}}
+      run: git fetch --prune --unshallow --tags
+
+    - name: Set up Go
+      uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
+      with:
+        go-version: ~1.23.5
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@4959ce089c160fddf62f7b42464195ba1a56d382 # v3.6.0
+
+    - name: Cache Go modules
+      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Log into ghcr.io
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Set up QEMU
+    #   # if: runner.arch != 'X64' # Only set up QEMU on non-x86_64 architectures
+    #   uses: docker/setup-qemu-action@53851d14592bedcffcf25ea515637cff71ef929a # v3.3.0
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 #v3.8.0
+      id: buildx
+      with:
+        install: true
+
+    - name: Run Trivy vulnerability scanner in repo mode
+      if: ${{inputs.tag == 'release'}}
+      uses: aquasecurity/trivy-action@40c4ca9e7421287d0c5576712fdff370978f9c3c
+      with:
+        scan-type: 'fs'
+        ignore-unfixed: true
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+
+    - name: Set Version
+      if: ${{ inputs.tag == 'release'}}
+      run: |
+        echo "REPORTS_SERVER_VERSION=$(git describe --match "v[0-9]*" --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+    - name: Generate SBOM JSON
+      if: ${{inputs.tag == 'release'}}
+      uses: CycloneDX/gh-gomod-generate-sbom@c18e41a4e3defe6dbf69b594e4d831a89db82ead # v1.0.0
+      with:
+        version: v1
+        args: app -licenses -json -output ${{inputs.image_name}}-${{ env.REPORTS_SERVER_VERSION }}-bom.cdx.json -main ${{inputs.main}}
+
+    - name: Upload SBOM JSON
+      if: ${{inputs.tag == 'release'}}
+      uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+      with:
+        name: ${{inputs.image_name}}-bom-cdx
+        path: ${{inputs.image_name}}-v*-bom.cdx.json
+
+    - name: Extract branch name
+      if: ${{inputs.tag == 'image'}}
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
+
+    - name: Check branch
+      if: ${{inputs.tag == 'image' && steps.extract_branch.outputs.branch != 'main'}}
+      id: check-branch
+      run: |
+        if [[ ${{ steps.extract_branch.outputs.branch }} =~ ^release-[0-9]+\.[0-9]$ ]]; then
+            echo ::set-output name=match::true
+        fi
+    - name: Debug Inputs
+      run: |
+        echo "Tag: ${{ inputs.tag }}"
+        echo "publish_command : ${{ inputs.publish_command}}"
+        echo "Digest Command: ${{ inputs.digest_command }}"
+        echo "Image Name: ${{ inputs.image_name }}"
+        echo "Repository: ${{ github.repository }}"
+        echo "Workflow: ${{ github.workflow }}"
+        echo "SHA: ${{ github.sha }}"
+        echo "secrets.GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
+        echo "github.actor: ${{ github.actor }}"
+        echo "Branch: ${{ steps.extract_branch.outputs.branch }}"
+    - name: Docker images publish
+      if: ${{inputs.tag == 'image' && steps.extract_branch.outputs.branch == 'main'}}
+      run: make ${{inputs.publish_command}} FIPS_ENABLED=1
+
+    - name: get image digest
+      if: ${{inputs.tag == 'image' && steps.extract_branch.outputs.branch == 'main'}}
+      id: get-step-image
+      run: |
+        digest=$(make ${{inputs.digest_command}} FIPS_ENABLED=1) 
+        echo "digest=${digest}" >> $GITHUB_ENV
+    - name: Docker release-images publish
+      if: ${{inputs.tag == 'release' || inputs.tag == 'image' }}
+      run: make ${{inputs.publish_command}} FIPS_ENABLED=1
+
+    - name: Clear Sigstore TUF Cache
+      run: |
+        rm -rf ~/.sigstore
+    - name: Get release-image digest
+      if: ${{ inputs.tag == 'release' || (inputs.tag == 'image' && steps.check-branch.outputs.match == 'true') }}
+      id: get-step
+      run: |
+        digest=$(make ${{inputs.digest_command}} FIPS_ENABLED=1  2>/dev/null || true)
+        if [[ -z "$digest" ]]; then
+          echo "Error: Unable to generate digest. Ensure the repository exists and credentials are valid." >&2
+          exit 1
+        fi
+        echo "digest=$digest" >> $GITHUB_ENV
+        echo "Digest: $digest"
+    - name: Debug Digest
+      run: |
+        echo "Digest: ${{ env.digest }}"
+        if [[ -z "${{ env.digest }}" || "${{ env.digest }}" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]]; then
+          echo "Error: Digest is empty or invalid." >&2
+          exit 1
+        fi
+    - name: Sign image
+      if: ${{ inputs.tag == 'image' && steps.extract_branch.outputs.branch == 'main' }}
+      env:
+        COSIGN_EXPERIMENTAL: "true"
+        COSIGN_REPOSITORY: "ghcr.io/${{ github.repository_owner }}/${{ github.repository }}/signatures"
+      run: |
+        cosign sign --yes \
+          -a "repo=${{ github.repository }}" \
+          -a "workflow=${{ github.workflow }}" \
+          -a "ref=${{ github.sha }}" \
+          ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}@sha256:${digest}
+    - name: Sign release-image
+      if: ${{ inputs.tag == 'release' || (inputs.tag == 'image' && steps.check-branch.outputs.match == 'true') }}
+      env:
+        COSIGN_EXPERIMENTAL: "true"
+        COSIGN_REPOSITORY: "ghcr.io/${{ github.repository_owner }}/${{ github.repository }}/signatures"
+        digest: ${{ env.digest }}
+      run: |
+        echo "Signing with digest: $digest"
+        cosign sign --yes \
+          -a "repo=${{ github.repository }}" \
+          -a "workflow=${{ github.workflow }}" \
+          -a "ref=${{ github.sha }}" \
+          ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}@sha256:$digest
+    - name: Attach SBOM
+      if: ${{inputs.tag == 'release'}}
+      env:
+        COSIGN_REPOSITORY: "ghcr.io/${{ github.repository_owner }}/${{ github.repository }}/sbom"
+      run: cosign attach sbom --sbom ./${{inputs.image_name}}-v*-bom.cdx.json --type cyclonedx  ghcr.io/${{ github.repository_owner }}/${{inputs.image_name}}@sha256:${{ env.digest }}

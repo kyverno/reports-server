@@ -2,7 +2,7 @@
 # @ignored
 templating:
   enabled: false
-
+fipsEnabled: false
 cloudnative-pg:
   crds:
     create: false
@@ -29,7 +29,7 @@ replicaCount: 1
 
 image:
   # -- Image registry
-  registry: ghcr.io
+  registry: reg.nirmata.io
   # -- Image repository
   repository: nirmata/reports-server
   # -- Image pull policy
@@ -224,9 +224,10 @@ apiServicesManagement:
 
   image:
     # -- (string) Image registry
-    registry: docker.io
+    # -- (string) Image registry
+    registry: ghcr.io
     # -- Image repository
-    repository: bitnami/kubectl
+    repository: nirmata/kubectl
     # -- Image tag
     # Defaults to `latest` if omitted
     tag: '1.30.2'

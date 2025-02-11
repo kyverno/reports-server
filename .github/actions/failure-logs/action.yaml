@@ -5,14 +5,16 @@ description: Show pods logs
 runs:
   using: composite
   steps:
-    - shell: bash
-      run: |
-        kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io
-        kubectl -n reports-server get pod
-        kubectl -n reports-server describe pod | grep -i events -A10
-    - shell: bash
-      run: |
-        kubectl -n reports-server logs deploy/reports-server --all-containers -p || true
-    - shell: bash
-      run: |
-        kubectl -n reports-server logs deploy/reports-server --all-containers
+  - shell: bash
+    run: |
+      kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io
+      kubectl -n reports-server get pod
+      kubectl -n reports-server describe pod | grep -i events -A10
+  - shell: bash
+    run: |
+      kubectl -n reports-server logs deploy/reports-server --all-containers -p || true
+  - shell: bash
+    run: |
+      kubectl -n reports-server logs deploy/reports-server --all-containers
+      kubectl -n reports-server logs statefulset/etcd --all-containers
+      kubectl -n reports-server logs job/reports-server-post-install-install-api-services

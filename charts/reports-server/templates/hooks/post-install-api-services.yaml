@@ -39,7 +39,7 @@ spec:
           image: "{{ .Values.apiServicesManagement.image.registry }}/{{ .Values.apiServicesManagement.image.repository }}:{{ .Values.apiServicesManagement.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.apiServicesManagement.image.pullPolicy }}
           command:
-            - /bin/bash
+            - /usr/bin/sh
             - '-c'
             - |-
               set -euo pipefail

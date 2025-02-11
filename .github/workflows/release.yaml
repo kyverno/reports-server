@@ -7,9 +7,24 @@ permissions: {}
 on:
   push:
     tags:
-      - 'v*'
+    - 'v*'
 
 jobs:
+  release-reports-server:
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: ./.github/workflows/reuse.yaml
+    with:
+      publish_command: docker-publish-reports-server-fips
+      digest_command: docker-get-reports-server-digest
+      image_name: reports-server-fips
+      tag: release
+      main: ./
+    secrets:
+      registry_username: ${{ github.actor }}
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
   goreleaser:
     permissions:
       contents: write
