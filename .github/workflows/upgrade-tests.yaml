@@ -1,4 +1,4 @@
-name: Migration Tests
+name: Upgrade Tests
 
 permissions: {}
 
@@ -70,52 +70,44 @@ jobs:
         run: |
           set -e
           kind create cluster --image kindest/node:${{ matrix.k8s-version.version }} --config ./.github/kind.yml
-      - name: Install kyverno
-        run: |
-          set -e
-          export HELM=${{ steps.helm.outputs.helm-path }}
-          curl https://raw.githubusercontent.com/kyverno/kyverno/refs/heads/main/scripts/config/standard/kyverno.yaml > values.yaml
-          helm install kyverno -n kyverno --create-namespace ./kyverno/charts/kyverno --wait --values values.yaml
-      - name: Wait for kyverno ready
-        run: |
-          set -e
-          kubectl wait --namespace kyverno --for=condition=ready pod --selector '!job-name' --timeout=120s
-      # - name: Install PSS policies
-      #   run: |
-      #     set -e
-      #     export HELM=${{ steps.helm.outputs.helm-path }}
-      #     make install-pss-policies
-      - name: API Service status before migation
-        run: |
-          set -e
-          kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io
       - name: Install report server
         run: |
           set -e
-          kubectl create ns reports-server
           export HELM=${{ steps.helm.outputs.helm-path }}
-          make kind-install
+          helm repo add reports-server https://kyverno.github.io/reports-server
+          helm repo update
+          helm install reports-server -n reports-server reports-server/reports-server --create-namespace
       - name: Wait for report server ready
         run: |
           set -e
           kubectl wait --namespace reports-server --for=condition=ready pod --selector '!job-name' --timeout=120s
-          kubectl wait --for condition="available" apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io --timeout=120s
-      - name: Wait for kyverno to pick up the change
+      - name: Install latest kyverno
         run: |
           set -e
-          sleep 600
-      - name: API Service status post migration
+          set -e
+          export HELM=${{ steps.helm.outputs.helm-path }}
+          helm install kyverno -n kyverno --create-namespace ./kyverno/charts/kyverno --wait --values ./testdata/values.yaml
+      - name: Wait for kyverno ready
         run: |
           set -e
-          kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io
-      - name: Install Chainsaw
-        uses: kyverno/action-install-chainsaw@d311eacde764f806c9658574ff64c9c3b21f8397 # v0.2.11
-      - name: Test with Chainsaw
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          kubectl wait --namespace kyverno --for=condition=ready pod --selector '!job-name' --timeout=120s
+      - name: Apply test data
         run: |
           set -e
-          cd ./kyverno/test/conformance/chainsaw/reports && chainsaw test --config ./../../../../../.chainsaw.yaml --exclude-test-regex '^chainsaw$/^admission$/^label'
+          kubectl apply -f ./testdata/report-1.yaml
+          kubectl apply -f ./testdata/report-2.yaml
+          kubectl get polr test-1 test-2
+      - name: Upgrade report server
+        run: |
+          set -e
+          export HELM=${{ steps.helm.outputs.helm-path }}
+          make kind-install
+      - name: Apply more test data
+        run: |
+          set -e
+          kubectl apply -f ./testdata/report-3.yaml
+          kubectl apply -f ./testdata/report-4.yaml
+          kubectl get polr test-3 test-4
       - name: Debug failure
         if: failure()
         uses: ./.github/actions/failure-logs
