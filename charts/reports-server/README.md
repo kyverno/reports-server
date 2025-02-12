@@ -43,7 +43,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | podEnv | object | `{}` | Provide additional environment variables to the pods. Map with the same format as kubernetes deployment spec's env. |
 | securityContext | object | See [values.yaml](values.yaml) | Container security context |
 | livenessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/livez","port":"https","scheme":"HTTPS"},"initialDelaySeconds":20,"periodSeconds":10}` | Liveness probe |
-| readinessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/readyz","port":"https","scheme":"HTTPS"},"initialDelaySeconds":30,"periodSeconds":10}` | Readiness probe |
+| readinessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/readyz","port":"https","scheme":"HTTPS"},"initialDelaySeconds":1,"periodSeconds":5}` | Readiness probe |
 | metrics.enabled | bool | `true` | Enable prometheus metrics |
 | metrics.serviceMonitor.enabled | bool | `false` | Enable service monitor for scraping prometheus metrics |
 | metrics.serviceMonitor.additionalLabels | object | `{}` | Service monitor additional labels |

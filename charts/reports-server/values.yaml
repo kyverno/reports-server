@@ -88,9 +88,9 @@ livenessProbe:
 
 # -- Readiness probe
 readinessProbe:
-  initialDelaySeconds: 30
+  initialDelaySeconds: 1
   failureThreshold: 10
-  periodSeconds: 10
+  periodSeconds: 5
   httpGet:
     path: /readyz
     port: https
