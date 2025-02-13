@@ -56,6 +56,9 @@ serviceAccount:
 # -- Pod annotations
 podAnnotations: {}
 
+# -- Labels to add to resources managed by the chart
+commonLabels: {}
+
 # -- Pod security context
 podSecurityContext:
   fsGroup: 2000
@@ -223,7 +226,7 @@ config:
     sslcert: ""
 
 apiServicesManagement:
-  # -- Create a helm hooks to install and delete api services
+  # -- Create a helm hooks to delete api services on uninstall
   enabled: true
 
   # -- Install api services in manifest

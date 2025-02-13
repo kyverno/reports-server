@@ -5,12 +5,12 @@ linters:
     - bidichk
     - bodyclose
     - containedctx
+    - copyloopvar
     - decorder
     - dogsled
     - durationcheck
     - errcheck
     - errname
-    - exportloopref
     - gci
     # - gochecknoinits
     - gofmt
@@ -30,20 +30,23 @@ linters:
     - nosprintfhostport
     # - paralleltest
     - staticcheck
-    - tenv
     - thelper
     - tparallel
     - typecheck
     - unconvert
     - unused
+    - usetesting
     - wastedassign
     - whitespace
 
 run:
   timeout: 15m
-  skip-files:
+
+issues:
+  exclude-files:
     - ".+\\.generated.go"
 
 output:
-  format: colored-line-number
+  formats:
+    - format: colored-line-number
   sort-results: true

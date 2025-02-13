@@ -19,10 +19,11 @@ spec:
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.apiServicesManagement.podLabels }}
       labels:
+      {{- with .Values.apiServicesManagement.podLabels }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- include "reports-server.labels" . | nindent 8 }}
     spec:
       serviceAccount: {{ include "reports-server.serviceAccountName" . }}
       {{- with .Values.apiServicesManagement.podSecurityContext }}

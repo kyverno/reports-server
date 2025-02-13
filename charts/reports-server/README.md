@@ -40,6 +40,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | serviceAccount.annotations | object | `{}` | Service account annotations |
 | serviceAccount.name | string | `""` | Service account name (required if `serviceAccount.create` is `false`) |
 | podAnnotations | object | `{}` | Pod annotations |
+| commonLabels | object | `{}` | Labels to add to resources managed by the chart |
 | podSecurityContext | object | `{"fsGroup":2000}` | Pod security context |
 | podEnv | object | `{}` | Provide additional environment variables to the pods. Map with the same format as kubernetes deployment spec's env. |
 | securityContext | object | See [values.yaml](values.yaml) | Container security context |
@@ -84,9 +85,9 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.sslrootcert | string | `""` | Database SSL root cert |
 | config.db.sslkey | string | `""` | Database SSL key |
 | config.db.sslcert | string | `""` | Database SSL cert |
-| apiServicesManagement.enabled | bool | `true` | Create a helm hooks to install and delete api services |
-| apiServicesManagement.installApiServices | object | `{"enabled":false,"installEphemeralReportsService":true}` | Install api services in manifest |
-| apiServicesManagement.installApiServices.enabled | bool | `false` | Store reports in reports-server |
+| apiServicesManagement.enabled | bool | `true` | Create a helm hooks to delete api services on uninstall |
+| apiServicesManagement.installApiServices | object | `{"enabled":true,"installEphemeralReportsService":true}` | Install api services in manifest |
+| apiServicesManagement.installApiServices.enabled | bool | `true` | Store reports in reports-server |
 | apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
 | apiServicesManagement.image.registry | string | `"ghcr.io"` | Image registry |
 | apiServicesManagement.image.repository | string | `"nirmata/kubectl"` | Image repository |
