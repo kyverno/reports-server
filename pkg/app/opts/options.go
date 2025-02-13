@@ -3,6 +3,8 @@ package opts
 import (
 	"fmt"
 	"net"
+	"os"
+	"strconv"
 	"strings"
 
 	"github.com/kyverno/reports-server/pkg/api"
@@ -81,11 +83,6 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.BoolVar(&o.EtcdConfig.Insecure, "etcdSkipTLS", true, "Skip TLS verification when connecting to etcd")
 	msfs.BoolVar(&o.ShowVersion, "version", false, "Show version")
 	msfs.StringVar(&o.Kubeconfig, "kubeconfig", o.Kubeconfig, "The path to the kubeconfig used to connect to the Kubernetes API server and the Kubelets (defaults to in-cluster config)")
-	msfs.StringVar(&o.DBHost, "dbhost", "reportsdb.kyverno", "Host url of postgres instance")
-	msfs.IntVar(&o.DBPort, "dbport", 5432, "Port of the postgres instance")
-	msfs.StringVar(&o.DBUser, "dbuser", "postgres", "Username to login into postgres")
-	msfs.StringVar(&o.DBPassword, "dbpassword", "password", "Password to login into postgres")
-	msfs.StringVar(&o.DBName, "dbname", "reportsdb", "Name of the database to store policy reports in")
 	msfs.StringVar(&o.DBSSLMode, "dbsslmode", "disable", "SSL mode of the postgres database.")
 	msfs.StringVar(&o.DBSSLRootCert, "dbsslrootcert", "", "Path to database root cert.")
 	msfs.StringVar(&o.DBSSLKey, "dbsslkey", "", "Path to database ssl key.")
@@ -123,6 +120,10 @@ func (o Options) ServerConfig() (*server.Config, error) {
 		return nil, err
 	}
 	restConfig, err := o.restConfig()
+	if err != nil {
+		return nil, err
+	}
+	err = o.dbConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -213,4 +214,21 @@ func (o Options) restConfig() (*rest.Config, error) {
 		return nil, err
 	}
 	return config, nil
+}
+
+// dbConfig reads the database configuration directly from environment variables
+// because these configurations contain sensitive data, this is not read directly from command line input,
+// to enable usecases of env variable injection, such as using vault-env
+func (o *Options) dbConfig() error {
+	o.DBHost = os.Getenv("DB_HOST")
+	o.DBName = os.Getenv("DB_DATABASE")
+	o.DBUser = os.Getenv("DB_USER")
+	o.DBPassword = os.Getenv("DB_PASSWORD")
+	dbPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		return err
+	} else {
+		o.DBPort = dbPort
+	}
+	return nil
 }

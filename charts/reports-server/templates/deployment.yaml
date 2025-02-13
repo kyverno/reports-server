@@ -23,7 +23,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "reports-server.selectorLabels" . | nindent 8 }}
+        {{- include "reports-server.labels" . | nindent 8 }}
     spec:
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
@@ -45,20 +45,15 @@ spec:
             {{- end }}
             - --etcdEndpoints=https://etcd-0.etcd.{{ $.Release.Namespace }}:2379,https://etcd-1.etcd.{{ $.Release.Namespace }}:2379,https://etcd-2.etcd.{{ $.Release.Namespace }}:2379
             {{- else }}
-            - --dbhost=$(DB_HOST)
-            - --dbport=$(DB_PORT)
-            - --dbuser=$(DB_USER)
-            - --dbpassword=$(DB_PASSWORD)
-            - --dbname=$(DB_DATABASE)
             - --dbsslmode={{ .Values.config.db.sslmode }}
             - --dbsslrootcert={{ .Values.config.db.sslrootcert }}
             - --dbsslkey={{ .Values.config.db.sslkey }}
             - --dbsslcert={{ .Values.config.db.sslcert }}
+            {{- end }}
             - --servicename={{ include "reports-server.fullname" . }}
             - --servicens={{ $.Release.Namespace }}
             - --storereports={{ .Values.apiServicesManagement.installApiServices.enabled }}
             - --storeephemeralreports={{ .Values.apiServicesManagement.installApiServices.installEphemeralReportsService }}
-            {{- end }}
             - --cert-dir=/tmp
             - --secure-port=4443
             {{- if .Values.metrics.enabled }}

@@ -35,6 +35,9 @@ Common labels
 */}}
 {{- define "reports-server.labels" -}}
 helm.sh/chart: {{ include "reports-server.chart" . }}
+{{- with .Values.commonLabels }}
+{{- toYaml .  }}
+{{- end }}
 {{ include "reports-server.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
@@ -46,6 +49,14 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "reports-server.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "reports-server.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "reports-server.commonLabels" -}}
 app.kubernetes.io/name: {{ include "reports-server.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
