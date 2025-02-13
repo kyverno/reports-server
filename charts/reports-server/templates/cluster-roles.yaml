@@ -28,7 +28,6 @@ rules:
     - namespaces
   verbs:
     - get
-{{- if .Values.apiServicesManagement.enabled }}
 - apiGroups:
     - apiregistration.k8s.io
   resources:
@@ -47,7 +46,6 @@ rules:
   resourceNames:
     - v1.reports.kyverno.io
     - v1alpha2.wgpolicyk8s.io
-{{- end }}
 - apiGroups:
     - wgpolicyk8s.io
   resources:

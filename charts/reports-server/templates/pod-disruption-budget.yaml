@@ -4,6 +4,8 @@ kind: PodDisruptionBudget
 metadata:
   name: {{ include "reports-server.fullname" . }}
   namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "reports-server.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:

@@ -9,6 +9,12 @@ kind: PodDisruptionBudget
 metadata:
   name: reports-server
   namespace: reports-server
+  labels:
+    helm.sh/chart: reports-server-0.1.3
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/managed-by: Helm
 spec:
   selector:
     matchLabels:
@@ -322,8 +328,11 @@ spec:
   template:
     metadata:
       labels:
+        helm.sh/chart: reports-server-0.1.3
         app.kubernetes.io/name: reports-server
         app.kubernetes.io/instance: reports-server
+        app.kubernetes.io/version: "v0.1.3"
+        app.kubernetes.io/managed-by: Helm
     spec:
       priorityClassName: system-cluster-critical
       serviceAccountName: reports-server
@@ -332,11 +341,6 @@ spec:
       containers:
         - name: reports-server
           args:
-            - --dbhost=$(DB_HOST)
-            - --dbport=$(DB_PORT)
-            - --dbuser=$(DB_USER)
-            - --dbpassword=$(DB_PASSWORD)
-            - --dbname=$(DB_DATABASE)
             - --dbsslmode=disable
             - --dbsslrootcert=
             - --dbsslkey=
