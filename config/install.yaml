@@ -9,6 +9,12 @@ kind: PodDisruptionBudget
 metadata:
   name: reports-server
   namespace: reports-server
+  labels:
+    helm.sh/chart: reports-server-0.1.3
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/version: "v0.1.3"
+    app.kubernetes.io/managed-by: Helm
 spec:
   selector:
     matchLabels:
