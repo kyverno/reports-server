@@ -1,18 +1,18 @@
 apiVersion: v2
 name: reports-server
 type: application
-version: 0.1.7-rc.1
-appVersion: v0.1.7-rc.1
+version: 0.1.7-rc.2
+appVersion: v0.1.7-rc.2
 keywords:
-  - kubernetes
-  - policy reports storage
-  - postgresql
+- kubernetes
+- policy reports storage
+- postgresql
 sources:
-  - https://github.com/nirmata/reports-server
+- https://github.com/nirmata/reports-server
 maintainers:
-  - name: Nirmata
-    url: https://kyverno.io/
-    email: cncf-kyverno-maintainers@lists.cncf.io
+- name: Nirmata
+  url: https://kyverno.io/
+  email: cncf-kyverno-maintainers@lists.cncf.io
 kubeVersion: ">=1.16.0-0"
 dependencies:
 - condition: postgresql.enabled
