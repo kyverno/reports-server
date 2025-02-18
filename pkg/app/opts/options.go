@@ -206,7 +206,7 @@ func (o Options) restConfig() (*rest.Config, error) {
 // to enable usecases of env variable injection, such as using vault-env
 func (o *Options) dbConfig() error {
 	
-	if o.Etcd == true {
+	if o.Etcd {
 		return nil
 	}
 	o.DBHost = os.Getenv("DB_HOST")
