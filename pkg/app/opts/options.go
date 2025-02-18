@@ -213,15 +213,10 @@ func (o *Options) dbConfig() error {
 	o.DBName = os.Getenv("DB_DATABASE")
 	o.DBUser = os.Getenv("DB_USER")
 	o.DBPassword = os.Getenv("DB_PASSWORD")
-	// Get DB_PORT and provide a default if it's empty
-	dbPortStr := os.Getenv("DB_PORT")
-	if dbPortStr == "" {
-		o.DBPort = 5432 // Default to PostgreSQL's default port; change as needed
+	dbPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		return err
 	} else {
-		dbPort, err := strconv.Atoi(dbPortStr)
-		if err != nil {
-			return fmt.Errorf("invalid DB_PORT: %v", err)
-		}
 		o.DBPort = dbPort
 	}
 	return nil
