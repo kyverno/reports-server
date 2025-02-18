@@ -1,3 +1,4 @@
+{{- $env := .Values.podEnv }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,7 +23,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "reports-server.selectorLabels" . | nindent 8 }}
+        {{- include "reports-server.labels" . | nindent 8 }}
     spec:
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
@@ -44,10 +45,6 @@ spec:
             {{- end }}
             - --etcdEndpoints=https://etcd-0.etcd.{{ $.Release.Namespace }}:2379,https://etcd-1.etcd.{{ $.Release.Namespace }}:2379,https://etcd-2.etcd.{{ $.Release.Namespace }}:2379
             {{- else }}
-            - --dbhost={{ include "reports-server.dbHost" . }}
-            - --dbname={{ include "reports-server.dbName" . }}
-            - --dbuser={{ include "reports-server.dbUser" . }}
-            - --dbpassword={{ include "reports-server.dbPassword" . }}
             - --dbsslmode={{ .Values.config.db.sslmode }}
             - --dbsslrootcert={{ .Values.config.db.sslrootcert }}
             - --dbsslkey={{ .Values.config.db.sslkey }}
@@ -58,29 +55,25 @@ spec:
             {{- if .Values.metrics.enabled }}
             - --authorization-always-allow-paths=/metrics
             {{- end }}
-          {{- if .Values.config.db.secretName }}
           env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: '1'
             - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.config.db.hostSecretKeyName }}
-                  name: {{ .Values.config.db.secretName }}
+              {{- include "reports-server.dbHost" . | nindent 14 }}
+            - name: DB_PORT
+              {{- include "reports-server.dbPort" . | nindent 14 }}
             - name: DB_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.config.db.dbNameSecretKeyName }}
-                  name: {{ .Values.config.db.secretName }}
+              {{- include "reports-server.dbName" . | nindent 14 }}
             - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.config.db.userSecretKeyName }}
-                  name: {{ .Values.config.db.secretName }}
+              {{- include "reports-server.dbUser" . | nindent 14 }}
             - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.config.db.passwordSecretKeyName }}
-                  name: {{ .Values.config.db.secretName }}
-          {{- end}}
+              {{- include "reports-server.dbPassword" . | nindent 14 }}
+          {{- with $env }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:

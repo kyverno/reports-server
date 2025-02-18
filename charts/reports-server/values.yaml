@@ -56,9 +56,15 @@ serviceAccount:
 # -- Pod annotations
 podAnnotations: {}
 
+# -- Labels to add to resources managed by the chart
+commonLabels: {}
+
 # -- Pod security context
 podSecurityContext:
   fsGroup: 2000
+
+# -- Provide additional environment variables to the pods. Map with the same format as kubernetes deployment spec's env.
+podEnv: {}
 
 # -- Container security context
 # @default -- See [values.yaml](values.yaml)
@@ -148,6 +154,16 @@ autoscaling:
   # -- Target Memory utilisation
   targetMemoryUtilizationPercentage: ~
 
+
+# -- Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica
+pdb:
+  # -- Enable PodDisruptionBudget
+  enabled: true
+  # -- minAvailable pods for PDB, cannot be used together with maxUnavailable
+  minAvailable: ~
+  # -- maxUnavailable pods for PDB, will take precedence over minAvailable if both are defined
+  maxUnavailable: 50%
+
 # -- Node selector
 nodeSelector: {}
 
@@ -180,6 +196,11 @@ config:
     # -- The database host will be read from this `key` in the specified Secret, when `db.secretName` is set.
     hostSecretKeyName: "host"
 
+    # -- Database port
+    port: 5432
+    # -- The database port will be read from this `key` in the specified Secret, when `db.secretName` is set.
+    portSecretKeyName: "port"
+
     # -- Database name
     name: reportsdb
     # -- The database name will be read from this `key` in the specified Secret, when `db.secretName` is set.
@@ -210,7 +231,7 @@ config:
     sslcert: ""
 
 apiServicesManagement:
-  # -- Create a helm hooks to install and delete api services
+  # -- Create a helm hooks to delete api services on uninstall
   enabled: true
 
   # -- Install api services in manifest

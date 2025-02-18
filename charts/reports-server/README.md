@@ -40,7 +40,9 @@ helm install reports-server --namespace reports-server --create-namespace report
 | serviceAccount.annotations | object | `{}` | Service account annotations |
 | serviceAccount.name | string | `""` | Service account name (required if `serviceAccount.create` is `false`) |
 | podAnnotations | object | `{}` | Pod annotations |
+| commonLabels | object | `{}` | Labels to add to resources managed by the chart |
 | podSecurityContext | object | `{"fsGroup":2000}` | Pod security context |
+| podEnv | object | `{}` | Provide additional environment variables to the pods. Map with the same format as kubernetes deployment spec's env. |
 | securityContext | object | See [values.yaml](values.yaml) | Container security context |
 | livenessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/livez","port":"https","scheme":"HTTPS"},"initialDelaySeconds":20,"periodSeconds":10}` | Liveness probe |
 | readinessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/readyz","port":"https","scheme":"HTTPS"},"initialDelaySeconds":30,"periodSeconds":10}` | Readiness probe |
@@ -58,6 +60,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 | autoscaling.maxReplicas | int | `100` | Max number of replicas |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation |
 | autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target Memory utilisation |
+| pdb | object | `{"enabled":true,"maxUnavailable":"50%","minAvailable":null}` | Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica |
+| pdb.enabled | bool | `true` | Enable PodDisruptionBudget |
+| pdb.minAvailable | string | `nil` | minAvailable pods for PDB, cannot be used together with maxUnavailable |
+| pdb.maxUnavailable | string | `"50%"` | maxUnavailable pods for PDB, will take precedence over minAvailable if both are defined |
 | nodeSelector | object | `{}` | Node selector |
 | tolerations | list | `[]` | Tolerations |
 | affinity | object | `{}` | Affinity |
@@ -69,6 +75,8 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.secretName | string | `""` | If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`. |
 | config.db.host | string | `"reports-server-cluster-rw.reports-server"` | Database host |
 | config.db.hostSecretKeyName | string | `"host"` | The database host will be read from this `key` in the specified Secret, when `db.secretName` is set. |
+| config.db.port | int | `5432` | Database port                                                                                                                                                                          |
+| config.db.portSecretKeyName | string | `"port"` | The database port will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.name | string | `"reportsdb"` | Database name |
 | config.db.dbNameSecretKeyName | string | `"dbname"` | The database name will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.user | string | `"app"` | Database user |
@@ -79,7 +87,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.sslrootcert | string | `""` | Database SSL root cert |
 | config.db.sslkey | string | `""` | Database SSL key |
 | config.db.sslcert | string | `""` | Database SSL cert |
-| apiServicesManagement.enabled | bool | `true` | Create a helm hooks to install and delete api services |
+| apiServicesManagement.enabled | bool | `true` | Create a helm hooks to delete api services on uninstall |
 | apiServicesManagement.installApiServices | object | `{"enabled":false,"installEphemeralReportsService":true}` | Install api services in manifest |
 | apiServicesManagement.installApiServices.enabled | bool | `false` | Store reports in reports-server |
 | apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |

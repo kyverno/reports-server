@@ -4,6 +4,23 @@ kind: Namespace
 metadata:
   name: reports-server
 ---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: reports-server
+  namespace: reports-server
+  labels:
+    helm.sh/chart: reports-server-0.1.7-rc.2
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/version: "v0.1.7-rc.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: reports-server
+  maxUnavailable: 50%
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -51,6 +68,12 @@ rules:
     - update
     - watch
     - deletecollection
+- apiGroups:
+    - ""
+  resources:
+    - namespaces
+  verbs:
+    - get
 - apiGroups:
     - apiregistration.k8s.io
   resources:
@@ -250,8 +273,11 @@ spec:
   template:
     metadata:
       labels:
+        helm.sh/chart: reports-server-0.1.7-rc.2
         app.kubernetes.io/name: reports-server
         app.kubernetes.io/instance: reports-server
+        app.kubernetes.io/version: "v0.1.7-rc.2"
+        app.kubernetes.io/managed-by: Helm
     spec:
       priorityClassName: system-cluster-critical
       serviceAccountName: reports-server
@@ -266,6 +292,22 @@ spec:
             - --cert-dir=/tmp
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: '1'
+            - name: DB_HOST
+              value: "reports-server-cluster-rw.reports-server"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_DATABASE
+              value: "reportsdb"
+            - name: DB_USER
+              value: "app"
+            - name: DB_PASSWORD
+              value: "password"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
