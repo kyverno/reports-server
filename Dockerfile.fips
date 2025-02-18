@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/oss/go/microsoft/golang:1.23.4-fips-cbl-mariner2.0 AS builder
+FROM mcr.microsoft.com/oss/go/microsoft/golang:1.23.6-fips-cbl-mariner2.0 AS builder
 
 ENV GOPATH=/go \
     PATH=/usr/local/go/bin:/go/bin:/usr/local/bin:/usr/bin:$PATH \

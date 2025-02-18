@@ -1,6 +1,6 @@
 module github.com/kyverno/reports-server
 
-go 1.23.4
+go 1.23.6
 
 require (
 	github.com/kyverno/kyverno v1.13.0
@@ -9,6 +9,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	go.etcd.io/etcd/client/v3 v3.5.16
 	google.golang.org/grpc v1.67.0
+	k8s.io/api v0.31.1
 	k8s.io/apimachinery v0.31.1
 	k8s.io/apiserver v0.31.1
 	k8s.io/client-go v0.31.1
@@ -292,7 +293,6 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.31.1 // indirect
 	k8s.io/apiextensions-apiserver v0.31.1 // indirect
 	k8s.io/cli-runtime v0.31.1 // indirect
 	k8s.io/kms v0.31.1 // indirect
