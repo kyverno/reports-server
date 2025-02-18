@@ -48,74 +48,74 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
-    - ''
+  - ''
   resources:
-    - namespaces
+  - namespaces
   verbs:
-    - get
-    - list
+  - get
+  - list
 - apiGroups:
-    - reports.kyverno.io
+  - reports.kyverno.io
   resources:
-    - ephemeralreports
-    - clusterephemeralreports
+  - ephemeralreports
+  - clusterephemeralreports
   verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-    - deletecollection
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+  - deletecollection
 - apiGroups:
-    - apiregistration.k8s.io
+  - apiregistration.k8s.io
   resources:
-    - apiservices
+  - apiservices
   verbs:
-    - create
+  - create
 - apiGroups:
-    - apiregistration.k8s.io
+  - apiregistration.k8s.io
   resources:
-    - apiservices
+  - apiservices
   verbs:
-    - get
-    - delete
-    - update
-    - patch
+  - get
+  - delete
+  - update
+  - patch
   resourceNames:
-    - v1.reports.kyverno.io
-    - v1alpha2.wgpolicyk8s.io
+  - v1.reports.kyverno.io
+  - v1alpha2.wgpolicyk8s.io
 - apiGroups:
-    - wgpolicyk8s.io
+  - wgpolicyk8s.io
   resources:
-    - policyreports
-    - policyreports/status
-    - clusterpolicyreports
-    - clusterpolicyreports/status
+  - policyreports
+  - policyreports/status
+  - clusterpolicyreports
+  - clusterpolicyreports/status
   verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-    - deletecollection
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+  - deletecollection
 - apiGroups:
-    - ''
-    - events.k8s.io
+  - ''
+  - events.k8s.io
   resources:
-    - events
+  - events
   verbs:
-    - create
-    - patch
+  - create
+  - patch
 - apiGroups:
-    - authorization.k8s.io
+  - authorization.k8s.io
   resources:
-    - subjectaccessreviews
+  - subjectaccessreviews
   verbs:
-    - create
+  - create
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -149,12 +149,12 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
-    - ''
+  - ''
   resources:
-    - pods
+  - pods
   verbs:
-    - get
-    - list
+  - get
+  - list
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -278,73 +278,69 @@ spec:
       securityContext:
         fsGroup: 2000
       containers:
-        - name: reports-server
-          args:
-            - --etcd
-            - --etcdSkipTLS
-            - --etcdEndpoints=https://etcd-0.etcd.reports-server:2379,https://etcd-1.etcd.reports-server:2379,https://etcd-2.etcd.reports-server:2379
-            - --servicename=reports-server
-            - --servicens=reports-server
-            - --storereports=true
-            - --storeephemeralreports=true
-            - --cert-dir=/tmp
-            - --secure-port=4443
-            - --authorization-always-allow-paths=/metrics
-          env:
-            - name: GOMEMLIMIT
-              valueFrom:
-                resourceFieldRef:
-                  resource: limits.memory
-                  divisor: '1'
-            - name: DB_HOST
-              value: "reports-server-postgresql.reports-server"
-            - name: DB_PORT
-              value: "5432"
-            - name: DB_DATABASE
-              value: "reportsdb"
-            - name: DB_USER
-              value: "postgres"
-            - name: DB_PASSWORD
-              value: "reports"
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            privileged: false
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            runAsUser: 1000
-            seccompProfile:
-              type: RuntimeDefault
-          volumeMounts:
-            - mountPath: /tmp
-              name: tmp-dir
-          image: "reg.nirmata.io/nirmata/reports-server:latest"
-          imagePullPolicy: IfNotPresent
-          ports:
-            - name: https
-              containerPort: 4443
-              protocol: TCP
-          livenessProbe:
-            failureThreshold: 10
-            httpGet:
-              path: /livez
-              port: https
-              scheme: HTTPS
-            initialDelaySeconds: 20
-            periodSeconds: 10
-          readinessProbe:
-            failureThreshold: 10
-            httpGet:
-              path: /readyz
-              port: https
-              scheme: HTTPS
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          resources:
-            limits: null
-            requests: null
+      - name: reports-server
+        args:
+        - --etcd
+        - --etcdSkipTLS
+        - --etcdEndpoints=https://etcd-0.etcd.reports-server:2379,https://etcd-1.etcd.reports-server:2379,https://etcd-2.etcd.reports-server:2379
+        - --cert-dir=/tmp
+        - --secure-port=4443
+        - --authorization-always-allow-paths=/metrics
+        env:
+        - name: GOMEMLIMIT
+          valueFrom:
+            resourceFieldRef:
+              resource: limits.memory
+              divisor: '1'
+        - name: DB_HOST
+          value: "reports-server-postgresql.reports-server"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_DATABASE
+          value: "reportsdb"
+        - name: DB_USER
+          value: "postgres"
+        - name: DB_PASSWORD
+          value: "reports"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-dir
+        image: "reg.nirmata.io/nirmata/reports-server:latest"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: https
+          containerPort: 4443
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /livez
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /readyz
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        resources:
+          limits: null
+          requests: null
       volumes:
       - emptyDir: {}
         name: tmp-dir
@@ -421,11 +417,11 @@ spec:
         - name: K8S_NAMESPACE
           valueFrom:
             fieldRef:
-             fieldPath: metadata.namespace
+              fieldPath: metadata.namespace
         - name: HOSTNAME
           valueFrom:
             fieldRef:
-             fieldPath: metadata.name
+              fieldPath: metadata.name
         - name: SERVICE_NAME
           valueFrom:
             fieldRef:
@@ -481,19 +477,19 @@ spec:
         #   mountPath: "/etc/etcd/certs/server"
         #   readOnly: true
       volumes:
-      # - name: etcd-client-tls
-      #   secret:
-      #     secretName: etcd-client-tls
-      #     optional: false
-      # - name: etcd-server-tls
-      #   secret:
-      #     secretName: etcd-server-tls
-      #     optional: false
+        # - name: etcd-client-tls
+        #   secret:
+        #     secretName: etcd-client-tls
+        #     optional: false
+        # - name: etcd-server-tls
+        #   secret:
+        #     secretName: etcd-server-tls
+        #     optional: false
   volumeClaimTemplates:
   - metadata:
       name: etcd-data
     spec:
-      accessModes: ["ReadWriteOnce"]
+      accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
           storage: 1Gi
