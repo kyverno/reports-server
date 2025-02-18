@@ -86,8 +86,8 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.sslkey | string | `""` | Database SSL key |
 | config.db.sslcert | string | `""` | Database SSL cert |
 | apiServicesManagement.enabled | bool | `true` | Create a helm hooks to delete api services on uninstall |
-| apiServicesManagement.installApiServices | object | `{"enabled":true,"installEphemeralReportsService":true}` | Install api services in manifest |
-| apiServicesManagement.installApiServices.enabled | bool | `true` | Store reports in reports-server |
+| apiServicesManagement.installApiServices | object | `{"enabled":false,"installEphemeralReportsService":true}` | Install api services in manifest |
+| apiServicesManagement.installApiServices.enabled | bool | `false` | Store reports in reports-server |
 | apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
 | apiServicesManagement.image.registry | string | `"ghcr.io"` | Image registry |
 | apiServicesManagement.image.repository | string | `"nirmata/kubectl"` | Image repository |
