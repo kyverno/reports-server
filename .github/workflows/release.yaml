@@ -8,6 +8,8 @@ on:
   push:
     tags:
     - 'v*'
+    branches:
+    - workflow-tag-update
 
 jobs:
   release-reports-server:
@@ -37,79 +39,78 @@ jobs:
       digest: ${{ steps.digest.outputs.digest }}
     runs-on: ubuntu-latest
     steps:
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
-        with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: true
-          swap-storage: false
-      - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        with:
-          fetch-depth: 0
-      - name: Fetch all tags
-        run: |
-          set -e
-          git fetch --force --tags
-      - name: Set up Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
-        with:
-          go-version-file: go.mod
-          cache-dependency-path: go.sum
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
-      - name: Install Syft
-        uses: anchore/sbom-action/download-syft@b6a39da80722a2cb0ef5d197531764a89b5d48c3 # v0.15.8
-      - name: Install Ko
-        uses: ko-build/setup-ko@ace48d793556083a76f1e3e6068850c1f4a369aa # v0.6
-      - name: Run GoReleaser
-        id: goreleaser
-        uses: goreleaser/goreleaser-action@7ec5c2b0c6cdda6e8bbb49444bc797dd33d74dd8 # v5.0.0
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --clean --timeout 90m
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload artifacts.json
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # 2.9.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: dist/artifacts.json
-          asset_name: artifacts.json
-          tag: ${{ github.ref }}
-      - name: Upload metadata.json
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # 2.9.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: dist/metadata.json
-          asset_name: metadata.json
-          tag: ${{ github.ref }}
-      - name: Generate subject
-        id: hash
-        env:
-          ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
-        run: |
-          set -euo pipefail
-          checksum_file=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Checksum") | .path')
-          hashes=$(cat $checksum_file | base64 -w0)
-          echo "hashes=$hashes" >> $GITHUB_OUTPUT
-      - name: Image digest
-        id: digest
-        env:
-          ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
-        run: |
-          set -euo pipefail
-          image_and_digest=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Docker Manifest") | .path')
-          image=$(echo "${image_and_digest}" | cut -d'@' -f1 | cut -d':' -f1)
-          digest=$(echo "${image_and_digest}" | cut -d'@' -f2)
-          echo "image=$image" >> "$GITHUB_OUTPUT"
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
-
+    - name: Free disk space
+      uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+      with:
+        tool-cache: true
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: false
+        docker-images: true
+        swap-storage: false
+    - name: Checkout
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        fetch-depth: 0
+    - name: Fetch all tags
+      run: |
+        set -e
+        git fetch --force --tags
+    - name: Set up Go
+      uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+      with:
+        go-version-file: go.mod
+        cache-dependency-path: go.sum
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
+    - name: Install Syft
+      uses: anchore/sbom-action/download-syft@b6a39da80722a2cb0ef5d197531764a89b5d48c3 # v0.15.8
+    - name: Install Ko
+      uses: ko-build/setup-ko@ace48d793556083a76f1e3e6068850c1f4a369aa # v0.6
+    - name: Run GoReleaser
+      id: goreleaser
+      uses: goreleaser/goreleaser-action@7ec5c2b0c6cdda6e8bbb49444bc797dd33d74dd8 # v5.0.0
+      with:
+        distribution: goreleaser
+        version: latest
+        args: release --clean --timeout 90m
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload artifacts.json
+      uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # 2.9.0
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: dist/artifacts.json
+        asset_name: artifacts.json
+        tag: ${{ github.ref }}
+    - name: Upload metadata.json
+      uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # 2.9.0
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: dist/metadata.json
+        asset_name: metadata.json
+        tag: ${{ github.ref }}
+    - name: Generate subject
+      id: hash
+      env:
+        ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
+      run: |
+        set -euo pipefail
+        checksum_file=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Checksum") | .path')
+        hashes=$(cat $checksum_file | base64 -w0)
+        echo "hashes=$hashes" >> $GITHUB_OUTPUT
+    - name: Image digest
+      id: digest
+      env:
+        ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
+      run: |
+        set -euo pipefail
+        image_and_digest=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Docker Manifest") | .path')
+        image=$(echo "${image_and_digest}" | cut -d'@' -f1 | cut -d':' -f1)
+        digest=$(echo "${image_and_digest}" | cut -d'@' -f2)
+        echo "image=$image" >> "$GITHUB_OUTPUT"
+        echo "digest=$digest" >> "$GITHUB_OUTPUT"
   # provenance:
   #   needs:
   #     - goreleaser
