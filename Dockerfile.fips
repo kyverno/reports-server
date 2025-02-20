@@ -23,7 +23,7 @@ ARG TARGETARCH
 RUN GOOS=linux GOARCH=$TARGETARCH \
     BUILD_TAGS=fips GOEXPERIMENT=systemcrypto \
     CGO_ENABLED=1 FIPS_ENABLED=1 \
-    go build -p 1  -ldflags="-s -w" -o /app/reports-server ./
+    go build -ldflags="-s -w" -o /app/reports-server ./
 
 RUN groupadd --system appgroup && \
     useradd --system --uid 1001 --gid appgroup --home-dir /nonexistent --shell /usr/sbin/nologin appuser && \
