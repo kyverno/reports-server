@@ -116,9 +116,12 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    # - name: Set up QEMU
-    #   # if: runner.arch != 'X64' # Only set up QEMU on non-x86_64 architectures
-    #   uses: docker/setup-qemu-action@53851d14592bedcffcf25ea515637cff71ef929a # v3.3.0
+    - name: Set up binfmt
+      uses: docker/setup-buildx-action@v3.8.0
+
+    - name: Install binfmt
+      run: |
+        docker run --rm --privileged tonistiigi/binfmt --install all
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 #v3.8.0
       id: buildx
