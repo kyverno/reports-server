@@ -297,7 +297,7 @@ ko-publish-reports-server: ko-login ## Build and publish reports-server image (w
 FIPS_ENABLED := 0 # Default to FIPS disabled
 
 ifeq ($(FIPS_ENABLED), 1)
-IMAGE_TAG    := $(shell git describe --tags --abbrev=0)
+IMAGE_TAG    := $(shell git describe --tags --match "v*.*.*" --abbrev=0)
 LD_FLAGS     :="-s -w"
 endif
 
