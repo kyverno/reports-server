@@ -35,64 +35,11 @@ jobs:
         echo "Detected architecture: $ARCH"
         echo "ARCH=$ARCH" >> $GITHUB_ENV
 
-    - name: Print Disk & Memory Usage (Before Cleanup)
-      run: |
-        echo "==== Disk Usage Before Cleanup ($ARCH) ===="
-        df -h
-        echo "==== Memory Usage Before Cleanup ($ARCH) ===="
-        free -h
-        echo "==== Docker Disk Usage Before Cleanup ($ARCH) ===="
-        docker system df
-
-    - name: Cleanup Space on Runner
-      run: |
-        echo "Running cleanup for $ARCH..."
-
-        # Remove unnecessary packages
-        sudo apt-get autoremove -y
-        sudo apt-get clean
-
-        # Remove dangling Docker images & containers
-        # docker system prune -af --volumes
-
-        # Remove cached Go modules
-        go clean -modcache
-
-        # Remove unnecessary system logs
-        sudo journalctl --vacuum-time=1s
-
-        # Remove npm cache (if applicable)
-        rm -rf ~/.npm
-        rm -rf ~/.cache
-
-        # Extra cleanup for ARM64 (if needed)
-        if [[ "$ARCH" == "aarch64" ]]; then
-          echo "Applying additional cleanup for ARM64..."
-          # Add ARM64-specific cleanup commands here if needed
-        fi
-
-    - name: Print Disk & Memory Usage (After Cleanup)
-      run: |
-        echo "==== Disk Usage After Cleanup ($ARCH) ===="
-        df -h
-        echo "==== Memory Usage After Cleanup ($ARCH) ===="
-        free -h
-        echo "==== Docker Disk Usage After Cleanup ($ARCH) ===="
-        docker system df
-
     - name: Checkout release
       if: ${{ inputs.tag == 'release'}}
       uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2.4.0
       with:
         fetch-depth: 0
-
-    - name: Checkout image
-      if: ${{ inputs.tag == 'image'}}
-      uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2.4.0
-
-    - name: Unshallow
-      if: ${{ inputs.tag == 'image'}}
-      run: git fetch --prune --unshallow --tags
 
     - name: Set up Go
       uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
@@ -156,12 +103,6 @@ jobs:
         name: ${{inputs.image_name}}-bom-cdx
         path: ${{inputs.image_name}}-v*-bom.cdx.json
 
-    - name: Extract branch name
-      if: ${{inputs.tag == 'image'}}
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: extract_branch
-
     - name: Check branch
       if: ${{inputs.tag == 'image' && steps.extract_branch.outputs.branch != 'main'}}
       id: check-branch
@@ -169,18 +110,6 @@ jobs:
         if [[ ${{ steps.extract_branch.outputs.branch }} =~ ^release-[0-9]+\.[0-9]$ ]]; then
             echo ::set-output name=match::true
         fi
-    - name: Debug Inputs
-      run: |
-        echo "Tag: ${{ inputs.tag }}"
-        echo "publish_command : ${{ inputs.publish_command}}"
-        echo "Digest Command: ${{ inputs.digest_command }}"
-        echo "Image Name: ${{ inputs.image_name }}"
-        echo "Repository: ${{ github.repository }}"
-        echo "Workflow: ${{ github.workflow }}"
-        echo "SHA: ${{ github.sha }}"
-        echo "secrets.GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
-        echo "github.actor: ${{ github.actor }}"
-        echo "Branch: ${{ steps.extract_branch.outputs.branch }}"
     - name: Docker images publish
       if: ${{inputs.tag == 'image' && steps.extract_branch.outputs.branch == 'main'}}
       run: make ${{inputs.publish_command}} FIPS_ENABLED=1
@@ -192,14 +121,14 @@ jobs:
         digest=$(make ${{inputs.digest_command}} FIPS_ENABLED=1) 
         echo "digest=${digest}" >> $GITHUB_ENV
     - name: Docker release-images publish
-      if: ${{inputs.tag == 'release' || inputs.tag == 'image' }}
+      if: ${{inputs.tag == 'release' }}
       run: make ${{inputs.publish_command}} FIPS_ENABLED=1
 
     - name: Clear Sigstore TUF Cache
       run: |
         rm -rf ~/.sigstore
     - name: Get release-image digest
-      if: ${{ inputs.tag == 'release' || (inputs.tag == 'image' && steps.check-branch.outputs.match == 'true') }}
+      if: ${{ inputs.tag == 'release' }}
       id: get-step
       run: |
         digest=$(make ${{inputs.digest_command}} FIPS_ENABLED=1  2>/dev/null || true)
@@ -216,17 +145,6 @@ jobs:
           echo "Error: Digest is empty or invalid." >&2
           exit 1
         fi
-    - name: Sign image
-      if: ${{ inputs.tag == 'image' && steps.extract_branch.outputs.branch == 'main' }}
-      env:
-        COSIGN_EXPERIMENTAL: "true"
-        COSIGN_REPOSITORY: "ghcr.io/${{ github.repository_owner }}/${{ github.repository }}/signatures"
-      run: |
-        cosign sign --yes \
-          -a "repo=${{ github.repository }}" \
-          -a "workflow=${{ github.workflow }}" \
-          -a "ref=${{ github.sha }}" \
-          ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}@sha256:${digest}
     - name: Sign release-image
       if: ${{ inputs.tag == 'release' || (inputs.tag == 'image' && steps.check-branch.outputs.match == 'true') }}
       env:
