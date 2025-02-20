@@ -8,8 +8,6 @@ on:
   push:
     tags:
     - 'v*'
-    branches:
-    - workflow-tag-update
 
 jobs:
   release-reports-server:
