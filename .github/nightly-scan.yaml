@@ -1,0 +1,97 @@
+name: Nightly Scan
+on:
+  workflow_dispatch:
+    inputs:
+  schedule:
+    - cron: "0 5 * * *" # UTC
+
+env:
+  REGISTRY: ghcr.io
+  GH_DEP_USERNAME: ${{secrets.DEPLOYMENT_USERNAME}}
+  GH_DEP_PAT: ${{secrets.DEPLOYMENT_PAT}}
+
+jobs:
+  configure:
+    runs-on: blacksmith-2vcpu-ubuntu-2204 
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout to repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        
+      - name: Get config file 
+        run: |
+          curl -H "Authorization: token ${{ secrets.DEPLOYMENT_PAT }}" -o ./config.json -s https://raw.githubusercontent.com/nirmata/reusable-workflows/main/tags/nctl_config.json
+          cat ./config.json
+
+      - name: Set matrix variable
+        id: set-matrix
+        run: |
+          echo "::set-output name=matrix::$(jq -c . < ./config.json)"
+
+  publish-scan-branch:
+    name: Publish
+    needs: configure
+    runs-on: blacksmith-2vcpu-ubuntu-2204
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      matrix: ${{ fromJson(needs.configure.outputs.matrix) }}
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ matrix.rs-ref }}
+          fetch-depth: 0
+
+      - name: Setup ssh config
+        run: |
+          git config --global url.https://$GH_DEP_USERNAME:$GH_DEP_PAT@github.com/.insteadOf https://github.com/
+
+      - name: Setup Go
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Set image name
+        run: |
+          echo IMAGE_NAME="nirmata/nightly-rs-${{ matrix.rs-ref }}" >> $GITHUB_ENV
+      
+      - name: Install KO
+        uses: ko-build/setup-ko@3aebd0597dc1e9d1a26bcfdb7cbeb19c131d3037 # v0.7
+
+      - name: Log into registry ${{env.REGISTRY}}
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ${{env.REGISTRY}}
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Build and Push
+        run: |
+          make build-ko KO_REGISTRY=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: image scanning
+        uses: nirmata/reusable-workflows/.github/actions/image-scanning@main
+        with:
+          pcc_url: ${{ secrets.PCC_URL }}
+          pcc_user: ${{ secrets.PCC_USER }}
+          pcc_pass: ${{ secrets.PCC_PASS }}
+          image_name: ${{env.REGISTRY}}/${{env.IMAGE_NAME}}:latest
+
+      - name: Notify failure status
+        if: always() && (job.status == 'failure')
+        uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 #v2.3.2
+        env:
+          SLACK_CHANNEL: cve-nightly-scan-alerts
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: https://cdn-icons-png.flaticon.com/512/25/25231.png
+          SLACK_MESSAGE: Repository - ${{github.repository}} - ${{ matrix.rs-ref }} Environment - nightly-scan
+          SLACK_TITLE: CVE discovered
+          SLACK_USERNAME: Github Actions
+          SLACK_WEBHOOK: ${{ secrets.NIGHTLY_SCAN_WEBHOOK }}  
