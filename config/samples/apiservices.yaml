@@ -4,8 +4,6 @@ kind: APIService
 metadata:
   name: v1alpha2.wgpolicyk8s.io
   namespace: kyverno
-  labels:
-    kube-aggregator.kubernetes.io/automanaged: "false"
 spec:
   group: wgpolicyk8s.io
   groupPriorityMinimum: 100
@@ -21,8 +19,6 @@ kind: APIService
 metadata:
   name: v1.reports.kyverno.io
   namespace: kyverno
-  labels:
-    kube-aggregator.kubernetes.io/automanaged: "false"
 spec:
   group: reports.kyverno.io
   groupPriorityMinimum: 100
