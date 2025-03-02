@@ -18,7 +18,7 @@ func BuildApiServices(serviceName string, serviceNamespace string) APIServices {
 			ObjectMeta: v1.ObjectMeta{
 				Name: "v1alpha2.wgpolicyk8s.io",
 				Labels: map[string]string{
-					"app.kubernetes.io/managed-by":              serviceName,
+					"app.kubernetes.io/managed-by": serviceName,
 				},
 			},
 			Spec: apiregistrationv1.APIServiceSpec{
@@ -37,7 +37,7 @@ func BuildApiServices(serviceName string, serviceNamespace string) APIServices {
 			ObjectMeta: v1.ObjectMeta{
 				Name: "v1.reports.kyverno.io",
 				Labels: map[string]string{
-					"app.kubernetes.io/managed-by":              serviceName,
+					"app.kubernetes.io/managed-by": serviceName,
 				},
 			},
 			Spec: apiregistrationv1.APIServiceSpec{
