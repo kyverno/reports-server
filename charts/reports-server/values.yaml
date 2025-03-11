@@ -186,6 +186,7 @@ config:
     enabled: true
     endpoints: ~
     insecure: true
+    storage: 1Gi
 
   db:
     # -- If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`.
