@@ -196,6 +196,7 @@ verify-codegen: codegen ## Verify all generated code and docs are up to date
 
 KIND_IMAGE     ?= kindest/node:v1.30.0
 KIND_NAME      ?= kind
+ETCD_STORAGE_SIZE ?= 8Gi
 
 .PHONY: kind-create
 kind-create: $(KIND) ## Create kind cluster
@@ -218,7 +219,8 @@ kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and depl
 	@$(HELM) upgrade --install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
 		--set image.registry=$(KO_REGISTRY) \
 		--set image.repository=$(PACKAGE) \
-		--set image.tag=$(GIT_SHA)
+		--set image.tag=$(GIT_SHA) \
+		--set config.etcd.storage=$(ETCD_STORAGE_SIZE)
 
 .PHONY: kind-install-etcd
 kind-install-etcd: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
@@ -228,13 +230,15 @@ kind-install-etcd: $(HELM) kind-load ## Build image, load it in kind cluster and
 		--set config.etcd.enabled=true \
 		--set postgresql.enabled=false \
 		--set image.repository=$(PACKAGE) \
-		--set image.tag=$(GIT_SHA)
+		--set image.tag=$(GIT_SHA) \
+		--set config.etcd.storage=$(ETCD_STORAGE_SIZE)
  
 .PHONY: kind-apply
 kind-apply: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
 	@echo Install chart... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server \
 		--set image.registry=$(KO_REGISTRY) \
+		--set config.etcd.storage=$(ETCD_STORAGE_SIZE) \
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA) \
 			| kubectl apply -f -
@@ -244,6 +248,7 @@ kind-migrate: $(HELM) kind-load ## Build image, load it in kind cluster and depl
 	@echo Install chart... >&2
 	@$(HELM) upgrade --install reports-server --namespace reports-server --create-namespace --wait ./charts/reports-server \
 		--set image.registry=$(KO_REGISTRY) \
+		--set config.etcd.storage=$(ETCD_STORAGE_SIZE) \
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA) \
 		--set apiServicesManagement.installApiServices.enabled=false
@@ -253,6 +258,7 @@ kind-apply-api-services: $(HELM) kind-load ## Build image, load it in kind clust
 	@echo Install api services... >&2
 	@$(HELM) template reports-server --namespace reports-server ./charts/reports-server \
 		--set image.registry=$(KO_REGISTRY) \
+		--set config.etcd.storage=$(ETCD_STORAGE_SIZE) \
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA) \
 			| kubectl apply -f -

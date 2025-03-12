@@ -205,7 +205,6 @@ func (o Options) restConfig() (*rest.Config, error) {
 // because these configurations contain sensitive data, this is not read directly from command line input,
 // to enable usecases of env variable injection, such as using vault-env
 func (o *Options) dbConfig() error {
-	
 	if o.Etcd {
 		return nil
 	}
