@@ -186,6 +186,11 @@ config:
     enabled: true
     endpoints: ~
     insecure: true
+    # Storage configuration for etcd persistence:
+    # - Default: If not specified, the chart will allocate 1Gi of storage.
+    # - Override: Set a custom storage size (e.g., "2Gi", "5Gi") as needed.
+    # This value defines the size of the persistent volume claim (PVC) for etcd.
+    storage:
 
   db:
     # -- If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`.
