@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -40,9 +41,15 @@ type server struct {
 	storage storage.Interface
 }
 
-// RunUntil starts background scraping goroutine and runs apiserver serving metrics.
+// RunUntil starts the background scraping goroutine and runs the apiserver serving metrics.
 func (s *server) RunUntil(stopCh <-chan struct{}) error {
-	return s.GenericAPIServer.PrepareRun().Run(stopCh)
+	// Create a context that will be canceled when stopCh is closed.
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		<-stopCh
+		cancel()
+	}()
+	return s.GenericAPIServer.PrepareRun().RunWithContext(ctx)
 }
 
 func (s *server) RegisterProbes() error {
