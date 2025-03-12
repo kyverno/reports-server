@@ -498,7 +498,7 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
-          storage: 1Gi
+          storage: {{ .Values.config.etcd.storage | default "1Gi" }}
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
