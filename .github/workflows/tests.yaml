@@ -16,6 +16,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  GOPRIVATE: github.com/nirmata
+  GH_DEP_USERNAME: ${{secrets.DEPLOYMENT_USERNAME}}
+  GH_DEP_PAT: ${{secrets.DEPLOYMENT_PAT}}
+
 jobs:
   unit-tests:
     runs-on: ubuntu-latest

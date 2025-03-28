@@ -16,6 +16,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  GOPRIVATE: github.com/nirmata
+  GH_DEP_USERNAME: ${{secrets.DEPLOYMENT_USERNAME}}
+  GH_DEP_PAT: ${{secrets.DEPLOYMENT_PAT}}
+
 jobs:
   required:
     runs-on: ubuntu-latest
@@ -26,6 +31,8 @@ jobs:
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
+      - name: Git config
+        run: git config --global url.https://$GH_DEP_USERNAME:$GH_DEP_PAT@github.com/.insteadOf https://github.com/
       - name: golangci-lint
         uses: golangci/golangci-lint-action@3cfe3a4abbb849e10058ce4af15d205b6da42804 # v4.0.0
         with:
