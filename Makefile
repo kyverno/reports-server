@@ -71,6 +71,7 @@ LOCAL_PLATFORM := linux/$(GOARCH)
 KO_REGISTRY    := ko.local
 KO_CACHE       ?= /tmp/ko-cache
 BIN            := reports-server
+GITHUB_TOKEN   ?= ""
 ifdef VERSION
 LD_FLAGS       := "-s -w -X $(PACKAGE)/pkg/version.BuildVersion=$(VERSION)"
 else
@@ -325,7 +326,7 @@ docker-buildx-builder:
 reports-server-fips: fmt vet
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=$(CGO_ENABLED) go build ./ -o $(PWD)/$(REPO_REPORTS_SERVER_FIPS) -tags "$(BUILD_TAGS)" -ldflags="$(LD_FLAGS)" $(PWD)/
 
-docker-publish-reports-server-fips: docker-buildx-builder docker-build-and-push-reports-server-fips
+docker-publish-reports-server-fips: docker-build-and-push-reports-server-fips
 
 docker-build-and-push-reports-server-fips: docker-buildx-builder
 	@docker buildx build --file $(PWD)/Dockerfile.fips \
@@ -334,6 +335,7 @@ docker-build-and-push-reports-server-fips: docker-buildx-builder
 		--tag $(REPO_REPORTS_SERVER_FIPS):$(IMAGE_TAG) \
 		. \
 		--build-arg LD_FLAGS=$(LD_FLAGS) \
+		--build-arg GITHUB_TOKEN=$(GITHUB_TOKEN) \
 		--push
 
 docker-get-reports-server-digest:

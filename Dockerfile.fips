@@ -20,6 +20,11 @@ COPY . .
 ARG LD_FLAGS
 
 ARG TARGETARCH
+
+ARG GITHUB_TOKEN
+
+RUN git config --global url."https://$GITHUB_TOKEN@github.com/".insteadOf "https://github.com/"
+
 RUN GOOS=linux GOARCH=$TARGETARCH \
     BUILD_TAGS=fips GOEXPERIMENT=systemcrypto \
     CGO_ENABLED=1 FIPS_ENABLED=1 \
