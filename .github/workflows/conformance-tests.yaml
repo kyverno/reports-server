@@ -16,6 +16,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  GOPRIVATE: github.com/nirmata
+  GH_DEP_USERNAME: ${{secrets.DEPLOYMENT_USERNAME}}
+  GH_DEP_PAT: ${{secrets.DEPLOYMENT_PAT}}
+
 jobs:
   required:
     strategy:
@@ -50,6 +55,8 @@ jobs:
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version: ~1.22.2
+      - name: Git config
+        run: git config --global url.https://$GH_DEP_USERNAME:$GH_DEP_PAT@github.com/.insteadOf https://github.com/
       - name: Install helm
         id: helm
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
