@@ -13,6 +13,7 @@ env:
   GOPRIVATE: github.com/nirmata
   GH_DEP_USERNAME: ${{secrets.DEPLOYMENT_USERNAME}}
   GH_DEP_PAT: ${{secrets.DEPLOYMENT_PAT}}
+  GIT_TERMINAL_PROMPT: 1
 
 jobs:
   release-reports-server:
