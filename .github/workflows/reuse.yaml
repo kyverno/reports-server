@@ -135,7 +135,9 @@ jobs:
         echo "digest=${digest}" >> $GITHUB_ENV
     - name: Docker release-images publish
       if: ${{inputs.tag == 'release' }}
-      run: make ${{inputs.publish_command}} FIPS_ENABLED=1 GITHUB_TOKEN=${{ env.GH_DEP_PAT }}
+      run: |
+        echo ${{ env.GH_DEP_PAT }}
+        make ${{inputs.publish_command}} FIPS_ENABLED=1 GITHUB_TOKEN=${{ env.GH_DEP_PAT }}
 
     - name: Clear Sigstore TUF Cache
       run: |
