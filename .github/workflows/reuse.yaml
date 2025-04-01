@@ -125,7 +125,7 @@ jobs:
         fi
     - name: Docker images publish
       if: ${{inputs.tag == 'image' && steps.extract_branch.outputs.branch == 'main'}}
-      run: make ${{inputs.publish_command}} FIPS_ENABLED=1  GITHUB_TOKEN=$GH_DEP_PAT
+      run: make ${{inputs.publish_command}} FIPS_ENABLED=1  GITHUB_TOKEN=${{ env.GH_DEP_PAT }}
 
     - name: get image digest
       if: ${{inputs.tag == 'image' && steps.extract_branch.outputs.branch == 'main'}}
@@ -135,7 +135,7 @@ jobs:
         echo "digest=${digest}" >> $GITHUB_ENV
     - name: Docker release-images publish
       if: ${{inputs.tag == 'release' }}
-      run: make ${{inputs.publish_command}} FIPS_ENABLED=1 GITHUB_TOKEN=$GH_DEP_PAT
+      run: make ${{inputs.publish_command}} FIPS_ENABLED=1 GITHUB_TOKEN=${{ env.GH_DEP_PAT }}
 
     - name: Clear Sigstore TUF Cache
       run: |
