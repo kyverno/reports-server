@@ -11,8 +11,8 @@ on:
 
 env:
   GOPRIVATE: github.com/nirmata
-  GH_DEP_USERNAME: ${{secrets.DEPLOYMENT_USERNAME}}
-  GH_DEP_PAT: ${{secrets.DEPLOYMENT_PAT}}
+  GH_DEP_USERNAME: ${{ secrets.DEPLOYMENT_USERNAME }}
+  GH_DEP_PAT: ${{ secrets.DEPLOYMENT_PAT }}
   GIT_TERMINAL_PROMPT: 1
 
 jobs:
@@ -31,6 +31,8 @@ jobs:
     secrets:
       registry_username: ${{ github.actor }}
       registry_password: ${{ secrets.GITHUB_TOKEN }}
+      deployment_username: $GH_DEP_USERNAME
+      deployment_pat: $GH_DEP_PAT
   goreleaser:
     permissions:
       contents: write

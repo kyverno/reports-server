@@ -21,11 +21,15 @@ on:
         required: true
       registry_password:
         required: true
+      deployment_username:
+        required: true
+      deployment_pat:
+        required: true
 
 env:
   GOPRIVATE: github.com/nirmata
-  GH_DEP_USERNAME: ${{ secrets.DEPLOYMENT_USERNAME }}
-  GH_DEP_PAT: ${{ secrets.DEPLOYMENT_PAT}}
+  GH_DEP_USERNAME: ${{ secrets.deployment_username }}
+  GH_DEP_PAT: ${{ secrets.deployment_pat }}
 
 jobs:
   build:
