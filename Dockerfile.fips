@@ -4,6 +4,7 @@ ENV GOPATH=/go \
     PATH=/usr/local/go/bin:/go/bin:/usr/local/bin:/usr/bin:$PATH \
     CGO_ENABLED=1 \
     FIPS_ENABLED=1
+    GIT_TERMINAL_PROMPT=1
 
 RUN mkdir -p /go && \
     tdnf install -y \
@@ -28,6 +29,7 @@ RUN git config --global url."https://$GITHUB_TOKEN@github.com/".insteadOf "https
 RUN GOOS=linux GOARCH=$TARGETARCH \
     BUILD_TAGS=fips GOEXPERIMENT=systemcrypto \
     CGO_ENABLED=1 FIPS_ENABLED=1 \
+
     go build -ldflags="-s -w" -o /app/reports-server ./
 
 RUN groupadd --system appgroup && \
