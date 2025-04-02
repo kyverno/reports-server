@@ -38,7 +38,7 @@ jobs:
       - id: process
         run: |
           # Process the org secret if needed
-          echo "result=${{ secrets.DEPLOYMENT_PAT }}" >> $GITHUB_OUTPUT
+          echo "result=${{ secrets.deployment_pat }}" >> $GITHUB_OUTPUT
   build:
     needs: process-secret
     runs-on: ubuntu-latest
