@@ -31,8 +31,8 @@ jobs:
     secrets:
       registry_username: ${{ github.actor }}
       registry_password: ${{ secrets.GITHUB_TOKEN }}
-      deployment_username: $GH_DEP_USERNAME
-      deployment_pat: $GH_DEP_PAT
+      deployment_username: ${{ secrets.DEPLOYMENT_USERNAME }}
+      deployment_pat: ${{ secrets.DEPLOYMENT_PAT }}
   goreleaser:
     permissions:
       contents: write
