@@ -4,8 +4,7 @@ ENV GOPATH=/go \
     PATH=/usr/local/go/bin:/go/bin:/usr/local/bin:/usr/bin:$PATH \
     CGO_ENABLED=1 \
     FIPS_ENABLED=1\
-    GIT_TERMINAL_PROMPT=1\
-    GOPRIVATE=github.com/nirmata
+    GIT_TERMINAL_PROMPT=1
 
 RUN mkdir -p /go && \
     tdnf install -y \
