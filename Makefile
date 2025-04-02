@@ -71,7 +71,6 @@ LOCAL_PLATFORM := linux/$(GOARCH)
 KO_REGISTRY    := ko.local
 KO_CACHE       ?= /tmp/ko-cache
 BIN            := reports-server
-GITHUB_TOKEN   ?= ""
 ifdef VERSION
 LD_FLAGS       := "-s -w -X $(PACKAGE)/pkg/version.BuildVersion=$(VERSION)"
 else
@@ -335,7 +334,7 @@ docker-build-and-push-reports-server-fips: docker-buildx-builder
 		--tag $(REPO_REPORTS_SERVER_FIPS):$(IMAGE_TAG) \
 		. \
 		--build-arg LD_FLAGS=$(LD_FLAGS) \
-		--build-arg GITHUB_TOKEN=$(GITHUB_TOKEN) \
+		--build-arg GITHUB_TOKEN=${GITHUB_PAT} \
 		--push
 
 docker-get-reports-server-digest:
