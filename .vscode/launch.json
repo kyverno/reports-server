@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Reports Server",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": [
+                "--kubeconfig=/Users/Puneet/.kube/config"
+            ],
+            "env": {
+                "DB_HOST": "10.1.103.119 10.1.239.51",
+                "DB_DATABASE": "kyverno_db",
+                "DB_USER": "postgres",
+                "DB_PASSWORD": "Test123$",
+                "DB_PORT": "5432",
+                "DB_SSLMODE": "disable",
+                "KUBERNETES_SERVICE_HOST": "127.0.0.1",
+                "KUBERNETES_SERVICE_PORT": "59269"
+            }
+        }
+    ]
+} 

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	_ "github.com/jackc/pgx/v5/stdlib" // Import the pgx driver
 	"github.com/kyverno/reports-server/pkg/storage/api"
 	"k8s.io/klog/v2"
 )
@@ -139,7 +140,7 @@ func (p PostgresConfig) String() string {
 	hostStr := strings.Join(hostList, ",")
 
 	// Build URL format connection string
-	url := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
+	url := fmt.Sprintf("pgx://%s:%s@%s/%s?sslmode=%s",
 		p.User, p.Password, hostStr, p.DBname, p.SSLMode)
 
 	// Add SSL parameters if provided
