@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/kyverno/reports-server/pkg/storage/api"
 	"k8s.io/klog/v2"
 )

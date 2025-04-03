@@ -8,6 +8,7 @@ on:
   push:
     tags:
       - 'reports-server-chart-*'
+      - 'test-chart-*'
 
 jobs:
   helm-tests:
