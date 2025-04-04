@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
+	_ "github.com/jackc/pgx/v5/stdlib" // Import the pgx driver
 	"github.com/kyverno/reports-server/pkg/storage/api"
-	_ "github.com/lib/pq"
 	"k8s.io/klog/v2"
 )
 
@@ -18,7 +19,7 @@ const (
 
 func New(config *PostgresConfig, clusterId string) (api.Storage, error) {
 	klog.Infof("starting postgres db")
-	db, err := sql.Open("postgres", config.String())
+	db, err := sql.Open("pgx", config.String())
 	if err != nil {
 		klog.Error("failed to open db", err.Error())
 		return nil, err
@@ -122,7 +123,27 @@ type PostgresConfig struct {
 }
 
 func (p PostgresConfig) String() string {
-	return fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=%s sslrootcert=%s sslkey=%s sslcert=%s",
-		p.Host, p.Port, p.User, p.Password, p.DBname, p.SSLMode, p.SSLRootCert, p.SSLKey, p.SSLCert)
+
+	if p.Port != 0 {
+		hosts := strings.Split(p.Host, ",")
+		for i, host := range hosts {
+			hosts[i] = fmt.Sprintf("%s:%d", host, p.Port)
+		}
+		p.Host = strings.Join(hosts, ",")
+	}
+
+	url := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
+		p.User, p.Password, p.Host, p.DBname, p.SSLMode)
+
+	if p.SSLRootCert != "" {
+		url += fmt.Sprintf("&sslrootcert=%s", p.SSLRootCert)
+	}
+	if p.SSLKey != "" {
+		url += fmt.Sprintf("&sslkey=%s", p.SSLKey)
+	}
+	if p.SSLCert != "" {
+		url += fmt.Sprintf("&sslcert=%s", p.SSLCert)
+	}
+
+	return url
 }
