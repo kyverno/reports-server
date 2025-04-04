@@ -212,11 +212,14 @@ func (o *Options) dbConfig() error {
 	o.DBName = os.Getenv("DB_DATABASE")
 	o.DBUser = os.Getenv("DB_USER")
 	o.DBPassword = os.Getenv("DB_PASSWORD")
-	dbPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
-	if err != nil {
-		return err
-	} else {
-		o.DBPort = dbPort
+	dbPortStr := os.Getenv("DB_PORT")
+	if dbPortStr != "" {
+		dbPort, err := strconv.Atoi(dbPortStr)
+		if err != nil {
+			return err
+		} else {
+			o.DBPort = dbPort
+		}
 	}
 	return nil
 }
