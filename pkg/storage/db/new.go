@@ -123,27 +123,18 @@ type PostgresConfig struct {
 }
 
 func (p PostgresConfig) String() string {
-	// Handle multiple hosts if Host contains space-separated values
-	hosts := strings.Fields(p.Host)
-	var hostList []string
-	
-	for _, h := range hosts {
-		hostList = append(hostList, fmt.Sprintf("%s:%d", h, p.Port))
-	}
-	
-	// If no hosts found, use the Host field directly
-	if len(hostList) == 0 && p.Host != "" {
-		hostList = append(hostList, fmt.Sprintf("%s:%d", p.Host, p.Port))
-	}
-	
-	// Join hosts with commas for pgx URL format
-	hostStr := strings.Join(hostList, ",")
 
-	// Build URL format connection string
-	url := fmt.Sprintf("pgx://%s:%s@%s/%s?sslmode=%s",
-		p.User, p.Password, hostStr, p.DBname, p.SSLMode)
+	if p.Port != 0 {
+		hosts := strings.Split(p.Host, ",")
+		for i, host := range hosts {
+			hosts[i] = fmt.Sprintf("%s:%d", host, p.Port)
+		}
+		p.Host = strings.Join(hosts, ",")
+	}
 
-	// Add SSL parameters if provided
+	url := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
+		p.User, p.Password, p.Host, p.DBname, p.SSLMode)
+
 	if p.SSLRootCert != "" {
 		url += fmt.Sprintf("&sslrootcert=%s", p.SSLRootCert)
 	}
