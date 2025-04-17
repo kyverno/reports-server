@@ -123,7 +123,6 @@ type PostgresConfig struct {
 }
 
 func (p PostgresConfig) String() string {
-
 	if p.Port != 0 {
 		hosts := strings.Split(p.Host, ",")
 		for i, host := range hosts {

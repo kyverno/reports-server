@@ -46,6 +46,12 @@ spec:
       annotations:
         serviceName: etcd
     spec:
+{{- if .Values.config.etcd.nodeSelector }}
+      nodeSelector: {{ toYaml .Values.config.etcd.nodeSelector | nindent 8 }}
+{{- end }}
+{{- if .Values.config.etcd.tolerations }}
+      tolerations: {{ toYaml .Values.config.etcd.tolerations | nindent 8 }}
+{{- end }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:

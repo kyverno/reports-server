@@ -192,6 +192,16 @@ config:
     # This value defines the size of the persistent volume claim (PVC) for etcd.
     storage:
 
+    ## @param nodeSelector [object] Node labels for pod assignment
+    ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+    ##
+    nodeSelector: {}
+
+    ## @param tolerations [array] Tolerations for pod assignment
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    ##
+    tolerations: []
+
   db:
     # -- If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`.
     secretName: ""
