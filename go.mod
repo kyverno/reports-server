@@ -3,8 +3,8 @@ module github.com/kyverno/reports-server
 go 1.23.6
 
 require (
+	github.com/jackc/pgx/v5 v5.7.4
 	github.com/kyverno/kyverno v1.13.0
-	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.1
 	go.etcd.io/etcd/client/v3 v3.5.16
@@ -164,7 +164,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.7.4 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jedisct1/go-minisign v0.0.0-20230811132847-661be99b8267 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
