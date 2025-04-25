@@ -136,6 +136,7 @@ spec:
         - --initial-cluster=etcd-0=$(URI_SCHEME)://etcd-0.$(SERVICE_NAME):2380,etcd-1=$(URI_SCHEME)://etcd-1.$(SERVICE_NAME):2380,etcd-2=$(URI_SCHEME)://etcd-2.$(SERVICE_NAME):2380
         - --initial-advertise-peer-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):2380
         - --listen-metrics-urls=http://0.0.0.0:8080
+        - --quota-backend-bytes={{ printf "%d" (int (default 2147483648 .Values.config.etcd.quotaBackendBytes)) }}
         # - --auto-compaction-mode=periodic
         # - --auto-compaction-retention=10m
         # - --client-cert-auth

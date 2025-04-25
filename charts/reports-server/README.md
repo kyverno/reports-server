@@ -1,6 +1,6 @@
 # reports-server
 
-![Version: 0.1.17](https://img.shields.io/badge/Version-0.1.17-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.16](https://img.shields.io/badge/AppVersion-v0.1.16-informational?style=flat-square)
+![Version: 0.1.18-rc.1](https://img.shields.io/badge/Version-0.1.18--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.16](https://img.shields.io/badge/AppVersion-v0.1.16-informational?style=flat-square)
 
 TODO
 
@@ -72,7 +72,8 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.etcd.enabled | bool | `true` |  |
 | config.etcd.endpoints | string | `nil` |  |
 | config.etcd.insecure | bool | `true` |  |
-| config.etcd.storage | string | `nil` |  |
+| config.etcd.storage | string | `"2Gi"` |  |
+| config.etcd.quotaBackendBytes | int | `1932735283` |  |
 | config.etcd.nodeSelector | object | `{}` |  |
 | config.etcd.tolerations | list | `[]` |  |
 | config.db.secretName | string | `""` | If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`. |
@@ -90,6 +91,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.sslrootcert | string | `""` | Database SSL root cert |
 | config.db.sslkey | string | `""` | Database SSL key |
 | config.db.sslcert | string | `""` | Database SSL cert |
+| config.db.sslrds | object | `{"mountPath":"/etc/ssl/rds","secretName":""}` | Volume configuration for RDS certificate |
 | apiServicesManagement.enabled | bool | `true` | Create a helm hooks to delete api services on uninstall |
 | apiServicesManagement.installApiServices | object | `{"enabled":false,"installEphemeralReportsService":true}` | Install api services in manifest |
 | apiServicesManagement.installApiServices.enabled | bool | `false` | Store reports in reports-server |
