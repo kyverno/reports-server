@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -131,18 +132,22 @@ func (p PostgresConfig) String() string {
 		p.Host = strings.Join(hosts, ",")
 	}
 
-	url := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
-		p.User, p.Password, p.Host, p.DBname, p.SSLMode)
+	// This is to handle special characters in the user and password
+	encodedUser := url.QueryEscape(p.User)
+	encodedPassword := url.QueryEscape(p.Password)
+
+	urlStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
+		encodedUser, encodedPassword, p.Host, p.DBname, p.SSLMode)
 
 	if p.SSLRootCert != "" {
-		url += fmt.Sprintf("&sslrootcert=%s", p.SSLRootCert)
+		urlStr += fmt.Sprintf("&sslrootcert=%s", p.SSLRootCert)
 	}
 	if p.SSLKey != "" {
-		url += fmt.Sprintf("&sslkey=%s", p.SSLKey)
+		urlStr += fmt.Sprintf("&sslkey=%s", p.SSLKey)
 	}
 	if p.SSLCert != "" {
-		url += fmt.Sprintf("&sslcert=%s", p.SSLCert)
+		urlStr += fmt.Sprintf("&sslcert=%s", p.SSLCert)
 	}
 
-	return url
+	return urlStr
 }
