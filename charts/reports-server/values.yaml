@@ -186,11 +186,17 @@ config:
     enabled: true
     endpoints: ~
     insecure: true
-    # Storage configuration for etcd persistence:
-    # - Default: If not specified, the chart will allocate 1Gi of storage.
+    # PVC Storage configuration for etcd persistence:
+    # - Default: If not specified, the chart will allocate 2Gi of storage.
     # - Override: Set a custom storage size (e.g., "2Gi", "5Gi") as needed.
+    # - NOTE: keep this **10‑20 % greater** than `quotaBackendBytes`
     # This value defines the size of the persistent volume claim (PVC) for etcd.
-    storage:
+    storage: 2Gi
+
+  # Quota for etcd’s internal database (BoltDB) **in bytes**
+  # - What it limits: the logical size of the etcd DB file, *not* the PVC.
+  # - Format: plain integer bytes (no Ki/Mi/Gi suffix).
+    quotaBackendBytes: 1932735283
 
     ## @param nodeSelector [object] Node labels for pod assignment
     ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
@@ -244,6 +250,11 @@ config:
 
     # -- Database SSL cert
     sslcert: ""
+
+    # -- Volume configuration for RDS certificate
+    sslrds:
+      secretName: ""
+      mountPath: "/etc/ssl/rds"
 
 apiServicesManagement:
   # -- Create a helm hooks to delete api services on uninstall

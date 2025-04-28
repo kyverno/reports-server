@@ -79,6 +79,10 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp-dir
+            {{- if .Values.config.db.sslrds.secretName }}
+            - mountPath: {{ .Values.config.db.sslrds.mountPath }}
+              name: rds-ca-cert
+            {{- end }}
         {{- if .Values.fipsEnabled }}
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}-fips:{{ .Values.image.tag | default .Chart.AppVersion }}"
         {{- else }}
@@ -114,3 +118,8 @@ spec:
       volumes:
       - emptyDir: {}
         name: tmp-dir
+      {{- if .Values.config.db.sslrds.secretName }}
+      - name: rds-ca-cert
+        secret:
+          secretName: {{ .Values.config.db.sslrds.secretName }}
+      {{- end }}

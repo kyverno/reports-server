@@ -10,7 +10,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -27,7 +27,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -41,7 +41,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: 'true'
     rbac.authorization.k8s.io/aggregate-to-edit: 'true'
     rbac.authorization.k8s.io/aggregate-to-view: 'true'
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -128,7 +128,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -148,7 +148,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -168,7 +168,7 @@ metadata:
   name: reports-server
   namespace: kube-system
   labels:
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -188,7 +188,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -209,7 +209,7 @@ metadata:
   namespace: reports-server
   labels:
     app: etcd-reports-server
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -234,7 +234,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -256,7 +256,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -273,7 +273,7 @@ spec:
   template:
     metadata:
       labels:
-        helm.sh/chart: reports-server-0.1.17
+        helm.sh/chart: reports-server-0.1.18-rc.1
         app.kubernetes.io/name: reports-server
         app.kubernetes.io/instance: reports-server
         app.kubernetes.io/version: "v0.1.16"
@@ -358,7 +358,7 @@ metadata:
   name: etcd
   labels:
     app: etcd-reports-server
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -463,6 +463,7 @@ spec:
         - --initial-cluster=etcd-0=$(URI_SCHEME)://etcd-0.$(SERVICE_NAME):2380,etcd-1=$(URI_SCHEME)://etcd-1.$(SERVICE_NAME):2380,etcd-2=$(URI_SCHEME)://etcd-2.$(SERVICE_NAME):2380
         - --initial-advertise-peer-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):2380
         - --listen-metrics-urls=http://0.0.0.0:8080
+        - --quota-backend-bytes=1932735283
         # - --auto-compaction-mode=periodic
         # - --auto-compaction-retention=10m
         # - --client-cert-auth
@@ -498,7 +499,7 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
-          storage: 1Gi
+          storage: 2Gi
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
@@ -506,7 +507,7 @@ metadata:
   name: v1alpha2.wgpolicyk8s.io
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
@@ -530,7 +531,7 @@ metadata:
   name: v1.reports.kyverno.io
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.17
+    helm.sh/chart: reports-server-0.1.18-rc.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.16"
