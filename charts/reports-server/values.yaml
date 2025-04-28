@@ -218,7 +218,7 @@ config:
     hostSecretKeyName: "host"
 
     # -- Database port
-    port: 5432
+    port:
     # -- The database port will be read from this `key` in the specified Secret, when `db.secretName` is set.
     portSecretKeyName: "port"
 
