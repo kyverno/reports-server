@@ -209,13 +209,20 @@ config:
     tolerations: []
 
   db:
-    # -- If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`.
+    # -- If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, `db.password` and `db.readReplicaHosts`.
     secretName: ""
 
     # -- Database host
     host: reports-server-cluster-rw.reports-server
+
     # -- The database host will be read from this `key` in the specified Secret, when `db.secretName` is set.
     hostSecretKeyName: "host"
+
+    # -- Database read replica hosts
+    readReplicaHosts: []
+
+    # -- The database read replica hosts will be read from this `key` in the specified Secret, when `db.secretName` is set.
+    readReplicaHostsSecretKeyName: readReplicaHosts
 
     # -- Database port
     port: 5432

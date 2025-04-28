@@ -63,6 +63,8 @@ spec:
                   divisor: '1'
             - name: DB_HOST
               {{- include "reports-server.dbHost" . | nindent 14 }}
+            - name: DB_READ_REPLICA_HOSTS
+              {{- include "reports-server.dbReadReplicaHosts" . | nindent 14 }}
             - name: DB_PORT
               {{- include "reports-server.dbPort" . | nindent 14 }}
             - name: DB_DATABASE

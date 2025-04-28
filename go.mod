@@ -3,10 +3,12 @@ module github.com/kyverno/reports-server
 go 1.23.6
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/kyverno/kyverno v1.13.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.1
+	github.com/stretchr/testify v1.10.0
 	go.etcd.io/etcd/client/v3 v3.5.16
 	google.golang.org/grpc v1.67.0
 	k8s.io/api v0.31.1
@@ -202,6 +204,7 @@ require (
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.20.4 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.59.1 // indirect

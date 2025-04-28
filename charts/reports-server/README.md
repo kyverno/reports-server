@@ -1,6 +1,6 @@
 # reports-server
 
-![Version: 0.1.18-rc.1](https://img.shields.io/badge/Version-0.1.18--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.16](https://img.shields.io/badge/AppVersion-v0.1.16-informational?style=flat-square)
+![Version: 0.1.18-rc.2](https://img.shields.io/badge/Version-0.1.18--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.16](https://img.shields.io/badge/AppVersion-v0.1.16-informational?style=flat-square)
 
 TODO
 
@@ -76,9 +76,11 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.etcd.quotaBackendBytes | int | `1932735283` |  |
 | config.etcd.nodeSelector | object | `{}` |  |
 | config.etcd.tolerations | list | `[]` |  |
-| config.db.secretName | string | `""` | If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, and `db.password`. |
+| config.db.secretName | string | `""` | If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, `db.password` and `db.readReplicaHosts`. |
 | config.db.host | string | `"reports-server-cluster-rw.reports-server"` | Database host |
 | config.db.hostSecretKeyName | string | `"host"` | The database host will be read from this `key` in the specified Secret, when `db.secretName` is set. |
+| config.db.readReplicaHosts | list | `[]` | Database read replica hosts |
+| config.db.readReplicaHostsSecretKeyName | string | `"readReplicaHosts"` | The database read replica hosts will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.port | int | `5432` | Database port |
 | config.db.portSecretKeyName | string | `"port"` | The database port will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.name | string | `"reportsdb"` | Database name |
