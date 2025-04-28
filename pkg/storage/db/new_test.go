@@ -10,7 +10,6 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -42,7 +41,7 @@ func TestPostgresConfigStringPasswordWithSpecialCharacters(t *testing.T) {
 	assert.True(t, isSet, "Password should be set in parsed URL")
 	assert.Equal(t, "Agdg151[tr@y^q]9", pw, "Decoded password should match original")
 
-	expectedEncodedPassword := "Agdg151%5Btr%40y%5Eq%5D9"
+	expectedEncodedPassword := "Agdg151%5Btr%40y%5Eq%5D9" // #nosec G101
 	expectedUserInfo := "testuser:" + expectedEncodedPassword
 	assert.Equal(t, expectedUserInfo, parsedURL.User.String(), "Encoded user info string mismatch")
 
@@ -180,7 +179,7 @@ func TestPostgresConnection_SpecialCharsPassword(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	passwordWithSpecialChars := "Agdg151[tr@y^q]9"
+	passwordWithSpecialChars := "Agdg151[tr@y^q]9" // #nosec G101
 	dbName := "users_special"
 	user := "testuser_special"
 
