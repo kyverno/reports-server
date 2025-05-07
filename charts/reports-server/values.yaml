@@ -219,7 +219,7 @@ config:
     hostSecretKeyName: "host"
 
     # -- Database read replica hosts
-    readReplicaHosts: []
+    readReplicaHosts: ""
 
     # -- The database read replica hosts will be read from this `key` in the specified Secret, when `db.secretName` is set.
     readReplicaHostsSecretKeyName: readReplicaHosts
