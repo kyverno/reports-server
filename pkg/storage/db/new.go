@@ -33,6 +33,9 @@ func New(config *PostgresConfig, clusterId string) (api.Storage, error) {
 
 	var readReplicas []*sql.DB
 	for _, host := range config.ReadReplicaHosts {
+		if host == "" {
+			continue
+		}
 		replicaCfg := *config
 		replicaCfg.Host = host
 		dsn := replicaCfg.String()
