@@ -40,9 +40,13 @@ type Options struct {
 	Kubeconfig  string
 
 	// dbopts
-	EtcdConfig    etcd.EtcdConfig
-	EtcdDir       string
-	DBHost        string
+	EtcdConfig etcd.EtcdConfig
+	EtcdDir    string
+
+	// PostgreSQL: write host and optional read replicas
+	DBHost             string   // writer (primary) endpoint (--db-host or env DB_HOST)
+	DBReadReplicaHosts []string // reader endpoints (--db-read-replica-hosts or env DB_READ_REPLICA_HOSTS)
+
 	DBPort        int
 	DBUser        string
 	DBPassword    string
@@ -119,15 +123,16 @@ func (o Options) ServerConfig() (*server.Config, error) {
 	}
 
 	dbconfig := &db.PostgresConfig{
-		Host:        o.DBHost,
-		Port:        o.DBPort,
-		User:        o.DBUser,
-		Password:    o.DBPassword,
-		DBname:      o.DBName,
-		SSLMode:     o.DBSSLMode,
-		SSLRootCert: o.DBSSLRootCert,
-		SSLKey:      o.DBSSLKey,
-		SSLCert:     o.DBSSLCert,
+		Host:             o.DBHost,
+		ReadReplicaHosts: o.DBReadReplicaHosts,
+		Port:             o.DBPort,
+		User:             o.DBUser,
+		Password:         o.DBPassword,
+		DBname:           o.DBName,
+		SSLMode:          o.DBSSLMode,
+		SSLRootCert:      o.DBSSLRootCert,
+		SSLKey:           o.DBSSLKey,
+		SSLCert:          o.DBSSLCert,
 	}
 
 	return &server.Config{
@@ -220,6 +225,10 @@ func (o *Options) dbConfig() error {
 		} else {
 			o.DBPort = dbPort
 		}
+	}
+
+	if len(os.Getenv("DB_READ_REPLICA_HOSTS")) > 0 {
+		o.DBReadReplicaHosts = strings.Split(os.Getenv("DB_READ_REPLICA_HOSTS"), ",")
 	}
 	return nil
 }

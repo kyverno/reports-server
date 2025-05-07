@@ -13,3 +13,4 @@ Session.vim
 *manifest-tool
 .gopath
 .tools
+.DS_Store

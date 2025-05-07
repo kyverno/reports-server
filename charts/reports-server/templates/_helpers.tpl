@@ -87,6 +87,17 @@ value: {{ default (printf "%s-postgresql.%s" $.Release.Name $.Release.Namespace 
 {{- end }}
 {{- end }}
 
+{{- define "reports-server.dbReadReplicaHosts" -}}
+{{- if .Values.config.db.secretName -}}
+valueFrom:
+  secretKeyRef:
+    key: {{ .Values.config.db.readReplicaHosts }}
+    name: {{ .Values.config.db.secretName }}
+{{- else -}}
+value: {{ .Values.config.db.readReplicaHosts | quote }}
+{{- end }}
+{{- end }}
+
 {{- define "reports-server.dbPort" -}}
 {{- if .Values.config.db.secretName -}}
 valueFrom:
