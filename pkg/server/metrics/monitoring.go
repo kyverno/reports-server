@@ -6,24 +6,26 @@ import (
 	"k8s.io/component-base/metrics"
 )
 
-var dbRequestTotalMetrics = metrics.NewCounterVec(
-	&metrics.CounterOpts{
-		Namespace: "reports_server",
-		Subsystem: "storage",
-		Name:      "db_requests_total",
-		Help:      "Total number of db requests",
-	},
-	[]string{"type", "operation", "reportType"},
-)
-var dbRequestLatencyMetrics = metrics.NewHistogramVec(
-	&metrics.HistogramOpts{
-		Namespace: "reports_server",
-		Subsystem: "storage",
-		Name:      "db_request_duration_seconds",
-		Help:      "duration of db requests",
-		Buckets:   metrics.ExponentialBuckets(0.001, 2, 10),
-	},
-	[]string{"type", "operation", "reportType"},
+var (
+	dbRequestTotalMetrics = metrics.NewCounterVec(
+		&metrics.CounterOpts{
+			Namespace: "reports_server",
+			Subsystem: "storage",
+			Name:      "db_requests_total",
+			Help:      "Total number of db requests",
+		},
+		[]string{"type", "operation", "reportType"},
+	)
+	dbRequestLatencyMetrics = metrics.NewHistogramVec(
+		&metrics.HistogramOpts{
+			Namespace: "reports_server",
+			Subsystem: "storage",
+			Name:      "db_request_duration_seconds",
+			Help:      "duration of db requests",
+			Buckets:   metrics.ExponentialBuckets(0.001, 2, 10),
+		},
+		[]string{"type", "operation", "reportType"},
+	)
 )
 
 func RegisterServerMetrics(registrationFunc func(metrics.Registerable) error) error {

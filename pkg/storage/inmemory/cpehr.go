@@ -49,10 +49,8 @@ func (c *cephrdb) Get(ctx context.Context, name string) (*reportsv1.ClusterEphem
 	key := c.key(name)
 	klog.Infof("getting value for key:%s", key)
 	if val, _ := c.db.Get(key); val != nil {
-
 		serverMetrics.UpdateDBRequestTotalMetrics("inmemory", "get", "ClusterEphemeralReport")
 		serverMetrics.UpdateDBRequestLatencyMetrics("inmemory", "get", "ClusterEphemeralReport", time.Since(startTime))
-
 		klog.Infof("value found for key:%s", key)
 		return val, nil
 	} else {

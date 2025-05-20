@@ -56,7 +56,6 @@ func UpdatePolicyReportMetrics(dbType string, operation string, report any, isMi
 }
 
 func updatePolicyReportMetric(dbType, operation, namespace, resourceName, resourceKind, reportType, migratedResource string) {
-
 	policyReportsTotal.WithLabelValues(
 		dbType,
 		namespace,
