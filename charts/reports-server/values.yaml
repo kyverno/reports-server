@@ -183,6 +183,10 @@ service:
 config:
 
   etcd:
+    image:
+      registry: ghcr.io
+      repository: nirmata/etcd
+      tag: v3.5.18-cve-free
     enabled: true
     endpoints: ~
     insecure: true

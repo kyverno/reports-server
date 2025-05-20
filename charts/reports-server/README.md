@@ -1,6 +1,6 @@
 # reports-server
 
-![Version: 0.1.20](https://img.shields.io/badge/Version-0.1.20-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.18](https://img.shields.io/badge/AppVersion-v0.1.18-informational?style=flat-square)
+![Version: 0.1.22](https://img.shields.io/badge/Version-0.1.22-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.19](https://img.shields.io/badge/AppVersion-v0.1.19-informational?style=flat-square)
 
 TODO
 
@@ -69,6 +69,9 @@ helm install reports-server --namespace reports-server --create-namespace report
 | affinity | object | `{}` | Affinity |
 | service.type | string | `"ClusterIP"` | Service type |
 | service.port | int | `443` | Service port |
+| config.etcd.image.registry | string | `"ghcr.io"` |  |
+| config.etcd.image.repository | string | `"nirmata/etcd"` |  |
+| config.etcd.image.tag | string | `"v3.5.18-cve-free"` |  |
 | config.etcd.enabled | bool | `true` |  |
 | config.etcd.endpoints | string | `nil` |  |
 | config.etcd.insecure | bool | `true` |  |
@@ -79,7 +82,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.secretName | string | `""` | If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, `db.password` and `db.readReplicaHosts`. |
 | config.db.host | string | `"reports-server-cluster-rw.reports-server"` | Database host |
 | config.db.hostSecretKeyName | string | `"host"` | The database host will be read from this `key` in the specified Secret, when `db.secretName` is set. |
-| config.db.readReplicaHosts | list | `[]` | Database read replica hosts |
+| config.db.readReplicaHosts | string | `""` | Database read replica hosts |
 | config.db.readReplicaHostsSecretKeyName | string | `"readReplicaHosts"` | The database read replica hosts will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.port | string | `nil` | Database port |
 | config.db.portSecretKeyName | string | `"port"` | The database port will be read from this `key` in the specified Secret, when `db.secretName` is set. |
