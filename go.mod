@@ -3,7 +3,6 @@ module github.com/kyverno/reports-server
 go 1.23.6
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/kyverno/kyverno v1.13.0
 	github.com/pkg/errors v0.9.1

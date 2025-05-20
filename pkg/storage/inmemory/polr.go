@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	metrics "github.com/kyverno/reports-server/pkg/storage/metrics"
 	"github.com/kyverno/reports-server/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
@@ -70,6 +71,7 @@ func (p *polrdb) Create(ctx context.Context, polr *v1alpha2.PolicyReport) error 
 		return errors.NewAlreadyExists(utils.PolicyReportsGR, key)
 	} else {
 		klog.Infof("entry created for key:%s", key)
+		metrics.UpdatePolicyReportMetrics("etcd", "create", polr, false)
 		return p.db.Store(key, *polr)
 	}
 }
@@ -85,6 +87,7 @@ func (p *polrdb) Update(ctx context.Context, polr *v1alpha2.PolicyReport) error 
 		return errors.NewNotFound(utils.PolicyReportsGR, key)
 	} else {
 		klog.Infof("entry updated for key:%s", key)
+		metrics.UpdatePolicyReportMetrics("etcd", "update", polr, false)
 		return p.db.Store(key, *polr)
 	}
 }
@@ -99,8 +102,14 @@ func (p *polrdb) Delete(ctx context.Context, name, namespace string) error {
 		klog.Errorf("entry does not exist k:%s", key)
 		return errors.NewNotFound(utils.PolicyReportsGR, key)
 	} else {
+		report, err := p.Get(ctx, name, namespace)
+		if err != nil {
+			klog.ErrorS(err, "failed to get polr")
+			return fmt.Errorf("delete policyreport: %v", err)
+		}
 		p.db.Delete(key)
 		klog.Infof("entry deleted for key:%s", key)
+		metrics.UpdatePolicyReportMetrics("etcd", "delete", report, false)
 		return nil
 	}
 }

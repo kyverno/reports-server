@@ -7,8 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
+	serverMetrics "github.com/kyverno/reports-server/pkg/server/metrics"
 	"github.com/kyverno/reports-server/pkg/storage/api"
+	storageMetrics "github.com/kyverno/reports-server/pkg/storage/metrics"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
@@ -37,6 +40,7 @@ func NewClusterPolicyReportStore(MultiDB *MultiDB, clusterId string) (api.Cluste
 
 func (c *cpolrdb) List(ctx context.Context) ([]*v1alpha2.ClusterPolicyReport, error) {
 	klog.Infof("listing all values")
+	startTime := time.Now()
 	res := make([]*v1alpha2.ClusterPolicyReport, 0)
 	var jsonb string
 
@@ -46,6 +50,8 @@ func (c *cpolrdb) List(ctx context.Context) ([]*v1alpha2.ClusterPolicyReport, er
 		return nil, fmt.Errorf("clusterpolicyreport list: %v", err)
 	}
 	defer rows.Close()
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "list", "ClusterPolicyReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "list", "ClusterPolicyReport", time.Since(startTime))
 	for rows.Next() {
 		if err := rows.Scan(&jsonb); err != nil {
 			klog.ErrorS(err, "failed to scan rows")
@@ -65,6 +71,7 @@ func (c *cpolrdb) List(ctx context.Context) ([]*v1alpha2.ClusterPolicyReport, er
 }
 
 func (c *cpolrdb) Get(ctx context.Context, name string) (*v1alpha2.ClusterPolicyReport, error) {
+	startTime := time.Now()
 	var jsonb string
 
 	row := c.MultiDB.ReadQueryRow(ctx, "SELECT report FROM clusterpolicyreports WHERE (name = $1) AND (clusterId = $2)", name, c.clusterId)
@@ -75,6 +82,8 @@ func (c *cpolrdb) Get(ctx context.Context, name string) (*v1alpha2.ClusterPolicy
 		}
 		return nil, fmt.Errorf("clusterpolicyreport get %s: %v", name, err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "get", "ClusterPolicyReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "get", "ClusterPolicyReport", time.Since(startTime))
 
 	var report v1alpha2.ClusterPolicyReport
 	err := json.Unmarshal([]byte(jsonb), &report)
@@ -88,7 +97,7 @@ func (c *cpolrdb) Get(ctx context.Context, name string) (*v1alpha2.ClusterPolicy
 func (c *cpolrdb) Create(ctx context.Context, cpolr *v1alpha2.ClusterPolicyReport) error {
 	c.Lock()
 	defer c.Unlock()
-
+	startTime := time.Now()
 	if cpolr == nil {
 		return errors.New("invalid cluster policy report")
 	}
@@ -105,12 +114,16 @@ func (c *cpolrdb) Create(ctx context.Context, cpolr *v1alpha2.ClusterPolicyRepor
 		klog.ErrorS(err, "failed to crate cpolr")
 		return fmt.Errorf("create clusterpolicyreport: %v", err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "create", "ClusterPolicyReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "create", "ClusterPolicyReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("postgres", "create", cpolr, false)
 	return nil
 }
 
 func (c *cpolrdb) Update(ctx context.Context, cpolr *v1alpha2.ClusterPolicyReport) error {
 	c.Lock()
 	defer c.Unlock()
+	startTime := time.Now()
 
 	if cpolr == nil {
 		return errors.New("invalid cluster policy report")
@@ -126,6 +139,9 @@ func (c *cpolrdb) Update(ctx context.Context, cpolr *v1alpha2.ClusterPolicyRepor
 		klog.ErrorS(err, "failed to updates cpolr")
 		return fmt.Errorf("update clusterpolicyreport: %v", err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "update", "ClusterPolicyReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "update", "ClusterPolicyReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("postgres", "update", cpolr, false)
 	return nil
 }
 
@@ -133,10 +149,20 @@ func (c *cpolrdb) Delete(ctx context.Context, name string) error {
 	c.Lock()
 	defer c.Unlock()
 
-	_, err := c.MultiDB.PrimaryDB.Exec("DELETE FROM clusterpolicyreports WHERE (name = $1) AND (clusterId = $2)", name, c.clusterId)
+	report, err := c.Get(ctx, name)
+	if err != nil {
+		klog.ErrorS(err, "failed to get cpolr")
+		return fmt.Errorf("delete clusterpolicyreport: %v", err)
+	}
+
+	startTime := time.Now()
+	_, err = c.MultiDB.PrimaryDB.Exec("DELETE FROM clusterpolicyreports WHERE (name = $1) AND (clusterId = $2)", name, c.clusterId)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete cpolr")
 		return fmt.Errorf("delete clusterpolicyreport: %v", err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "delete", "ClusterPolicyReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "delete", "ClusterPolicyReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("postgres", "delete", report, false)
 	return nil
 }

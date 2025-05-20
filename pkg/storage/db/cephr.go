@@ -7,9 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
+	serverMetrics "github.com/kyverno/reports-server/pkg/server/metrics"
 	"github.com/kyverno/reports-server/pkg/storage/api"
+	storageMetrics "github.com/kyverno/reports-server/pkg/storage/metrics"
 	"k8s.io/klog/v2"
 )
 
@@ -37,6 +40,7 @@ func NewClusterEphemeralReportStore(MultiDB *MultiDB, clusterId string) (api.Clu
 
 func (c *cephr) List(ctx context.Context) ([]*reportsv1.ClusterEphemeralReport, error) {
 	klog.Infof("listing all values")
+	startTime := time.Now()
 	res := make([]*reportsv1.ClusterEphemeralReport, 0)
 	var jsonb string
 
@@ -62,10 +66,13 @@ func (c *cephr) List(ctx context.Context) ([]*reportsv1.ClusterEphemeralReport, 
 	}
 
 	klog.Infof("list found length: %d", len(res))
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "list", "ClusterEphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "list", "ClusterEphemeralReport", time.Since(startTime))
 	return res, nil
 }
 
 func (c *cephr) Get(ctx context.Context, name string) (*reportsv1.ClusterEphemeralReport, error) {
+	startTime := time.Now()
 	var jsonb string
 
 	row := c.MultiDB.ReadQueryRow(ctx, "SELECT report FROM clusterephemeralreports WHERE (name = $1) AND (clusterId = $2)", name, c.clusterId)
@@ -76,6 +83,8 @@ func (c *cephr) Get(ctx context.Context, name string) (*reportsv1.ClusterEphemer
 		}
 		return nil, fmt.Errorf("clusterephemeralreport get %s: %v", name, err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "get", "ClusterEphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "get", "ClusterEphemeralReport", time.Since(startTime))
 
 	var report reportsv1.ClusterEphemeralReport
 	err := json.Unmarshal([]byte(jsonb), &report)
@@ -89,6 +98,7 @@ func (c *cephr) Get(ctx context.Context, name string) (*reportsv1.ClusterEphemer
 func (c *cephr) Create(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error {
 	c.Lock()
 	defer c.Unlock()
+	startTime := time.Now()
 
 	if cephr == nil {
 		return errors.New("invalid cluster ephemeral report")
@@ -106,12 +116,16 @@ func (c *cephr) Create(ctx context.Context, cephr *reportsv1.ClusterEphemeralRep
 		klog.ErrorS(err, "failed to crate cephr")
 		return fmt.Errorf("create clusterephemeralreport: %v", err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "create", "ClusterEphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "create", "ClusterEphemeralReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("postgres", "create", cephr, false)
 	return nil
 }
 
 func (c *cephr) Update(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error {
 	c.Lock()
 	defer c.Unlock()
+	startTime := time.Now()
 
 	if cephr == nil {
 		return errors.New("invalid cluster ephemeral report")
@@ -127,17 +141,30 @@ func (c *cephr) Update(ctx context.Context, cephr *reportsv1.ClusterEphemeralRep
 		klog.ErrorS(err, "failed to updates cephr")
 		return fmt.Errorf("update clusterephemeralreport: %v", err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "update", "ClusterEphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "update", "ClusterEphemeralReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("postgres", "update", cephr, false)
 	return nil
 }
 
 func (c *cephr) Delete(ctx context.Context, name string) error {
 	c.Lock()
 	defer c.Unlock()
+	startTime := time.Now()
 
-	_, err := c.MultiDB.PrimaryDB.Exec("DELETE FROM clusterephemeralreports WHERE (name = $1) AND (clusterId = $2)", name, c.clusterId)
+	report, err := c.Get(ctx, name)
+	if err != nil {
+		klog.ErrorS(err, "failed to get cephr")
+		return fmt.Errorf("delete clusterephemeralreport: %v", err)
+	}
+
+	_, err = c.MultiDB.PrimaryDB.Exec("DELETE FROM clusterephemeralreports WHERE (name = $1) AND (clusterId = $2)", name, c.clusterId)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete cephr")
 		return fmt.Errorf("delete clusterephemeralreport: %v", err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "delete", "ClusterEphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "delete", "ClusterEphemeralReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("postgres", "delete", report, false)
 	return nil
 }
