@@ -184,9 +184,16 @@ config:
 
   etcd:
     image:
+      # -- Image registry
       registry: ghcr.io
+      # -- Image repository
       repository: nirmata/etcd
+      # -- Image tag
       tag: v3.5.18-cve-free
+
+    # -- Image pull secrets
+    imagePullSecrets: []
+
     enabled: true
     endpoints: ~
     insecure: true

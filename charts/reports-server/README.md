@@ -1,6 +1,6 @@
 # reports-server
 
-![Version: 0.1.22](https://img.shields.io/badge/Version-0.1.22-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.19](https://img.shields.io/badge/AppVersion-v0.1.19-informational?style=flat-square)
+![Version: 0.1.23](https://img.shields.io/badge/Version-0.1.23-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.19](https://img.shields.io/badge/AppVersion-v0.1.19-informational?style=flat-square)
 
 TODO
 
@@ -69,9 +69,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 | affinity | object | `{}` | Affinity |
 | service.type | string | `"ClusterIP"` | Service type |
 | service.port | int | `443` | Service port |
-| config.etcd.image.registry | string | `"ghcr.io"` |  |
-| config.etcd.image.repository | string | `"nirmata/etcd"` |  |
-| config.etcd.image.tag | string | `"v3.5.18-cve-free"` |  |
+| config.etcd.image.registry | string | `"ghcr.io"` | Image registry |
+| config.etcd.image.repository | string | `"nirmata/etcd"` | Image repository |
+| config.etcd.image.tag | string | `"v3.5.18-cve-free"` | Image tag |
+| config.etcd.imagePullSecrets | list | `[]` | Image pull secrets |
 | config.etcd.enabled | bool | `true` |  |
 | config.etcd.endpoints | string | `nil` |  |
 | config.etcd.insecure | bool | `true` |  |
