@@ -10,7 +10,7 @@ var (
 	dbRequestTotalMetrics = metrics.NewCounterVec(
 		&metrics.CounterOpts{
 			Namespace: "reports_server",
-			Subsystem: "storage",
+			Subsystem: "server",
 			Name:      "db_requests_total",
 			Help:      "Total number of db requests",
 		},
@@ -19,7 +19,7 @@ var (
 	dbRequestLatencyMetrics = metrics.NewHistogramVec(
 		&metrics.HistogramOpts{
 			Namespace: "reports_server",
-			Subsystem: "storage",
+			Subsystem: "server",
 			Name:      "db_request_duration_seconds",
 			Help:      "duration of db requests",
 			Buckets:   metrics.ExponentialBuckets(0.001, 2, 10),
