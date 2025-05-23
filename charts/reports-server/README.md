@@ -79,7 +79,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.secretName | string | `""` | If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, `db.password` and `db.readReplicaHosts`. |
 | config.db.host | string | `"reports-server-cluster-rw.reports-server"` | Database host |
 | config.db.hostSecretKeyName | string | `"host"` | The database host will be read from this `key` in the specified Secret, when `db.secretName` is set. |
-| config.db.readReplicaHosts | list | `[]` | Database read replica hosts |
+| config.db.readReplicaHosts | string | `""` | Database read replica hosts |
 | config.db.readReplicaHostsSecretKeyName | string | `"readReplicaHosts"` | The database read replica hosts will be read from this `key` in the specified Secret, when `db.secretName` is set. |
 | config.db.port | string | `nil` | Database port |
 | config.db.portSecretKeyName | string | `"port"` | The database port will be read from this `key` in the specified Secret, when `db.secretName` is set. |

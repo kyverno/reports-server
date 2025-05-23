@@ -301,7 +301,7 @@ spec:
             - name: DB_HOST
               value: "reports-server-cluster-rw.reports-server"
             - name: DB_READ_REPLICA_HOSTS
-              value: "[]"
+              value: ""
             - name: DB_PORT
               value: 
             - name: DB_DATABASE
