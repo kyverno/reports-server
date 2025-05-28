@@ -91,7 +91,7 @@ value: {{ default (printf "%s-postgresql.%s" $.Release.Name $.Release.Namespace 
 {{- if .Values.config.db.secretName -}}
 valueFrom:
   secretKeyRef:
-    key: {{ .Values.config.db.readReplicaHosts }}
+    key: {{ .Values.config.db.readReplicaHostsSecretKeyName }}
     name: {{ .Values.config.db.secretName }}
 {{- else -}}
 value: {{ .Values.config.db.readReplicaHosts | quote }}
