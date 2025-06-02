@@ -52,6 +52,9 @@ spec:
 {{- if .Values.config.etcd.tolerations }}
       tolerations: {{ toYaml .Values.config.etcd.tolerations | nindent 8 }}
 {{- end }}
+{{- if .Values.config.etcd.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml .Values.config.etcd.imagePullSecrets | nindent 8 }}
+{{- end }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -66,7 +69,7 @@ spec:
               topologyKey: "kubernetes.io/hostname"
       containers:
       - name: etcd
-        image: ghcr.io/nirmata/etcd:v3.5.18-cve-free
+        image:  "{{ .Values.config.etcd.image.registry }}/{{ .Values.config.etcd.image.repository }}:{{ .Values.config.etcd.image.tag }}"
         imagePullPolicy: IfNotPresent
         ports:
         - name: etcd-client
