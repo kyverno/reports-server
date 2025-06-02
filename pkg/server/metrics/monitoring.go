@@ -41,9 +41,9 @@ func RegisterServerMetrics(registrationFunc func(metrics.Registerable) error) er
 }
 
 func UpdateDBRequestTotalMetrics(dbType string, operation string, reportType string) {
-	dbRequestTotalMetrics.WithLabelValues(dbType, operation, reportType).Inc()
+	// dbRequestTotalMetrics.WithLabelValues(dbType, operation, reportType).Inc()
 }
 
 func UpdateDBRequestLatencyMetrics(dbType string, operation string, reportType string, duration time.Duration) {
-	dbRequestLatencyMetrics.WithLabelValues(dbType, operation, reportType).Observe(duration.Seconds())
+	// dbRequestLatencyMetrics.WithLabelValues(dbType, operation, reportType).Observe(duration.Seconds())
 }
