@@ -220,6 +220,10 @@ config:
     tolerations: []
 
   db:
+
+    # -- If set, a secret will be created with the database connection information. If this is set to true, secretName must be set.
+    secretCreation: false
+
     # -- If set, database connection information will be read from the Secret with this name. Overrides `db.host`, `db.name`, `db.user`, `db.password` and `db.readReplicaHosts`.
     secretName: ""
 
