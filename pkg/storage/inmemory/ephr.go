@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
+	metrics "github.com/kyverno/reports-server/pkg/storage/metrics"
 	"github.com/kyverno/reports-server/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
@@ -66,6 +67,7 @@ func (e *ephrdb) Create(ctx context.Context, ephr *reportsv1.EphemeralReport) er
 		return errors.NewAlreadyExists(utils.EphemeralReportsGR, key)
 	} else {
 		klog.Infof("entry created for key:%s", key)
+		metrics.UpdatePolicyReportMetrics("etcd", "create", ephr, false)
 		return e.db.Store(key, *ephr)
 	}
 }
@@ -81,6 +83,7 @@ func (e *ephrdb) Update(ctx context.Context, ephr *reportsv1.EphemeralReport) er
 		return errors.NewNotFound(utils.EphemeralReportsGR, key)
 	} else {
 		klog.Infof("entry updated for key:%s", key)
+		metrics.UpdatePolicyReportMetrics("etcd", "update", ephr, false)
 		return e.db.Store(key, *ephr)
 	}
 }
@@ -95,8 +98,10 @@ func (e *ephrdb) Delete(ctx context.Context, name, namespace string) error {
 		klog.Errorf("entry does not exist k:%s", key)
 		return errors.NewNotFound(utils.EphemeralReportsGR, key)
 	} else {
+		report := reportsv1.EphemeralReport{}
 		e.db.Delete(key)
 		klog.Infof("entry deleted for key:%s", key)
+		metrics.UpdatePolicyReportMetrics("etcd", "delete", report, false)
 		return nil
 	}
 }

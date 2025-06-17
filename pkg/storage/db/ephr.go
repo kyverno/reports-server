@@ -7,9 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
+	serverMetrics "github.com/kyverno/reports-server/pkg/server/metrics"
 	"github.com/kyverno/reports-server/pkg/storage/api"
+	storageMetrics "github.com/kyverno/reports-server/pkg/storage/metrics"
 	"k8s.io/klog/v2"
 )
 
@@ -42,6 +45,7 @@ func NewEphemeralReportStore(MultiDB *MultiDB, clusterId string) (api.EphemeralR
 
 func (p *ephrdb) List(ctx context.Context, namespace string) ([]*reportsv1.EphemeralReport, error) {
 	klog.Infof("listing all values for namespace:%s", namespace)
+	startTime := time.Now()
 	res := make([]*reportsv1.EphemeralReport, 0)
 	var jsonb string
 	var rows *sql.Rows
@@ -57,6 +61,8 @@ func (p *ephrdb) List(ctx context.Context, namespace string) ([]*reportsv1.Ephem
 		return nil, fmt.Errorf("ephemeralreport list %q: %v", namespace, err)
 	}
 	defer rows.Close()
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "list", "EphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "list", "EphemeralReport", time.Since(startTime))
 	for rows.Next() {
 		if err := rows.Scan(&jsonb); err != nil {
 			klog.ErrorS(err, "ephemeralreport scan failed")
@@ -76,6 +82,7 @@ func (p *ephrdb) List(ctx context.Context, namespace string) ([]*reportsv1.Ephem
 }
 
 func (p *ephrdb) Get(ctx context.Context, name, namespace string) (*reportsv1.EphemeralReport, error) {
+	startTime := time.Now()
 	var jsonb string
 
 	row := p.MultiDB.ReadQueryRow(ctx, "SELECT report FROM ephemeralreports WHERE (namespace = $1) AND (name = $2) AND (clusterId = $3)", namespace, name, p.clusterId)
@@ -86,6 +93,8 @@ func (p *ephrdb) Get(ctx context.Context, name, namespace string) (*reportsv1.Ep
 		}
 		return nil, fmt.Errorf("ephemeralreport get %s/%s: %v", namespace, name, err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "get", "EphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "get", "EphemeralReport", time.Since(startTime))
 
 	var report reportsv1.EphemeralReport
 	err := json.Unmarshal([]byte(jsonb), &report)
@@ -99,6 +108,7 @@ func (p *ephrdb) Get(ctx context.Context, name, namespace string) (*reportsv1.Ep
 func (p *ephrdb) Create(ctx context.Context, polr *reportsv1.EphemeralReport) error {
 	p.Lock()
 	defer p.Unlock()
+	startTime := time.Now()
 
 	if polr == nil {
 		return errors.New("invalid ephemeral report")
@@ -115,13 +125,16 @@ func (p *ephrdb) Create(ctx context.Context, polr *reportsv1.EphemeralReport) er
 		klog.ErrorS(err, "failed to create ephemeral report")
 		return fmt.Errorf("create ephemeralreport: %v", err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "create", "EphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "create", "EphemeralReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("postgres", "create", polr, false)
 	return nil
 }
 
 func (p *ephrdb) Update(ctx context.Context, polr *reportsv1.EphemeralReport) error {
 	p.Lock()
 	defer p.Unlock()
-
+	startTime := time.Now()
 	if polr == nil {
 		return errors.New("invalid ephemeral report")
 	}
@@ -136,6 +149,9 @@ func (p *ephrdb) Update(ctx context.Context, polr *reportsv1.EphemeralReport) er
 		klog.ErrorS(err, "failed to update ephemeral report")
 		return fmt.Errorf("update ephemeralreport: %v", err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "update", "EphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "update", "EphemeralReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("postgres", "update", polr, false)
 	return nil
 }
 
@@ -143,10 +159,19 @@ func (p *ephrdb) Delete(ctx context.Context, name, namespace string) error {
 	p.Lock()
 	defer p.Unlock()
 
-	_, err := p.MultiDB.PrimaryDB.Exec("DELETE FROM ephemeralreports WHERE (namespace = $1) AND (name = $2) AND (clusterId = $3)", namespace, name, p.clusterId)
+	report, err := p.Get(ctx, name, namespace)
+	if err != nil {
+		klog.ErrorS(err, "failed to get ephemeral report")
+		return fmt.Errorf("delete ephemeralreport: %v", err)
+	}
+	startTime := time.Now()
+	_, err = p.MultiDB.PrimaryDB.Exec("DELETE FROM ephemeralreports WHERE (namespace = $1) AND (name = $2) AND (clusterId = $3)", namespace, name, p.clusterId)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete ephemeral report")
 		return fmt.Errorf("delete ephemeralreport: %v", err)
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "delete", "EphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "delete", "EphemeralReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("postgres", "delete", report, false)
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	metrics "github.com/kyverno/reports-server/pkg/storage/metrics"
 	"github.com/kyverno/reports-server/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
@@ -62,6 +63,7 @@ func (c *cpolrdb) Create(ctx context.Context, cpolr *v1alpha2.ClusterPolicyRepor
 		return errors.NewAlreadyExists(utils.ClusterPolicyReportsGR, key)
 	} else {
 		klog.Infof("entry created for key:%s", key)
+		metrics.UpdatePolicyReportMetrics("etcd", "create", cpolr, false)
 		return c.db.Store(key, *cpolr)
 	}
 }
@@ -77,6 +79,7 @@ func (c *cpolrdb) Update(ctx context.Context, cpolr *v1alpha2.ClusterPolicyRepor
 		return errors.NewNotFound(utils.ClusterPolicyReportsGR, key)
 	} else {
 		klog.Infof("entry updated for key:%s", key)
+		metrics.UpdatePolicyReportMetrics("etcd", "update", cpolr, false)
 		return c.db.Store(key, *cpolr)
 	}
 }
@@ -91,8 +94,10 @@ func (c *cpolrdb) Delete(ctx context.Context, name string) error {
 		klog.Errorf("entry does not exist k:%s", key)
 		return errors.NewNotFound(utils.ClusterPolicyReportsGR, key)
 	} else {
+		report := v1alpha2.ClusterPolicyReport{}
 		c.db.Delete(key)
 		klog.Infof("entry deleted for key:%s", key)
+		metrics.UpdatePolicyReportMetrics("etcd", "delete", report, false)
 		return nil
 	}
 }

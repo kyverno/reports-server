@@ -26,7 +26,7 @@ KIND_VERSION                       := v0.23.0
 KO                                 := $(TOOLS_DIR)/ko
 KO_VERSION                         := v0.14.1
 HELM                               := $(TOOLS_DIR)/helm
-HELM_VERSION                       := v3.10.1
+HELM_VERSION                       := v3.17.3
 TOOLS                              := $(REGISTER_GEN) $(OPENAPI_GEN) $(KIND) $(KO) $(HELM)
 ifeq ($(GOOS), darwin)
 SED                                := gsed
@@ -142,9 +142,9 @@ codegen-openapi: $(PACKAGE_SHIM) $(OPENAPI_GEN) ## Generate openapi
 		-i k8s.io/apimachinery/pkg/runtime \
 		-i k8s.io/apimachinery/pkg/types \
 		-i k8s.io/api/core/v1 \
-		-i sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2 \
 		-i github.com/kyverno/kyverno/api/reports/v1 \
 		-i github.com/kyverno/kyverno/api/policyreport/v1alpha2 \
+		-i sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2 \
 		-p ./pkg/api/generated/openapi \
 		-O zz_generated.openapi \
 		-h ./.hack/boilerplate.go.txt

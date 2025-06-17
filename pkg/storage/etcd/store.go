@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
+	serverMetrics "github.com/kyverno/reports-server/pkg/server/metrics"
+	storageMetrics "github.com/kyverno/reports-server/pkg/storage/metrics"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,7 +55,7 @@ func (o *objectStoreNamespaced[T]) getKey(name, namespace string) string {
 func (o *objectStoreNamespaced[T]) Get(ctx context.Context, name, namespace string) (T, error) {
 	o.Lock()
 	defer o.Unlock()
-
+	startTime := time.Now()
 	var obj T
 	key := o.getKey(name, namespace)
 	resp, err := o.etcdclient.Get(ctx, key)
@@ -60,6 +63,8 @@ func (o *objectStoreNamespaced[T]) Get(ctx context.Context, name, namespace stri
 		klog.ErrorS(err, "failed to get report kind=%s", o.gvk.String())
 		return obj, err
 	}
+	serverMetrics.UpdateDBRequestLatencyMetrics("etcd", "get", o.gvk.String(), time.Since(startTime))
+	serverMetrics.UpdateDBRequestTotalMetrics("etcd", "get", o.gvk.String())
 	klog.InfoS("get resp resp=%+v", resp)
 	if len(resp.Kvs) != 1 {
 		return obj, errors.NewNotFound(o.gr, key)
@@ -75,7 +80,7 @@ func (o *objectStoreNamespaced[T]) Get(ctx context.Context, name, namespace stri
 func (o *objectStoreNamespaced[T]) List(ctx context.Context, namespace string) ([]T, error) {
 	o.Lock()
 	defer o.Unlock()
-
+	startTime := time.Now()
 	var objects []T
 	key := o.getPrefix(namespace)
 	resp, err := o.etcdclient.Get(ctx, key, clientv3.WithPrefix())
@@ -83,6 +88,8 @@ func (o *objectStoreNamespaced[T]) List(ctx context.Context, namespace string) (
 		klog.ErrorS(err, "failed to list report kind=%s", o.gvk.String())
 		return objects, err
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("etcd", "list", o.gvk.String())
+	serverMetrics.UpdateDBRequestLatencyMetrics("etcd", "list", o.gvk.String(), time.Since(startTime))
 	klog.InfoS("list resp resp=%+v", resp)
 	if len(resp.Kvs) == 0 {
 		return objects, nil
@@ -102,13 +109,15 @@ func (o *objectStoreNamespaced[T]) List(ctx context.Context, namespace string) (
 func (o *objectStoreNamespaced[T]) Create(ctx context.Context, obj T) error {
 	o.Lock()
 	defer o.Unlock()
-
+	startTime := time.Now()
 	key := o.getKey(obj.GetName(), obj.GetNamespace())
 	resp, err := o.etcdclient.Get(ctx, key)
 	if err != nil {
 		klog.ErrorS(err, "failed to create report kind=%s", o.gvk.String())
 		return err
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("etcd", "create", o.gvk.String())
+	serverMetrics.UpdateDBRequestLatencyMetrics("etcd", "create", o.gvk.String(), time.Since(startTime))
 	klog.InfoS("create resp resp=%+v", resp)
 	if len(resp.Kvs) > 0 {
 		return errors.NewAlreadyExists(o.gr, key)
@@ -123,19 +132,22 @@ func (o *objectStoreNamespaced[T]) Create(ctx context.Context, obj T) error {
 	if err != nil {
 		return err
 	}
+	storageMetrics.UpdatePolicyReportMetrics("etcd", "create", obj, false)
 	return nil
 }
 
 func (o *objectStoreNamespaced[T]) Update(ctx context.Context, obj T) error {
 	o.Lock()
 	defer o.Unlock()
-
+	startTime := time.Now()
 	key := o.getKey(obj.GetName(), obj.GetNamespace())
 	resp, err := o.etcdclient.Get(ctx, key)
 	if err != nil {
 		klog.ErrorS(err, "failed to update report kind=%s", o.gvk.String())
 		return err
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("etcd", "update", o.gvk.String())
+	serverMetrics.UpdateDBRequestLatencyMetrics("etcd", "update", o.gvk.String(), time.Since(startTime))
 	if len(resp.Kvs) != 1 {
 		return errors.NewNotFound(o.gr, key)
 	}
@@ -149,6 +161,7 @@ func (o *objectStoreNamespaced[T]) Update(ctx context.Context, obj T) error {
 	if err != nil {
 		return err
 	}
+	storageMetrics.UpdatePolicyReportMetrics("etcd", "update", obj, false)
 	return nil
 }
 
@@ -156,16 +169,18 @@ func (o *objectStoreNamespaced[T]) Delete(ctx context.Context, name, namespace s
 	o.Lock()
 	defer o.Unlock()
 
+	startTime := time.Now()
 	key := o.getKey(name, namespace)
 	resp, err := o.etcdclient.Delete(ctx, key)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete report kind=%s", o.gvk.String())
 		return err
 	}
+	serverMetrics.UpdateDBRequestTotalMetrics("etcd", "delete", o.gvk.String())
+	serverMetrics.UpdateDBRequestLatencyMetrics("etcd", "delete", o.gvk.String(), time.Since(startTime))
 	if resp.Deleted == 0 {
 		return errors.NewNotFound(o.gr, key)
 	}
-
 	return nil
 }
 
