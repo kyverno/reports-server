@@ -12,7 +12,8 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded,hook-failed
     helm.sh/hook-weight: "100"
 spec:
-  backoffLimit: 2
+  backoffLimit: 1
+  activeDeadlineSeconds: 300
   template:
     metadata:
       {{- with .Values.apiServicesManagement.podAnnotations }}
@@ -44,8 +45,42 @@ spec:
             - '-c'
             - |-
               set -euo pipefail
-              kubectl wait -n {{ $.Release.Namespace }} pod --for=condition=ready -l app.kubernetes.io/name={{ include "reports-server.name" . }} --timeout=120s
-              kubectl delete apiservice v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io --ignore-not-found=true
+              
+              echo "Starting cleanup of reports-server API services..."
+              
+              # Delete API services individually with retry logic
+              # This approach is more reliable than deleting multiple services at once
+              api_services="v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io"
+              success_count=0
+              total_count=0
+              
+              for api_service in $api_services; do
+                total_count=$((total_count + 1))
+                echo "Attempting to delete API service: $api_service"
+                
+                attempt=1
+                while [ $attempt -le 3 ]; do
+                  if kubectl delete apiservice "$api_service" --ignore-not-found=true; then
+                    echo "Successfully deleted API service: $api_service"
+                    success_count=$((success_count + 1))
+                    break
+                  else
+                    echo "Attempt $attempt failed to delete API service: $api_service"
+                    if [ $attempt -lt 3 ]; then
+                      echo "Retrying in 2 seconds..."
+                      sleep 2
+                    else
+                      echo "WARNING: Failed to delete API service $api_service after 3 attempts"
+                    fi
+                  fi
+                  attempt=$((attempt + 1))
+                done
+              done
+              
+              echo "API services cleanup completed: $success_count/$total_count successful"
+              
+              # Exit successfully even if some deletions failed - cleanup is best effort during uninstall
+              exit 0
           {{- with .Values.apiServicesManagement.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
