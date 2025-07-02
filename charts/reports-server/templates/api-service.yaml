@@ -1,4 +1,4 @@
-{{- if .Values.apiServicesManagement.installApiServices.enabled }}
+{{- if and .Values.apiServicesManagement.installApiServices.enabled (not .Values.apiServicesManagement.migrateReportsServer.enabled) }}
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
@@ -43,4 +43,3 @@ spec:
   versionPriority: 100
 {{- end }}
 {{- end }}
-	

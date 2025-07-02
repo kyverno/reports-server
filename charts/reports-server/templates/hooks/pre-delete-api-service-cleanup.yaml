@@ -1,4 +1,4 @@
-{{- if .Values.apiServicesManagement.enabled -}}
+{{- if .Values.apiServicesManagement.installApiServices.enabled -}}
 {{- if not .Values.templating.enabled -}}
 apiVersion: batch/v1
 kind: Job
@@ -16,30 +16,30 @@ spec:
   activeDeadlineSeconds: 300
   template:
     metadata:
-      {{- with .Values.apiServicesManagement.podAnnotations }}
+      {{- with .Values.jobConfigurations.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-      {{- with .Values.apiServicesManagement.podLabels }}
+      {{- with .Values.jobConfigurations.podLabels }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- include "reports-server.labels" . | nindent 8 }}
     spec:
       serviceAccount: {{ include "reports-server.serviceAccountName" . }}
-      {{- with .Values.apiServicesManagement.podSecurityContext }}
+      {{- with .Values.jobConfigurations.podSecurityContext }}
       securityContext:
         {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
       restartPolicy: Never
-      {{- with .Values.apiServicesManagement.imagePullSecrets | default .Values.imagePullSecrets }}
+      {{- with .Values.jobConfigurations.imagePullSecrets | default .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
       containers:
         - name: kubectl
-          image: "{{ .Values.apiServicesManagement.image.registry }}/{{ .Values.apiServicesManagement.image.repository }}:{{ .Values.apiServicesManagement.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.apiServicesManagement.image.pullPolicy }}
+          image: "{{ .Values.jobConfigurations.image.registry }}/{{ .Values.jobConfigurations.image.repository }}:{{ .Values.jobConfigurations.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.jobConfigurations.image.pullPolicy }}
           command:
             - /usr/bin/sh
             - '-c'
@@ -81,29 +81,29 @@ spec:
               
               # Exit successfully even if some deletions failed - cleanup is best effort during uninstall
               exit 0
-          {{- with .Values.apiServicesManagement.securityContext }}
+          {{- with .Values.jobConfigurations.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with .Values.apiServicesManagement.tolerations | default .Values.tolerations}}
+      {{- with .Values.jobConfigurations.tolerations | default .Values.tolerations}}
       tolerations:
         {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
-      {{- with .Values.apiServicesManagement.nodeSelector | default .Values.nodeSelector }}
+      {{- with .Values.jobConfigurations.nodeSelector | default .Values.nodeSelector }}
       nodeSelector:
         {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
-      {{- if or .Values.apiServicesManagement.podAntiAffinity .Values.apiServicesManagement.podAffinity .Values.apiServicesManagement.nodeAffinity }}
+      {{- if or .Values.jobConfigurations.podAntiAffinity .Values.jobConfigurations.podAffinity .Values.jobConfigurations.nodeAffinity }}
       affinity:
-        {{- with .Values.apiServicesManagement.podAntiAffinity }}
+        {{- with .Values.jobConfigurations.podAntiAffinity }}
         podAntiAffinity:
           {{- tpl (toYaml .) $ | nindent 10 }}
         {{- end }}
-        {{- with .Values.apiServicesManagement.podAffinity }}
+        {{- with .Values.jobConfigurations.podAffinity }}
         podAffinity:
           {{- tpl (toYaml .) $ | nindent 10 }}
         {{- end }}
-        {{- with .Values.apiServicesManagement.nodeAffinity }}
+        {{- with .Values.jobConfigurations.nodeAffinity }}
         nodeAffinity:
           {{- tpl (toYaml .) $ | nindent 10 }}
         {{- end }}

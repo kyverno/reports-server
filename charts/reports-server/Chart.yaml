@@ -1,7 +1,7 @@
 apiVersion: v2
 name: reports-server
 type: application
-version: 0.1.30
+version: 0.2.0-rc1
 appVersion: v0.1.25
 keywords:
 - kubernetes
@@ -14,8 +14,3 @@ maintainers:
   url: https://kyverno.io/
   email: cncf-kyverno-maintainers@lists.cncf.io
 kubeVersion: ">=1.16.0-0"
-dependencies:
-- condition: postgresql.enabled
-  name: cloudnative-pg
-  version: 0.22.0
-  repository: https://cloudnative-pg.github.io/charts

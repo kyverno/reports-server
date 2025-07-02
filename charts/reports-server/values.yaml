@@ -3,20 +3,12 @@
 templating:
   enabled: false
 fipsEnabled: false
-cloudnative-pg:
-  crds:
-    create: false
 
-postgresql:
 
-  # -- Deploy postgresql dependency chart
-  enabled: false
+# cloudnative-pg:
+#   crds:
+#     create: false
 
-  auth:
-
-    postgresPassword: reports
-
-    database: reportsdb
 
 # -- Name override
 nameOverride: ""
@@ -279,20 +271,22 @@ config:
       mountPath: "/etc/ssl/rds"
 
 apiServicesManagement:
-  # -- Create a helm hooks to delete api services on uninstall
-  enabled: true
-
   # -- Install api services in manifest
   installApiServices:
 
     # -- Store reports in reports-server
-    enabled: false
+    enabled: true
 
     # -- Store ephemeral reports in reports-server
     installEphemeralReportsService: true
 
+  migrateReportsServer:
+    # -- Create api services only when reports-server is ready and migration is guaranteed
+    enabled: false
+
+
+jobConfigurations:
   image:
-    # -- (string) Image registry
     # -- (string) Image registry
     registry: ghcr.io
     # -- Image repository
