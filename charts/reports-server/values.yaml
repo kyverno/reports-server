@@ -122,13 +122,11 @@ metrics:
 resources:
   # -- Container resource limits
   limits:
-    # cpu: 100m
-    # memory: 128Mi
-
+    memory: 128Mi
   # -- Container resource requests
   requests:
-    # cpu: 100m
-    # memory: 128Mi
+    cpu: 100m
+    memory: 64Mi
 
 autoscaling:
   # -- Enable autoscaling
@@ -145,6 +143,25 @@ autoscaling:
 
   # -- Target Memory utilisation
   targetMemoryUtilizationPercentage: ~
+
+  # -- HPA behavior configuration (optional)
+  # behavior:
+  #   scaleDown:
+  #     stabilizationWindowSeconds: 300
+  #     policies:
+  #     - type: Percent
+  #       value: 100
+  #       periodSeconds: 15
+  #   scaleUp:
+  #     stabilizationWindowSeconds: 0
+  #     policies:
+  #     - type: Percent
+  #       value: 100
+  #       periodSeconds: 15
+  #     - type: Pods
+  #       value: 4
+  #       periodSeconds: 15
+  #     selectPolicy: Max
 
 
 # -- Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica

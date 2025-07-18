@@ -1,6 +1,6 @@
 # reports-server
 
-![Version: 0.1.30](https://img.shields.io/badge/Version-0.1.30-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.25](https://img.shields.io/badge/AppVersion-v0.1.25-informational?style=flat-square)
+![Version: 0.2.1-rc1](https://img.shields.io/badge/Version-0.2.1--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.25](https://img.shields.io/badge/AppVersion-v0.1.25-informational?style=flat-square)
 
 TODO
 
@@ -23,10 +23,6 @@ helm install reports-server --namespace reports-server --create-namespace report
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | fipsEnabled | bool | `false` |  |
-| cloudnative-pg.crds.create | bool | `false` |  |
-| postgresql.enabled | bool | `false` | Deploy postgresql dependency chart |
-| postgresql.auth.postgresPassword | string | `"reports"` |  |
-| postgresql.auth.database | string | `"reportsdb"` |  |
 | nameOverride | string | `""` | Name override |
 | fullnameOverride | string | `""` | Full name override |
 | replicaCount | int | `1` | Number of pod replicas |
@@ -53,8 +49,8 @@ helm install reports-server --namespace reports-server --create-namespace report
 | metrics.serviceMonitor.metricRelabelings | list | `[]` | Service monitor metric relabelings |
 | metrics.serviceMonitor.relabelings | list | `[]` | Service monitor relabelings |
 | metrics.serviceMonitor.scrapeTimeout | string | `""` | Service monitor scrape timeout |
-| resources.limits | string | `nil` | Container resource limits |
-| resources.requests | string | `nil` | Container resource requests |
+| resources.limits | object | `{"memory":"128Mi"}` | Container resource limits |
+| resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Container resource requests |
 | autoscaling.enabled | bool | `false` | Enable autoscaling |
 | autoscaling.minReplicas | int | `1` | Min number of replicas |
 | autoscaling.maxReplicas | int | `100` | Max number of replicas |
@@ -99,24 +95,24 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.sslkey | string | `""` | Database SSL key |
 | config.db.sslcert | string | `""` | Database SSL cert |
 | config.db.sslrds | object | `{"mountPath":"/etc/ssl/rds","secretName":""}` | Volume configuration for RDS certificate |
-| apiServicesManagement.enabled | bool | `true` | Create a helm hooks to delete api services on uninstall |
-| apiServicesManagement.installApiServices | object | `{"enabled":false,"installEphemeralReportsService":true}` | Install api services in manifest |
-| apiServicesManagement.installApiServices.enabled | bool | `false` | Store reports in reports-server |
+| apiServicesManagement.installApiServices | object | `{"enabled":true,"installEphemeralReportsService":true}` | Install api services in manifest |
+| apiServicesManagement.installApiServices.enabled | bool | `true` | Store reports in reports-server |
 | apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
-| apiServicesManagement.image.registry | string | `"ghcr.io"` | Image registry |
-| apiServicesManagement.image.repository | string | `"nirmata/kubectl"` | Image repository |
-| apiServicesManagement.image.tag | string | `"1.30.2"` | Image tag Defaults to `latest` if omitted |
-| apiServicesManagement.image.pullPolicy | string | `nil` | Image pull policy Defaults to image.pullPolicy if omitted |
-| apiServicesManagement.imagePullSecrets | list | `[]` | Image pull secrets |
-| apiServicesManagement.podSecurityContext | object | `{}` | Security context for the pod |
-| apiServicesManagement.nodeSelector | object | `{}` | Node labels for pod assignment |
-| apiServicesManagement.tolerations | list | `[]` | List of node taints to tolerate |
-| apiServicesManagement.podAntiAffinity | object | `{}` | Pod anti affinity constraints. |
-| apiServicesManagement.podAffinity | object | `{}` | Pod affinity constraints. |
-| apiServicesManagement.podLabels | object | `{}` | Pod labels. |
-| apiServicesManagement.podAnnotations | object | `{}` | Pod annotations. |
-| apiServicesManagement.nodeAffinity | object | `{}` | Node affinity constraints. |
-| apiServicesManagement.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsNonRoot":true,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Security context for the hook containers |
+| apiServicesManagement.migrateReportsServer.enabled | bool | `false` | Create api services only when reports-server is ready and migration is guaranteed |
+| jobConfigurations.image.registry | string | `"ghcr.io"` | Image registry |
+| jobConfigurations.image.repository | string | `"nirmata/kubectl"` | Image repository |
+| jobConfigurations.image.tag | string | `"1.30.2"` | Image tag Defaults to `latest` if omitted |
+| jobConfigurations.image.pullPolicy | string | `nil` | Image pull policy Defaults to image.pullPolicy if omitted |
+| jobConfigurations.imagePullSecrets | list | `[]` | Image pull secrets |
+| jobConfigurations.podSecurityContext | object | `{}` | Security context for the pod |
+| jobConfigurations.nodeSelector | object | `{}` | Node labels for pod assignment |
+| jobConfigurations.tolerations | list | `[]` | List of node taints to tolerate |
+| jobConfigurations.podAntiAffinity | object | `{}` | Pod anti affinity constraints. |
+| jobConfigurations.podAffinity | object | `{}` | Pod affinity constraints. |
+| jobConfigurations.podLabels | object | `{}` | Pod labels. |
+| jobConfigurations.podAnnotations | object | `{}` | Pod annotations. |
+| jobConfigurations.nodeAffinity | object | `{}` | Node affinity constraints. |
+| jobConfigurations.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsNonRoot":true,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Security context for the hook containers |
 
 ## Source Code
 
@@ -125,10 +121,6 @@ helm install reports-server --namespace reports-server --create-namespace report
 ## Requirements
 
 Kubernetes: `>=1.16.0-0`
-
-| Repository | Name | Version |
-|------------|------|---------|
-| https://cloudnative-pg.github.io/charts | cloudnative-pg | 0.22.0 |
 
 ## Maintainers
 
