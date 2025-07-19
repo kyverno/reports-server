@@ -89,7 +89,7 @@ jobs:
       - name: API Service status before migation
         run: |
           set -e
-          kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io v1alpha1.openreports.io
+          kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io 
       - name: Install report server
         run: |
           set -e
