@@ -75,6 +75,7 @@ jobs:
           set -e
           export HELM=${{ steps.helm.outputs.helm-path }}
           curl https://raw.githubusercontent.com/kyverno/kyverno/refs/heads/main/scripts/config/standard/kyverno.yaml > values.yaml
+          helm dependency build
           helm install kyverno -n kyverno --create-namespace ./kyverno/charts/kyverno --wait --values values.yaml
       - name: Wait for kyverno ready
         run: |
