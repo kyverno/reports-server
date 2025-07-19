@@ -75,8 +75,11 @@ jobs:
           set -e
           export HELM=${{ steps.helm.outputs.helm-path }}
           curl https://raw.githubusercontent.com/kyverno/kyverno/refs/heads/main/scripts/config/standard/kyverno.yaml > values.yaml
+          helm repo add openreports https://openreports.github.io/reports-api
+          helm repo update
           helm dependency build
-          helm install kyverno -n kyverno --create-namespace ./kyverno/charts/kyverno --wait --values values.yaml
+          helm template kyverno -n kyverno ./kyverno/charts/kyverno --values values.yaml > kyverno.yaml
+          kubectl apply --server-side -f kyverno.yaml
       - name: Wait for kyverno ready
         run: |
           set -e
