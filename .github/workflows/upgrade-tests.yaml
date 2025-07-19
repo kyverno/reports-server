@@ -37,11 +37,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      # - name: Checkout kyverno/kyverno
-      #   uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      #   with:
-      #     repository: kyverno/kyverno
-      #     path: kyverno
+      - name: Checkout kyverno/kyverno
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          repository: kyverno/kyverno
+          path: kyverno
       - name: Setup Go
         uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
         with:
@@ -88,7 +88,7 @@ jobs:
           rm ./kyverno/charts/kyverno/templates/validate.yaml # until validation for crd is removed
           export HELM=${{ steps.helm.outputs.helm-path }}
           helm repo add kyverno https://kyverno.github.io/kyverno/
-          helm install kyverno -n kyverno --create-namespace https://kyverno.github.io/kyverno --values ./testdata/values.yaml > kyverno.yaml
+          helm install kyverno -n kyverno --create-namespace kyverno/kyverno --values ./testdata/values.yaml > kyverno.yaml
       - name: Wait for kyverno ready
         run: |
           set -e
