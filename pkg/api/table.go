@@ -20,8 +20,83 @@ import (
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
+
+func addOpenreportsReportToTable(table *metav1beta1.Table, reps ...openreportsv1alpha1.Report) {
+	for i, rep := range reps {
+		table.ColumnDefinitions = []metav1beta1.TableColumnDefinition{
+			{Name: "Name", Type: "string", Format: "name", Description: "Name of the resource"},
+			{Name: "Kind", Type: "string", Format: "string"},
+			{Name: "Name", Type: "string", Format: "string"},
+			{Name: "Pass", Type: "integer", Format: "string"},
+			{Name: "Fail", Type: "integer", Format: "string"},
+			{Name: "Warn", Type: "integer", Format: "string"},
+			{Name: "Error", Type: "integer", Format: "string"},
+			{Name: "Skip", Type: "integer", Format: "string"},
+			{Name: "Age", Type: "string", Format: "duration"},
+		}
+		row := make([]interface{}, 0, len(table.ColumnDefinitions))
+		row = append(row, rep.Name)
+
+		if rep.Scope == nil {
+			row = append(row, "")
+			row = append(row, "")
+		} else {
+			row = append(row, rep.Scope.Kind)
+			row = append(row, rep.Scope.Name)
+		}
+
+		row = append(row, rep.Summary.Pass)
+		row = append(row, rep.Summary.Fail)
+		row = append(row, rep.Summary.Warn)
+		row = append(row, rep.Summary.Error)
+		row = append(row, rep.Summary.Skip)
+		row = append(row, time.Since(rep.CreationTimestamp.Time).Truncate(time.Second).String())
+		table.Rows = append(table.Rows, metav1beta1.TableRow{
+			Cells:  row,
+			Object: runtime.RawExtension{Object: &reps[i]},
+		})
+	}
+}
+
+func addOpenreportsClusterReportToTable(table *metav1beta1.Table, reps ...openreportsv1alpha1.ClusterReport) {
+	for i, rep := range reps {
+		table.ColumnDefinitions = []metav1beta1.TableColumnDefinition{
+			{Name: "Name", Type: "string", Format: "name", Description: "Name of the resource"},
+			{Name: "Kind", Type: "string", Format: "string"},
+			{Name: "Name", Type: "string", Format: "string"},
+			{Name: "Pass", Type: "integer", Format: "string"},
+			{Name: "Fail", Type: "integer", Format: "string"},
+			{Name: "Warn", Type: "integer", Format: "string"},
+			{Name: "Error", Type: "integer", Format: "string"},
+			{Name: "Skip", Type: "integer", Format: "string"},
+			{Name: "Age", Type: "string", Format: "duration"},
+		}
+		row := make([]interface{}, 0, len(table.ColumnDefinitions))
+		row = append(row, rep.Name)
+
+		if rep.Scope == nil {
+			row = append(row, "")
+			row = append(row, "")
+		} else {
+			row = append(row, rep.Scope.Kind)
+			row = append(row, rep.Scope.Name)
+		}
+
+		row = append(row, rep.Summary.Pass)
+		row = append(row, rep.Summary.Fail)
+		row = append(row, rep.Summary.Warn)
+		row = append(row, rep.Summary.Error)
+		row = append(row, rep.Summary.Skip)
+		row = append(row, time.Since(rep.CreationTimestamp.Time).Truncate(time.Second).String())
+		table.Rows = append(table.Rows, metav1beta1.TableRow{
+			Cells:  row,
+			Object: runtime.RawExtension{Object: &reps[i]},
+		})
+	}
+}
 
 func addPolicyReportToTable(table *metav1beta1.Table, polrs ...v1alpha2.PolicyReport) {
 	for i, polr := range polrs {

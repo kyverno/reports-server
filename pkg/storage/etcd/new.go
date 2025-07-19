@@ -11,6 +11,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
@@ -22,10 +23,12 @@ type EtcdConfig struct {
 }
 
 type etcdClient struct {
-	polrClient  ObjectStorageNamespaced[*v1alpha2.PolicyReport]
-	ephrClient  ObjectStorageNamespaced[*reportsv1.EphemeralReport]
-	cpolrClient ObjectStorageCluster[*v1alpha2.ClusterPolicyReport]
-	cephrClient ObjectStorageCluster[*reportsv1.ClusterEphemeralReport]
+	polrClient           ObjectStorageNamespaced[*v1alpha2.PolicyReport]
+	ephrClient           ObjectStorageNamespaced[*reportsv1.EphemeralReport]
+	reportsClient        ObjectStorageNamespaced[*openreportsv1alpha1.Report]
+	cpolrClient          ObjectStorageCluster[*v1alpha2.ClusterPolicyReport]
+	cephrClient          ObjectStorageCluster[*reportsv1.ClusterEphemeralReport]
+	clusterReportsClient ObjectStorageCluster[*openreportsv1alpha1.ClusterReport]
 }
 
 func New(cfg *EtcdConfig) (api.Storage, error) {
@@ -45,10 +48,12 @@ func New(cfg *EtcdConfig) (api.Storage, error) {
 	}
 
 	return &etcdClient{
-		polrClient:  NewObjectStoreNamespaced[*v1alpha2.PolicyReport](client, utils.PolicyReportsGVK, utils.PolicyReportsGR),
-		ephrClient:  NewObjectStoreNamespaced[*reportsv1.EphemeralReport](client, utils.EphemeralReportsGVK, utils.EphemeralReportsGR),
-		cpolrClient: NewObjectStoreCluster[*v1alpha2.ClusterPolicyReport](client, utils.ClusterPolicyReportsGVK, utils.ClusterPolicyReportsGR),
-		cephrClient: NewObjectStoreCluster[*reportsv1.ClusterEphemeralReport](client, utils.ClusterEphemeralReportsGVK, utils.ClusterEphemeralReportsGR),
+		polrClient:           NewObjectStoreNamespaced[*v1alpha2.PolicyReport](client, utils.PolicyReportsGVK, utils.PolicyReportsGR),
+		ephrClient:           NewObjectStoreNamespaced[*reportsv1.EphemeralReport](client, utils.EphemeralReportsGVK, utils.EphemeralReportsGR),
+		reportsClient:        NewObjectStoreNamespaced[*openreportsv1alpha1.Report](client, utils.OpenreportsReportGVK, utils.OpenreportsReportGR),
+		cpolrClient:          NewObjectStoreCluster[*v1alpha2.ClusterPolicyReport](client, utils.ClusterPolicyReportsGVK, utils.ClusterPolicyReportsGR),
+		cephrClient:          NewObjectStoreCluster[*reportsv1.ClusterEphemeralReport](client, utils.ClusterEphemeralReportsGVK, utils.ClusterEphemeralReportsGR),
+		clusterReportsClient: NewObjectStoreCluster[*openreportsv1alpha1.ClusterReport](client, utils.OpenreportsClusterReportGVK, utils.OpenreportsClusterReportGR),
 	}, nil
 }
 
@@ -70,4 +75,12 @@ func (e *etcdClient) EphemeralReports() api.EphemeralReportsInterface {
 
 func (e *etcdClient) ClusterEphemeralReports() api.ClusterEphemeralReportsInterface {
 	return e.cephrClient
+}
+
+func (e *etcdClient) Reports() api.ReportInterface {
+	return e.reportsClient
+}
+
+func (e *etcdClient) ClusterReports() api.ClusterReportInterface {
+	return e.clusterReportsClient
 }

@@ -1,10 +1,10 @@
 ARG ARCH
-FROM golang:1.22.2 as build
+FROM golang:1.24 as build
 
 WORKDIR /
 COPY . ./
 
-RUN GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-w -s" -o reports-server ./main.go
+RUN GOOS=linux CGO_ENABLED=0 go build -ldflags="-w -s" -o reports-server ./main.go
 
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /

@@ -4,12 +4,15 @@ import (
 	"context"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
 type Storage interface {
 	Ready() bool
 	PolicyReports() PolicyReportsInterface
+	Reports() ReportInterface
+	ClusterReports() ClusterReportInterface
 	ClusterPolicyReports() ClusterPolicyReportsInterface
 	EphemeralReports() EphemeralReportsInterface
 	ClusterEphemeralReports() ClusterEphemeralReportsInterface
@@ -44,6 +47,22 @@ type ClusterEphemeralReportsInterface interface {
 	List(ctx context.Context) ([]*reportsv1.ClusterEphemeralReport, error)
 	Create(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error
 	Update(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error
+	Delete(ctx context.Context, name string) error
+}
+
+type ReportInterface interface {
+	Get(ctx context.Context, name, namespace string) (*openreportsv1alpha1.Report, error)
+	List(ctx context.Context, namespace string) ([]*openreportsv1alpha1.Report, error)
+	Create(ctx context.Context, cephr *openreportsv1alpha1.Report) error
+	Update(ctx context.Context, cephr *openreportsv1alpha1.Report) error
+	Delete(ctx context.Context, name, namespace string) error
+}
+
+type ClusterReportInterface interface {
+	Get(ctx context.Context, name string) (*openreportsv1alpha1.ClusterReport, error)
+	List(ctx context.Context) ([]*openreportsv1alpha1.ClusterReport, error)
+	Create(ctx context.Context, cephr *openreportsv1alpha1.ClusterReport) error
+	Update(ctx context.Context, cephr *openreportsv1alpha1.ClusterReport) error
 	Delete(ctx context.Context, name string) error
 }
 
