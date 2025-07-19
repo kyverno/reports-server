@@ -75,10 +75,8 @@ jobs:
           set -e
           export HELM=${{ steps.helm.outputs.helm-path }}
           curl https://raw.githubusercontent.com/kyverno/kyverno/refs/heads/main/scripts/config/standard/kyverno.yaml > values.yaml
-          helm repo add openreports https://openreports.github.io/reports-api
-          helm repo update
-          helm dependency build
-          helm template kyverno -n kyverno ./kyverno/charts/kyverno --values values.yaml > kyverno.yaml
+          helm repo add kyverno https://kyverno.github.io/kyverno/
+          helm template kyverno -n kyverno https://kyverno.github.io/kyverno --values values.yaml > kyverno.yaml
           kubectl apply --server-side -f kyverno.yaml
       - name: Wait for kyverno ready
         run: |
@@ -92,7 +90,7 @@ jobs:
       - name: API Service status before migation
         run: |
           set -e
-          kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io
+          kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io v1alpha1.openreports.io
       - name: Install report server
         run: |
           set -e
@@ -103,7 +101,7 @@ jobs:
         run: |
           set -e
           kubectl wait --namespace reports-server --for=condition=ready pod --selector '!job-name' --timeout=120s
-          kubectl wait --for condition="available" apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io --timeout=120s
+          kubectl wait --for condition="available" apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io v1alpha1.openreports.io --timeout=120s
       - name: Wait for kyverno to pick up the change
         run: |
           set -e
@@ -111,7 +109,7 @@ jobs:
       - name: API Service status post migration
         run: |
           set -e
-          kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io
+          kubectl get apiservices v1alpha2.wgpolicyk8s.io v1.reports.kyverno.io v1alpha1.openreports.io
       - name: Install Chainsaw
         uses: kyverno/action-install-chainsaw@d311eacde764f806c9658574ff64c9c3b21f8397 # v0.2.11
       - name: Test with Chainsaw
