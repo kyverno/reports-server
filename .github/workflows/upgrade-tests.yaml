@@ -88,8 +88,7 @@ jobs:
           rm ./kyverno/charts/kyverno/templates/validate.yaml # until validation for crd is removed
           export HELM=${{ steps.helm.outputs.helm-path }}
           helm repo add kyverno https://kyverno.github.io/kyverno/
-          helm template kyverno -n kyverno https://kyverno.github.io/kyverno --values ./testdata/values.yaml > kyverno.yaml
-          kubectl apply --server-side -f kyverno.yaml
+          helm install kyverno -n kyverno --create-namespace https://kyverno.github.io/kyverno --values ./testdata/values.yaml > kyverno.yaml
       - name: Wait for kyverno ready
         run: |
           set -e
