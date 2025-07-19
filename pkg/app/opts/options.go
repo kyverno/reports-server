@@ -168,14 +168,14 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 		return nil, err
 	}
 
-	// if !o.DisableAuthForTesting {
-	// 	if err := o.Authentication.ApplyTo(&serverConfig.Authentication, serverConfig.SecureServing, nil); err != nil {
-	// 		return nil, err
-	// 	}
-	// 	if err := o.Authorization.ApplyTo(&serverConfig.Authorization); err != nil {
-	// 		return nil, err
-	// 	}
-	// }
+	if !o.DisableAuthForTesting {
+		if err := o.Authentication.ApplyTo(&serverConfig.Authentication, serverConfig.SecureServing, nil); err != nil {
+			return nil, err
+		}
+		if err := o.Authorization.ApplyTo(&serverConfig.Authorization); err != nil {
+			return nil, err
+		}
+	}
 
 	if err := o.Audit.ApplyTo(serverConfig); err != nil {
 		return nil, err
