@@ -87,9 +87,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.sslkey | string | `""` | Database SSL key |
 | config.db.sslcert | string | `""` | Database SSL cert |
 | apiServicesManagement.enabled | bool | `true` | Create a helm hooks to delete api services on uninstall |
-| apiServicesManagement.installApiServices | object | `{"enabled":true,"installEphemeralReportsService":true}` | Install api services in manifest |
+| apiServicesManagement.installApiServices | object | `{"enabled":true,"installEphemeralReportsService":true,"installOpenreportsService":true}` | Install api services in manifest |
 | apiServicesManagement.installApiServices.enabled | bool | `true` | Store reports in reports-server |
 | apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
+| apiServicesManagement.installApiServices.installOpenreportsService | bool | `true` | Store open reports in reports-server |
 | apiServicesManagement.image.registry | string | `"docker.io"` | Image registry |
 | apiServicesManagement.image.repository | string | `"bitnami/kubectl"` | Image repository |
 | apiServicesManagement.image.tag | string | `"1.30.2"` | Image tag Defaults to `latest` if omitted |
