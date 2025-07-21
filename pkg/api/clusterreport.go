@@ -53,24 +53,16 @@ func (c *clusterReportStore) NewList() runtime.Object {
 
 func (c *clusterReportStore) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
 	var labelSelector labels.Selector
-	// fieldSelector := fields.Everything() // TODO: Field selectors
 	if options != nil {
 		if options.LabelSelector != nil {
 			labelSelector = options.LabelSelector
 		}
-		// if options.FieldSelector != nil {
-		// 	fieldSelector = options.FieldSelector
-		// }
 	}
 	klog.Infof("listing all cluster policy reports")
 	list, err := c.listCpolr()
 	if err != nil {
 		return nil, errors.NewBadRequest("failed to list resource clusterpolicyreport")
 	}
-
-	// if labelSelector.String() == labels.Everything().String() {
-	// 	return list, nil
-	// }
 
 	cpolrList := &openreportsv1alpha1.ClusterReportList{
 		Items:    make([]openreportsv1alpha1.ClusterReport, 0),
@@ -121,10 +113,6 @@ func (c *clusterReportStore) Create(ctx context.Context, obj runtime.Object, cre
 		switch options.FieldValidation {
 		case "Ignore":
 		case "Warn":
-			// return &admissionv1.AdmissionResponse{
-			// 	Allowed:  false,
-			// 	Warnings: []string{err.Error()},
-			// }, nil
 		case "Strict":
 			return nil, err
 		}
@@ -186,10 +174,6 @@ func (c *clusterReportStore) Update(ctx context.Context, name string, objInfo re
 		switch options.FieldValidation {
 		case "Ignore":
 		case "Warn":
-			// return &admissionv1.AdmissionResponse{
-			// 	Allowed:  false,
-			// 	Warnings: []string{err.Error()},
-			// }, nil
 		case "Strict":
 			return nil, false, err
 		}
@@ -241,7 +225,7 @@ func (c *clusterReportStore) Delete(ctx context.Context, name string, deleteVali
 		}
 	}
 
-	return cpolr, true, nil // TODO: Add protobuf in wgpolicygroup
+	return cpolr, true, nil
 }
 
 func (c *clusterReportStore) DeleteCollection(ctx context.Context, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions, listOptions *metainternalversion.ListOptions) (runtime.Object, error) {

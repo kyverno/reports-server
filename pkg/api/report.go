@@ -54,14 +54,10 @@ func (s *reportStore) NewList() runtime.Object {
 
 func (s *reportStore) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
 	var labelSelector labels.Selector
-	// fieldSelector := fields.Everything() // TODO: Field selectors
 	if options != nil {
 		if options.LabelSelector != nil {
 			labelSelector = options.LabelSelector
 		}
-		// if options.FieldSelector != nil {
-		// 	fieldSelector = options.FieldSelector
-		// }
 	}
 	namespace := genericapirequest.NamespaceValue(ctx)
 
@@ -70,11 +66,6 @@ func (s *reportStore) List(ctx context.Context, options *metainternalversion.Lis
 	if err != nil {
 		return nil, errors.NewBadRequest("failed to list resource policyreport")
 	}
-
-	// if labelSelector == labels.Everything() {
-	// 	return list, nil
-	// }
-
 	repList := &openreportsv1alpha1.ReportList{
 		Items:    make([]openreportsv1alpha1.Report, 0),
 		ListMeta: metav1.ListMeta{},
@@ -126,10 +117,6 @@ func (s *reportStore) Create(ctx context.Context, obj runtime.Object, createVali
 		switch options.FieldValidation {
 		case "Ignore":
 		case "Warn":
-			// return &admissionv1.AdmissionResponse{
-			// 	Allowed:  false,
-			// 	Warnings: []string{ers.Error()},
-			// }, nil
 		case "Strict":
 			return nil, err
 		}
@@ -199,10 +186,6 @@ func (s *reportStore) Update(ctx context.Context, name string, objInfo rest.Upda
 		switch options.FieldValidation {
 		case "Ignore":
 		case "Warn":
-			// return &admissionv1.AdmissionResponse{
-			// 	Allowed:  false,
-			// 	Warnings: []string{ers.Error()},
-			// }, nil
 		case "Strict":
 			return nil, false, err
 		}
