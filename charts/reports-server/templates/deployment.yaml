@@ -85,6 +85,9 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp-dir
+            {{- with .Values.extraVolumes.volumeMounts }}
+            {{ toYaml . | nindent 12 | trim }}
+            {{- end }}
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -116,3 +119,6 @@ spec:
       volumes:
       - emptyDir: {}
         name: tmp-dir
+      {{- with .Values.extraVolumes.volumes }}
+      {{ toYaml . | nindent 6 | trim }}
+      {{- end }}
