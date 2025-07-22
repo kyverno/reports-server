@@ -19,39 +19,39 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/klog/v2"
-	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 
-type cpolrStore struct {
+type clusterReportStore struct {
 	broadcaster *watch.Broadcaster
 	store       storage.Interface
 }
 
-func ClusterPolicyReportStore(store storage.Interface) API {
+func ClusterReportStore(store storage.Interface) API {
 	broadcaster := watch.NewBroadcaster(1000, watch.WaitIfChannelFull)
 
-	return &cpolrStore{
+	return &clusterReportStore{
 		broadcaster: broadcaster,
 		store:       store,
 	}
 }
 
-func (c *cpolrStore) New() runtime.Object {
-	return &v1alpha2.ClusterPolicyReport{}
+func (c *clusterReportStore) New() runtime.Object {
+	return &openreportsv1alpha1.ClusterReportList{}
 }
 
-func (c *cpolrStore) Destroy() {
+func (c *clusterReportStore) Destroy() {
 }
 
-func (c *cpolrStore) Kind() string {
-	return "ClusterPolicyReport"
+func (c *clusterReportStore) Kind() string {
+	return "ClusterReport"
 }
 
-func (c *cpolrStore) NewList() runtime.Object {
-	return &v1alpha2.ClusterPolicyReportList{}
+func (c *clusterReportStore) NewList() runtime.Object {
+	return &openreportsv1alpha1.ClusterReportList{}
 }
 
-func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
+func (c *clusterReportStore) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
 	var labelSelector labels.Selector
 	if options != nil {
 		if options.LabelSelector != nil {
@@ -64,8 +64,8 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 		return nil, errors.NewBadRequest("failed to list resource clusterpolicyreport")
 	}
 
-	cpolrList := &v1alpha2.ClusterPolicyReportList{
-		Items:    make([]v1alpha2.ClusterPolicyReport, 0),
+	cpolrList := &openreportsv1alpha1.ClusterReportList{
+		Items:    make([]openreportsv1alpha1.ClusterReport, 0),
 		ListMeta: metav1.ListMeta{},
 	}
 	var desiredRv uint64
@@ -96,16 +96,16 @@ func (c *cpolrStore) List(ctx context.Context, options *metainternalversion.List
 	return cpolrList, nil
 }
 
-func (c *cpolrStore) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
-	klog.Infof("fetching cluster policy report name=%s", name)
+func (c *clusterReportStore) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
+	klog.Infof("fetching cluster report name=%s", name)
 	report, err := c.getCpolr(name)
 	if err != nil || report == nil {
-		return nil, errors.NewNotFound(utils.ClusterPolicyReportsGR, name)
+		return nil, errors.NewNotFound(utils.OpenreportsClusterReportGR, name)
 	}
 	return report, nil
 }
 
-func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) {
+func (c *clusterReportStore) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
 
 	err := createValidation(ctx, obj)
@@ -118,20 +118,20 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 		}
 	}
 
-	cpolr, ok := obj.(*v1alpha2.ClusterPolicyReport)
+	cpolr, ok := obj.(*openreportsv1alpha1.ClusterReport)
 	if !ok {
 		return nil, errors.NewBadRequest("failed to validate cluster policy report")
 	}
 	if cpolr.Name == "" {
 		if cpolr.GenerateName == "" {
-			return nil, errors.NewAlreadyExists(utils.ClusterPolicyReportsGR, cpolr.Name)
+			return nil, errors.NewAlreadyExists(utils.OpenreportsClusterReportGR, cpolr.Name)
 		}
 		cpolr.Name = nameGenerator.GenerateName(cpolr.GenerateName)
 	}
 
 	cpolr.Annotations = labelReports(cpolr.Annotations)
 	cpolr.Generation = 1
-	klog.Infof("creating cluster policy report name=%s", cpolr.Name)
+	klog.Infof("creating cluster report name=%s", cpolr.Name)
 	if !isDryRun {
 		r, err := c.createCpolr(cpolr)
 		if err != nil {
@@ -145,7 +145,7 @@ func (c *cpolrStore) Create(ctx context.Context, obj runtime.Object, createValid
 	return obj, nil
 }
 
-func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
+func (c *clusterReportStore) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
 
 	oldObj, err := c.getCpolr(name)
@@ -157,7 +157,7 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 	if err != nil && !forceAllowCreate {
 		return nil, false, err
 	}
-	cpolr := updatedObject.(*v1alpha2.ClusterPolicyReport)
+	cpolr := updatedObject.(*openreportsv1alpha1.ClusterReport)
 	if forceAllowCreate {
 		r, err := c.updateCpolr(cpolr, oldObj)
 		if err != nil {
@@ -179,13 +179,13 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		}
 	}
 
-	cpolr, ok := updatedObject.(*v1alpha2.ClusterPolicyReport)
+	cpolr, ok := updatedObject.(*openreportsv1alpha1.ClusterReport)
 	if !ok {
 		return nil, false, errors.NewBadRequest("failed to validate cluster policy report")
 	}
 	cpolr.Annotations = labelReports(cpolr.Annotations)
 	cpolr.Generation += 1
-	klog.Infof("updating cluster policy report name=%s", cpolr.Name)
+	klog.Infof("updating cluster report name=%s", cpolr.Name)
 	if !isDryRun {
 		r, err := c.updateCpolr(cpolr, oldObj)
 		if err != nil {
@@ -199,13 +199,13 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 	return updatedObject, true, nil
 }
 
-func (c *cpolrStore) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (runtime.Object, bool, error) {
+func (c *clusterReportStore) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (runtime.Object, bool, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
 
 	cpolr, err := c.getCpolr(name)
 	if err != nil {
-		klog.ErrorS(err, "Failed to find cpolrs", "name", name)
-		return nil, false, errors.NewNotFound(utils.ClusterPolicyReportsGR, name)
+		klog.ErrorS(err, "Failed to find creps", "name", name)
+		return nil, false, errors.NewNotFound(utils.OpenreportsClusterReportGR, name)
 	}
 
 	err = deleteValidation(ctx, cpolr)
@@ -214,7 +214,7 @@ func (c *cpolrStore) Delete(ctx context.Context, name string, deleteValidation r
 		return nil, false, errors.NewBadRequest(fmt.Sprintf("invalid resource: %s", err.Error()))
 	}
 
-	klog.Infof("deleting cluster policy report name=%s", cpolr.Name)
+	klog.Infof("deleting cluster report name=%s", cpolr.Name)
 	if !isDryRun {
 		if err = c.deleteCpolr(cpolr); err != nil {
 			klog.ErrorS(err, "failed to delete cpolr", "name", name)
@@ -228,18 +228,18 @@ func (c *cpolrStore) Delete(ctx context.Context, name string, deleteValidation r
 	return cpolr, true, nil
 }
 
-func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions, listOptions *metainternalversion.ListOptions) (runtime.Object, error) {
+func (c *clusterReportStore) DeleteCollection(ctx context.Context, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions, listOptions *metainternalversion.ListOptions) (runtime.Object, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
 
 	obj, err := c.List(ctx, listOptions)
 	if err != nil {
-		klog.ErrorS(err, "Failed to find cpolrs")
+		klog.ErrorS(err, "Failed to find creps")
 		return nil, errors.NewBadRequest("Failed to find cluster policy reports")
 	}
 
-	cpolrList, ok := obj.(*v1alpha2.ClusterPolicyReportList)
+	cpolrList, ok := obj.(*openreportsv1alpha1.ClusterReportList)
 	if !ok {
-		klog.ErrorS(err, "Failed to parse cpolrs")
+		klog.ErrorS(err, "Failed to parse creps")
 		return nil, errors.NewBadRequest("Failed to parse cluster policy reports")
 	}
 
@@ -255,7 +255,7 @@ func (c *cpolrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 	return cpolrList, nil
 }
 
-func (c *cpolrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
+func (c *clusterReportStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
 	klog.Infof("watching cluster policy reports rv=%s", options.ResourceVersion)
 	switch options.ResourceVersion {
 	case "", "0":
@@ -267,9 +267,9 @@ func (c *cpolrStore) Watch(ctx context.Context, options *metainternalversion.Lis
 	if err != nil {
 		return nil, err
 	}
-	list, ok := items.(*v1alpha2.ClusterPolicyReportList)
+	list, ok := items.(*openreportsv1alpha1.ClusterReportList)
 	if !ok {
-		return nil, fmt.Errorf("failed to convert runtime object into cluster policy report list")
+		return nil, fmt.Errorf("failed to convert runtime object into cluster report list")
 	}
 	events := make([]watch.Event, len(list.Items))
 	for i, pol := range list.Items {
@@ -282,54 +282,54 @@ func (c *cpolrStore) Watch(ctx context.Context, options *metainternalversion.Lis
 	return c.broadcaster.WatchWithPrefix(events)
 }
 
-func (c *cpolrStore) ConvertToTable(ctx context.Context, object runtime.Object, tableOptions runtime.Object) (*metav1beta1.Table, error) {
+func (c *clusterReportStore) ConvertToTable(ctx context.Context, object runtime.Object, tableOptions runtime.Object) (*metav1beta1.Table, error) {
 	var table metav1beta1.Table
 
 	switch t := object.(type) {
-	case *v1alpha2.ClusterPolicyReport:
+	case *openreportsv1alpha1.ClusterReport:
 		table.ResourceVersion = t.ResourceVersion
 		table.SelfLink = t.SelfLink //nolint:staticcheck // keep deprecated field to be backward compatible
-		addClusterPolicyReportToTable(&table, *t)
-	case *v1alpha2.ClusterPolicyReportList:
+		addOpenreportsClusterReportToTable(&table, *t)
+	case *openreportsv1alpha1.ClusterReportList:
 		table.ResourceVersion = t.ResourceVersion
 		table.SelfLink = t.SelfLink //nolint:staticcheck // keep deprecated field to be backward compatible
 		table.Continue = t.Continue
-		addClusterPolicyReportToTable(&table, t.Items...)
+		addOpenreportsClusterReportToTable(&table, t.Items...)
 	default:
 	}
 
 	return &table, nil
 }
 
-func (c *cpolrStore) NamespaceScoped() bool {
+func (c *clusterReportStore) NamespaceScoped() bool {
 	return false
 }
 
-func (c *cpolrStore) GetSingularName() string {
-	return "clusterpolicyreport"
+func (c *clusterReportStore) GetSingularName() string {
+	return "clusterreport"
 }
 
-func (c *cpolrStore) ShortNames() []string {
-	return []string{"cpolr"}
+func (c *clusterReportStore) ShortNames() []string {
+	return []string{"creps"}
 }
 
-func (c *cpolrStore) getCpolr(name string) (*v1alpha2.ClusterPolicyReport, error) {
-	val, err := c.store.ClusterPolicyReports().Get(context.TODO(), name)
+func (c *clusterReportStore) getCpolr(name string) (*openreportsv1alpha1.ClusterReport, error) {
+	val, err := c.store.ClusterReports().Get(context.TODO(), name)
 	if err != nil {
-		return nil, errorpkg.Wrapf(err, "could not find cluster policy report in store")
+		return nil, errorpkg.Wrapf(err, "could not find cluster report in store")
 	}
 
 	return val, nil
 }
 
-func (c *cpolrStore) listCpolr() (*v1alpha2.ClusterPolicyReportList, error) {
-	valList, err := c.store.ClusterPolicyReports().List(context.TODO())
+func (c *clusterReportStore) listCpolr() (*openreportsv1alpha1.ClusterReportList, error) {
+	valList, err := c.store.ClusterReports().List(context.TODO())
 	if err != nil {
-		return nil, errorpkg.Wrapf(err, "could not find cluster policy report in store")
+		return nil, errorpkg.Wrapf(err, "could not find cluster report in store")
 	}
 
-	reportList := &v1alpha2.ClusterPolicyReportList{
-		Items: make([]v1alpha2.ClusterPolicyReport, 0, len(valList)),
+	reportList := &openreportsv1alpha1.ClusterReportList{
+		Items: make([]openreportsv1alpha1.ClusterReport, 0, len(valList)),
 	}
 
 	for _, v := range valList {
@@ -340,19 +340,19 @@ func (c *cpolrStore) listCpolr() (*v1alpha2.ClusterPolicyReportList, error) {
 	return reportList, nil
 }
 
-func (c *cpolrStore) createCpolr(report *v1alpha2.ClusterPolicyReport) (*v1alpha2.ClusterPolicyReport, error) {
+func (c *clusterReportStore) createCpolr(report *openreportsv1alpha1.ClusterReport) (*openreportsv1alpha1.ClusterReport, error) {
 	report.ResourceVersion = c.store.UseResourceVersion()
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
 
-	return report, c.store.ClusterPolicyReports().Create(context.TODO(), report)
+	return report, c.store.ClusterReports().Create(context.TODO(), report)
 }
 
-func (c *cpolrStore) updateCpolr(report *v1alpha2.ClusterPolicyReport, _ *v1alpha2.ClusterPolicyReport) (*v1alpha2.ClusterPolicyReport, error) {
+func (c *clusterReportStore) updateCpolr(report *openreportsv1alpha1.ClusterReport, _ *openreportsv1alpha1.ClusterReport) (*openreportsv1alpha1.ClusterReport, error) {
 	report.ResourceVersion = c.store.UseResourceVersion()
-	return report, c.store.ClusterPolicyReports().Update(context.TODO(), report)
+	return report, c.store.ClusterReports().Update(context.TODO(), report)
 }
 
-func (c *cpolrStore) deleteCpolr(report *v1alpha2.ClusterPolicyReport) error {
-	return c.store.ClusterPolicyReports().Delete(context.TODO(), report.Name)
+func (c *clusterReportStore) deleteCpolr(report *openreportsv1alpha1.ClusterReport) error {
+	return c.store.ClusterReports().Delete(context.TODO(), report.Name)
 }

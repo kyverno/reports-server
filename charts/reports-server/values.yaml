@@ -242,6 +242,9 @@ apiServicesManagement:
     # -- Store ephemeral reports in reports-server
     installEphemeralReportsService: true
 
+    # -- Store open reports in reports-server
+    installOpenreportsService: true
+
   image:
     # -- (string) Image registry
     registry: docker.io

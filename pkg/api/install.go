@@ -24,6 +24,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
@@ -42,6 +43,9 @@ func init() {
 
 	utilruntime.Must(reportsv1.Install(Scheme))
 	utilruntime.Must(Scheme.SetVersionPriority(reportsv1.SchemeGroupVersion))
+	// openreports
+	utilruntime.Must(openreportsv1alpha1.AddToScheme(Scheme))
+	utilruntime.Must(Scheme.SetVersionPriority(openreportsv1alpha1.SchemeGroupVersion))
 }
 
 // BuildPolicyReports constructs APIGroupInfo the wgpolicyk8s.io API group using the given getters.
@@ -70,8 +74,22 @@ func BuildEphemeralReports(ephr, cephr rest.Storage) genericapiserver.APIGroupIn
 	return apiGroupInfo
 }
 
-// Install builds the reports for the wgpolicyk8s.io and reports.kyverno.io API, and then installs it into the given API reports-server.
+// BuildOpenreports constructs APIGroupInfo the openreports.io API group using the given getters.
+func BuildOpenreports(rep, crep rest.Storage) genericapiserver.APIGroupInfo {
+	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(openreportsv1alpha1.SchemeGroupVersion.Group, Scheme, metav1.ParameterCodec, Codecs)
+	orStorage := map[string]rest.Storage{
+		"reports":        rep,
+		"clusterreports": crep,
+	}
+	apiGroupInfo.VersionedResourcesStorageMap[openreportsv1alpha1.SchemeGroupVersion.Version] = orStorage
+	apiGroupInfo.NegotiatedSerializer = DefaultSubsetNegotiatedSerializer(Codecs)
+
+	return apiGroupInfo
+}
+
+// Install builds the reports for the wgpolicyk8s.io, openreports.io and reports.kyverno.io API, and then installs it into the given API reports-server.
 func Install(store storage.Interface, server *genericapiserver.GenericAPIServer) error {
+	// wgpolicy
 	polr := PolicyReportStore(store)
 	cpolr := ClusterPolicyReportStore(store)
 
@@ -81,6 +99,17 @@ func Install(store storage.Interface, server *genericapiserver.GenericAPIServer)
 		return err
 	}
 
+	// // openreports
+	orReport := ReportStore(store)
+	orClusterReport := ClusterReportStore(store)
+
+	orInfo := BuildOpenreports(orReport, orClusterReport)
+	err = server.InstallAPIGroup(&orInfo)
+	if err != nil {
+		return err
+	}
+
+	// ephemeral reports
 	ephr := EphemeralReportStore(store)
 	cephr := ClusterEphemeralReportStore(store)
 

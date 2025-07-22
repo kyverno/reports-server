@@ -56,6 +56,14 @@ func (s *store) PolicyReports() api.PolicyReportsInterface {
 	return s.db.PolicyReports()
 }
 
+func (s *store) Reports() api.ReportInterface {
+	return s.db.Reports()
+}
+
+func (s *store) ClusterReports() api.ClusterReportInterface {
+	return s.db.ClusterReports()
+}
+
 func (s *store) Ready() bool {
 	return s.db.Ready()
 }

@@ -62,20 +62,24 @@ func New(config *PostgresConfig, clusterUID string, clusterName string) (api.Sto
 
 	klog.Info("successfully setup storage")
 	return &postgresstore{
-		db:         db,
-		polrstore:  &polrdb{db: db, clusterUID: clusterUID},
-		cpolrstore: &cpolrdb{db: db, clusterUID: clusterUID},
-		ephrstore:  &ephrdb{db: db, clusterUID: clusterUID},
-		cephrstore: &cephr{db: db, clusterUID: clusterUID},
+		db:                   db,
+		polrstore:            &polrdb{db: db, clusterUID: clusterUID},
+		cpolrstore:           &cpolrdb{db: db, clusterUID: clusterUID},
+		ephrstore:            &ephrdb{db: db, clusterUID: clusterUID},
+		cephrstore:           &cephr{db: db, clusterUID: clusterUID},
+		orreportstore:        &orReportDB{db: db, clusterUID: clusterUID},
+		orclusterreportstore: &orClusterReportDB{db: db, clusterUID: clusterUID},
 	}, nil
 }
 
 type postgresstore struct {
-	db         *sql.DB
-	polrstore  api.PolicyReportsInterface
-	cpolrstore api.ClusterPolicyReportsInterface
-	ephrstore  api.EphemeralReportsInterface
-	cephrstore api.ClusterEphemeralReportsInterface
+	db                   *sql.DB
+	polrstore            api.PolicyReportsInterface
+	cpolrstore           api.ClusterPolicyReportsInterface
+	ephrstore            api.EphemeralReportsInterface
+	cephrstore           api.ClusterEphemeralReportsInterface
+	orreportstore        api.ReportInterface
+	orclusterreportstore api.ClusterReportInterface
 }
 
 func (p *postgresstore) ClusterPolicyReports() api.ClusterPolicyReportsInterface {
@@ -92,6 +96,14 @@ func (p *postgresstore) ClusterEphemeralReports() api.ClusterEphemeralReportsInt
 
 func (p *postgresstore) EphemeralReports() api.EphemeralReportsInterface {
 	return p.ephrstore
+}
+
+func (p *postgresstore) ClusterReports() api.ClusterReportInterface {
+	return p.orclusterreportstore
+}
+
+func (p *postgresstore) Reports() api.ReportInterface {
+	return p.orreportstore
 }
 
 func (p *postgresstore) Ready() bool {
@@ -134,11 +146,19 @@ func populateClusterUIDLegacyRecords(db *sql.DB, clusterUID string) error {
 	if err != nil {
 		return err
 	}
+	_, err = db.Query("UPDATE clusterreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	if err != nil {
+		return err
+	}
 	_, err = db.Query("UPDATE ephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
 	_, err = db.Query("UPDATE policyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	if err != nil {
+		return err
+	}
+	_, err = db.Query("UPDATE reports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}

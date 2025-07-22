@@ -54,14 +54,10 @@ func (p *polrStore) NewList() runtime.Object {
 
 func (p *polrStore) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
 	var labelSelector labels.Selector
-	// fieldSelector := fields.Everything() // TODO: Field selectors
 	if options != nil {
 		if options.LabelSelector != nil {
 			labelSelector = options.LabelSelector
 		}
-		// if options.FieldSelector != nil {
-		// 	fieldSelector = options.FieldSelector
-		// }
 	}
 	namespace := genericapirequest.NamespaceValue(ctx)
 
@@ -70,10 +66,6 @@ func (p *polrStore) List(ctx context.Context, options *metainternalversion.ListO
 	if err != nil {
 		return nil, errors.NewBadRequest("failed to list resource policyreport")
 	}
-
-	// if labelSelector == labels.Everything() {
-	// 	return list, nil
-	// }
 
 	polrList := &v1alpha2.PolicyReportList{
 		Items:    make([]v1alpha2.PolicyReport, 0),
@@ -126,10 +118,6 @@ func (p *polrStore) Create(ctx context.Context, obj runtime.Object, createValida
 		switch options.FieldValidation {
 		case "Ignore":
 		case "Warn":
-			// return &admissionv1.AdmissionResponse{
-			// 	Allowed:  false,
-			// 	Warnings: []string{err.Error()},
-			// }, nil
 		case "Strict":
 			return nil, err
 		}
@@ -199,10 +187,6 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 		switch options.FieldValidation {
 		case "Ignore":
 		case "Warn":
-			// return &admissionv1.AdmissionResponse{
-			// 	Allowed:  false,
-			// 	Warnings: []string{err.Error()},
-			// }, nil
 		case "Strict":
 			return nil, false, err
 		}
@@ -261,7 +245,7 @@ func (p *polrStore) Delete(ctx context.Context, name string, deleteValidation re
 		}
 	}
 
-	return polr, true, nil // TODO: Add protobuf in wgpolicygroup
+	return polr, true, nil
 }
 
 func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions, listOptions *metainternalversion.ListOptions) (runtime.Object, error) {

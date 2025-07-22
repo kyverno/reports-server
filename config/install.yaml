@@ -114,6 +114,7 @@ rules:
   resourceNames:
     - v1.reports.kyverno.io
     - v1alpha2.wgpolicyk8s.io
+    - v1alpha1.openreports.io
 - apiGroups:
     - wgpolicyk8s.io
   resources:
@@ -349,6 +350,7 @@ spec:
             - --servicens=reports-server
             - --storereports=true
             - --storeephemeralreports=true
+            - --storeopenreports=true
             - --cert-dir=/tmp
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics

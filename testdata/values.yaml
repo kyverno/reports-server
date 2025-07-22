@@ -5,6 +5,9 @@ features:
   omitEvents:
     eventTypes: []
 
+policyReportsCleanup:
+  enabled: false
+
 crds:
   groups:
     reports:

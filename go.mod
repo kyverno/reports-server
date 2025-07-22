@@ -1,6 +1,8 @@
 module github.com/kyverno/reports-server
 
-go 1.22.2
+go 1.24.1
+
+toolchain go1.24.3
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
@@ -10,14 +12,15 @@ require (
 	github.com/spf13/cobra v1.8.1
 	go.etcd.io/etcd/client/v3 v3.5.16
 	google.golang.org/grpc v1.64.1
-	k8s.io/api v0.29.2
-	k8s.io/apimachinery v0.29.2
+	k8s.io/api v0.29.3
+	k8s.io/apimachinery v0.30.0-rc.2
 	k8s.io/apiserver v0.29.2
-	k8s.io/client-go v0.29.2
+	k8s.io/client-go v0.29.3
 	k8s.io/component-base v0.29.2
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/kube-aggregator v0.29.2
-	k8s.io/kube-openapi v0.0.0-20240221221325-2ac9dc51f3f1
+	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340
+	openreports.io v0.0.0-00010101000000-000000000000
 	sigs.k8s.io/wg-policy-prototypes v0.0.0-20231226153523-db3ef51d230f
 )
 
@@ -290,7 +293,7 @@ require (
 	k8s.io/kms v0.29.2 // indirect
 	k8s.io/kubectl v0.29.2 // indirect
 	k8s.io/pod-security-admission v0.29.2 // indirect
-	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
+	k8s.io/utils v0.0.0-20240310230437-4693a0247e57 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.29.0 // indirect
 	sigs.k8s.io/controller-runtime v0.17.1 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
@@ -300,3 +303,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
+
+replace openreports.io => github.com/openreports/reports-api v0.0.0-20250321064407-5081e5b516e8

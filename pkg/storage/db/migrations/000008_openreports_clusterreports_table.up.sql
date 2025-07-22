@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS clusterreports (name VARCHAR NOT NULL, report JSONB NOT NULL, PRIMARY KEY(name));

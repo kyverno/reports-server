@@ -53,24 +53,16 @@ func (c *cephrStore) NewList() runtime.Object {
 
 func (c *cephrStore) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
 	var labelSelector labels.Selector
-	// fieldSelector := fields.Everything() // TODO: Field selectors
 	if options != nil {
 		if options.LabelSelector != nil {
 			labelSelector = options.LabelSelector
 		}
-		// if options.FieldSelector != nil {
-		// 	fieldSelector = options.FieldSelector
-		// }
 	}
 	klog.Infof("listing cluster ephemeral reports")
 	list, err := c.listCephr()
 	if err != nil {
 		return nil, errors.NewBadRequest("failed to list resource clusterephemeralreport")
 	}
-
-	// if labelSelector.String() == labels.Everything().String() {
-	// 	return list, nil
-	// }
 
 	cephrList := &reportsv1.ClusterEphemeralReportList{
 		Items:    make([]reportsv1.ClusterEphemeralReport, 0),
@@ -121,10 +113,6 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 		switch options.FieldValidation {
 		case "Ignore":
 		case "Warn":
-			// return &admissionv1.AdmissionResponse{
-			// 	Allowed:  false,
-			// 	Warnings: []string{err.Error()},
-			// }, nil
 		case "Strict":
 			return nil, err
 		}
@@ -186,10 +174,6 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 		switch options.FieldValidation {
 		case "Ignore":
 		case "Warn":
-			// return &admissionv1.AdmissionResponse{
-			// 	Allowed:  false,
-			// 	Warnings: []string{err.Error()},
-			// }, nil
 		case "Strict":
 			return nil, false, err
 		}
@@ -242,7 +226,7 @@ func (c *cephrStore) Delete(ctx context.Context, name string, deleteValidation r
 		}
 	}
 
-	return cephr, true, nil // TODO: Add protobuf
+	return cephr, true, nil
 }
 
 func (c *cephrStore) DeleteCollection(ctx context.Context, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions, listOptions *metainternalversion.ListOptions) (runtime.Object, error) {

@@ -484,6 +484,9 @@ func (c Config) installApiServices() error {
 	if err := c.createOrDeleteApiservice(c.APIServices.v1ReportsApiService, *apiRegClient, c.APIServices.StoreEphemeralReports); err != nil {
 		return err
 	}
+	if err := c.createOrDeleteApiservice(c.APIServices.openreportsApiService, *apiRegClient, c.APIServices.StoreOpenreports); err != nil {
+		return err
+	}
 
 	return nil
 }

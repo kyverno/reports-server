@@ -56,6 +56,7 @@ type Options struct {
 	ServiceNamespace      string
 	StoreReports          bool
 	StoreEphemeralReports bool
+	StoreOpenreports      bool
 
 	// Only to be used to for testing
 	DisableAuthForTesting bool
@@ -90,6 +91,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.StringVar(&o.ServiceName, "servicename", "", "Name of the service targeted by the APIService.")
 	msfs.StringVar(&o.ServiceNamespace, "servicens", "", "Namespace of the service targeted by the APIService.")
 	msfs.BoolVar(&o.StoreReports, "storereports", true, "Whether or not to store and manage Policy Reports.")
+	msfs.BoolVar(&o.StoreOpenreports, "storeopenreports", true, "Whether or not to store and manage Open Reports.")
 	msfs.BoolVar(&o.StoreEphemeralReports, "storeephemeralreports", true, "Whether or not to store and manage Ephemeral Reports.")
 
 	o.SecureServing.AddFlags(fs.FlagSet("apiserver secure serving"))
@@ -143,6 +145,7 @@ func (o Options) ServerConfig() (*server.Config, error) {
 	apiservices := server.BuildApiServices(o.ServiceName, o.ServiceNamespace)
 	apiservices.StoreReports = o.StoreReports
 	apiservices.StoreEphemeralReports = o.StoreEphemeralReports
+	apiservices.StoreOpenreports = o.StoreOpenreports
 
 	return &server.Config{
 		Apiserver:   apiserver,
