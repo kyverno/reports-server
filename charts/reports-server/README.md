@@ -1,6 +1,6 @@
 # reports-server
 
-![Version: 0.2.1-rc1](https://img.shields.io/badge/Version-0.2.1--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.25](https://img.shields.io/badge/AppVersion-v0.1.25-informational?style=flat-square)
+![Version: 0.2.1-rc2](https://img.shields.io/badge/Version-0.2.1--rc2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.25](https://img.shields.io/badge/AppVersion-v0.1.25-informational?style=flat-square)
 
 TODO
 
@@ -74,6 +74,9 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.etcd.insecure | bool | `true` |  |
 | config.etcd.storage | string | `"2Gi"` |  |
 | config.etcd.quotaBackendBytes | int | `1932735283` |  |
+| config.etcd.autoCompaction.enabled | bool | `true` | Enable auto-compaction for etcd |
+| config.etcd.autoCompaction.mode | string | `"periodic"` | Auto-compaction mode (periodic or revision) |
+| config.etcd.autoCompaction.retention | string | `"30m"` | Auto-compaction retention (e.g., 30m for 30 minutes, 1h for 1 hour) |
 | config.etcd.nodeSelector | object | `{}` |  |
 | config.etcd.tolerations | list | `[]` |  |
 | config.db.secretCreation | bool | `false` | If set, a secret will be created with the database connection information. If this is set to true, secretName must be set. |

@@ -140,8 +140,10 @@ spec:
         - --initial-advertise-peer-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):2380
         - --listen-metrics-urls=http://0.0.0.0:8080
         - --quota-backend-bytes={{ printf "%d" (int (default 2147483648 .Values.config.etcd.quotaBackendBytes)) }}
-        # - --auto-compaction-mode=periodic
-        # - --auto-compaction-retention=10m
+        {{- if .Values.config.etcd.autoCompaction.enabled }}
+        - --auto-compaction-mode={{ .Values.config.etcd.autoCompaction.mode }}
+        - --auto-compaction-retention={{ .Values.config.etcd.autoCompaction.retention }}
+        {{- end }}
         # - --client-cert-auth
         # - --trusted-ca-file=$(ETCDCTL_CACERT)
         # - --cert-file=$(ETCDCTL_CERT)
