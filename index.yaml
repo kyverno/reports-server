@@ -3,13 +3,13 @@ entries:
   reports-server:
   - apiVersion: v2
     appVersion: v0.1.4-rc.1
-    created: "2025-02-13T13:49:17.070127415Z"
+    created: "2025-07-23T12:17:52.319480908Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
       repository: oci://registry-1.docker.io/bitnamicharts
       version: 13.4.1
-    digest: 01a495b183335b37b254a46719024176ef64f7aa890b05ba081f234481d713ba
+    digest: 600c66cea0607d2c25e9a250600d7efa999403fdcaadb09cfcf2d020e86bc990
     keywords:
     - kubernetes
     - policy reports storage
@@ -151,4 +151,4 @@ entries:
     urls:
     - https://kyverno.github.io/reports-server/reports-server-0.1.0-alpha.1.tgz
     version: 0.1.0-alpha.1
-generated: "2025-02-13T13:49:17.064959422Z"
+generated: "2025-07-23T12:17:52.313803405Z"
