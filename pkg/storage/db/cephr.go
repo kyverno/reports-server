@@ -111,7 +111,7 @@ func (c *cephr) Create(ctx context.Context, cephr *reportsv1.ClusterEphemeralRep
 		return err
 	}
 
-	_, err = c.MultiDB.PrimaryDB.Exec("INSERT INTO clusterephemeralreports (name, report, clusterId) VALUES ($1, $2, $3)", cephr.Name, string(jsonb), c.clusterId)
+	_, err = c.MultiDB.PrimaryDB.Exec("INSERT INTO clusterephemeralreports (name, report, clusterId) VALUES ($1, $2, $3) ON CONFLICT (name, clusterId) DO UPDATE SET report = EXCLUDED.report", cephr.Name, string(jsonb), c.clusterId)
 	if err != nil {
 		klog.ErrorS(err, "failed to crate cephr")
 		return fmt.Errorf("create clusterephemeralreport: %v", err)

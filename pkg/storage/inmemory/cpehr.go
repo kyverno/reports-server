@@ -66,16 +66,10 @@ func (c *cephrdb) Create(ctx context.Context, cephr *reportsv1.ClusterEphemeralR
 
 	key := c.key(cephr.Name)
 	klog.Infof("creating entry for key:%s", key)
-	if v, _ := c.db.Get(key); v != nil {
-		klog.Errorf("entry already exists k:%s", key)
-		return errors.NewAlreadyExists(utils.ClusterEphemeralReportsGR, key)
-	} else {
-		klog.Infof("entry created for key:%s", key)
-		serverMetrics.UpdateDBRequestTotalMetrics("inmemory", "create", "ClusterEphemeralReport")
-		serverMetrics.UpdateDBRequestLatencyMetrics("inmemory", "create", "ClusterEphemeralReport", time.Since(startTime))
-		storageMetrics.UpdatePolicyReportMetrics("inmemory", "create", cephr, false)
-		return c.db.Store(key, *cephr)
-	}
+	serverMetrics.UpdateDBRequestTotalMetrics("inmemory", "create", "ClusterEphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("inmemory", "create", "ClusterEphemeralReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("inmemory", "create", cephr, false)
+	return c.db.Store(key, *cephr)
 }
 
 func (c *cephrdb) Update(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error {
@@ -84,16 +78,10 @@ func (c *cephrdb) Update(ctx context.Context, cephr *reportsv1.ClusterEphemeralR
 	startTime := time.Now()
 	key := c.key(cephr.Name)
 	klog.Infof("updating entry for key:%s", key)
-	if v, _ := c.db.Get(key); v == nil {
-		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(utils.ClusterEphemeralReportsGR, key)
-	} else {
-		klog.Infof("entry updated for key:%s", key)
-		serverMetrics.UpdateDBRequestTotalMetrics("inmemory", "update", "ClusterEphemeralReport")
-		serverMetrics.UpdateDBRequestLatencyMetrics("inmemory", "update", "ClusterEphemeralReport", time.Since(startTime))
-		storageMetrics.UpdatePolicyReportMetrics("inmemory", "update", cephr, false)
-		return c.db.Store(key, *cephr)
-	}
+	serverMetrics.UpdateDBRequestTotalMetrics("inmemory", "update", "ClusterEphemeralReport")
+	serverMetrics.UpdateDBRequestLatencyMetrics("inmemory", "update", "ClusterEphemeralReport", time.Since(startTime))
+	storageMetrics.UpdatePolicyReportMetrics("inmemory", "update", cephr, false)
+	return c.db.Store(key, *cephr)
 }
 
 func (c *cephrdb) Delete(ctx context.Context, name string) error {

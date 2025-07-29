@@ -62,14 +62,8 @@ func (e *ephrdb) Create(ctx context.Context, ephr *reportsv1.EphemeralReport) er
 
 	key := e.key(ephr.Name, ephr.Namespace)
 	klog.Infof("creating entry for key:%s", key)
-	if val, _ := e.db.Get(key); val != nil {
-		klog.Errorf("entry already exists k:%s", key)
-		return errors.NewAlreadyExists(utils.EphemeralReportsGR, key)
-	} else {
-		klog.Infof("entry created for key:%s", key)
-		metrics.UpdatePolicyReportMetrics("etcd", "create", ephr, false)
-		return e.db.Store(key, *ephr)
-	}
+	metrics.UpdatePolicyReportMetrics("etcd", "create", ephr, false)
+	return e.db.Store(key, *ephr)
 }
 
 func (e *ephrdb) Update(ctx context.Context, ephr *reportsv1.EphemeralReport) error {
@@ -78,14 +72,8 @@ func (e *ephrdb) Update(ctx context.Context, ephr *reportsv1.EphemeralReport) er
 
 	key := e.key(ephr.Name, ephr.Namespace)
 	klog.Infof("updating entry for key:%s", key)
-	if val, _ := e.db.Get(key); val == nil {
-		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(utils.EphemeralReportsGR, key)
-	} else {
-		klog.Infof("entry updated for key:%s", key)
-		metrics.UpdatePolicyReportMetrics("etcd", "update", ephr, false)
-		return e.db.Store(key, *ephr)
-	}
+	metrics.UpdatePolicyReportMetrics("etcd", "update", ephr, false)
+	return e.db.Store(key, *ephr)
 }
 
 func (e *ephrdb) Delete(ctx context.Context, name, namespace string) error {

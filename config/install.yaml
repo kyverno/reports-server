@@ -10,7 +10,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -27,7 +27,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -41,7 +41,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: 'true'
     rbac.authorization.k8s.io/aggregate-to-edit: 'true'
     rbac.authorization.k8s.io/aggregate-to-view: 'true'
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -128,7 +128,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: reports-server
   labels:
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -148,7 +148,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -168,7 +168,7 @@ metadata:
   name: reports-server
   namespace: kube-system
   labels:
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -188,7 +188,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -209,7 +209,7 @@ metadata:
   namespace: reports-server
   labels:
     app: etcd-reports-server
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -234,7 +234,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -256,7 +256,7 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -273,7 +273,7 @@ spec:
   template:
     metadata:
       labels:
-        helm.sh/chart: reports-server-0.2.1-rc2
+        helm.sh/chart: reports-server-0.2.1
         app.kubernetes.io/name: reports-server
         app.kubernetes.io/instance: reports-server
         app.kubernetes.io/version: "v0.1.25"
@@ -363,7 +363,7 @@ metadata:
   name: etcd
   labels:
     app: etcd-reports-server
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
@@ -512,14 +512,12 @@ metadata:
   name: v1alpha2.wgpolicyk8s.io
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
     app.kubernetes.io/managed-by: Helm
     kube-aggregator.kubernetes.io/automanaged: "false"
-  annotations:
-    helm.sh/hook: post-install
 spec:
   group: wgpolicyk8s.io
   groupPriorityMinimum: 100
@@ -536,14 +534,12 @@ metadata:
   name: v1.reports.kyverno.io
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.2.1-rc2
+    helm.sh/chart: reports-server-0.2.1
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
     app.kubernetes.io/version: "v0.1.25"
     app.kubernetes.io/managed-by: Helm
     kube-aggregator.kubernetes.io/automanaged: "false"
-  annotations:
-    helm.sh/hook: post-install
 spec:
   group: reports.kyverno.io
   groupPriorityMinimum: 100

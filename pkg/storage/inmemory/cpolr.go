@@ -58,14 +58,8 @@ func (c *cpolrdb) Create(ctx context.Context, cpolr *v1alpha2.ClusterPolicyRepor
 
 	key := c.key(cpolr.Name)
 	klog.Infof("creating entry for key:%s", key)
-	if v, _ := c.db.Get(key); v != nil {
-		klog.Errorf("entry already exists k:%s", key)
-		return errors.NewAlreadyExists(utils.ClusterPolicyReportsGR, key)
-	} else {
-		klog.Infof("entry created for key:%s", key)
-		metrics.UpdatePolicyReportMetrics("etcd", "create", cpolr, false)
-		return c.db.Store(key, *cpolr)
-	}
+	metrics.UpdatePolicyReportMetrics("etcd", "create", cpolr, false)
+	return c.db.Store(key, *cpolr)
 }
 
 func (c *cpolrdb) Update(ctx context.Context, cpolr *v1alpha2.ClusterPolicyReport) error {
@@ -74,14 +68,8 @@ func (c *cpolrdb) Update(ctx context.Context, cpolr *v1alpha2.ClusterPolicyRepor
 
 	key := c.key(cpolr.Name)
 	klog.Infof("updating entry for key:%s", key)
-	if v, _ := c.db.Get(key); v == nil {
-		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(utils.ClusterPolicyReportsGR, key)
-	} else {
-		klog.Infof("entry updated for key:%s", key)
-		metrics.UpdatePolicyReportMetrics("etcd", "update", cpolr, false)
-		return c.db.Store(key, *cpolr)
-	}
+	metrics.UpdatePolicyReportMetrics("etcd", "update", cpolr, false)
+	return c.db.Store(key, *cpolr)
 }
 
 func (c *cpolrdb) Delete(ctx context.Context, name string) error {

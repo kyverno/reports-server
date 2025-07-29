@@ -120,7 +120,7 @@ func (p *polrdb) Create(ctx context.Context, polr *v1alpha2.PolicyReport) error 
 		return err
 	}
 
-	_, err = p.MultiDB.PrimaryDB.Exec("INSERT INTO policyreports (name, namespace, report, clusterId) VALUES ($1, $2, $3, $4)", polr.Name, polr.Namespace, string(jsonb), p.clusterId)
+	_, err = p.MultiDB.PrimaryDB.Exec("INSERT INTO policyreports (name, namespace, report, clusterId) VALUES ($1, $2, $3, $4) ON CONFLICT (name, namespace, clusterId) DO UPDATE SET report = EXCLUDED.report", polr.Name, polr.Namespace, string(jsonb), p.clusterId)
 	if err != nil {
 		klog.ErrorS(err, "failed to create policy report")
 		return fmt.Errorf("create policyreport: %v", err)

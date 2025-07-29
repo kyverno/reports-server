@@ -120,7 +120,7 @@ func (p *ephrdb) Create(ctx context.Context, polr *reportsv1.EphemeralReport) er
 		return err
 	}
 
-	_, err = p.MultiDB.PrimaryDB.Exec("INSERT INTO ephemeralreports (name, namespace, report, clusterId) VALUES ($1, $2, $3, $4)", polr.Name, polr.Namespace, string(jsonb), p.clusterId)
+	_, err = p.MultiDB.PrimaryDB.Exec("INSERT INTO ephemeralreports (name, namespace, report, clusterId) VALUES ($1, $2, $3, $4) ON CONFLICT (name, namespace, clusterId) DO UPDATE SET report = EXCLUDED.report", polr.Name, polr.Namespace, string(jsonb), p.clusterId)
 	if err != nil {
 		klog.ErrorS(err, "failed to create ephemeral report")
 		return fmt.Errorf("create ephemeralreport: %v", err)

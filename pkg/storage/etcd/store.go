@@ -111,27 +111,21 @@ func (o *objectStoreNamespaced[T]) Create(ctx context.Context, obj T) error {
 	defer o.Unlock()
 	startTime := time.Now()
 	key := o.getKey(obj.GetName(), obj.GetNamespace())
-	resp, err := o.etcdclient.Get(ctx, key)
-	if err != nil {
-		klog.ErrorS(err, "failed to create report kind=%s", o.gvk.String())
-		return err
-	}
-	serverMetrics.UpdateDBRequestTotalMetrics("etcd", "create", o.gvk.String())
-	serverMetrics.UpdateDBRequestLatencyMetrics("etcd", "create", o.gvk.String(), time.Since(startTime))
-	klog.InfoS("create resp resp=%+v", resp)
-	if len(resp.Kvs) > 0 {
-		return errors.NewAlreadyExists(o.gr, key)
-	}
 
 	bObject, err := json.Marshal(obj)
 	if err != nil {
 		return err
 	}
 
+	// Upsert behavior - Put creates if not exists, updates if exists
 	_, err = o.etcdclient.Put(ctx, key, string(bObject))
 	if err != nil {
+		klog.ErrorS(err, "failed to create report kind=%s", o.gvk.String())
 		return err
 	}
+
+	serverMetrics.UpdateDBRequestTotalMetrics("etcd", "create", o.gvk.String())
+	serverMetrics.UpdateDBRequestLatencyMetrics("etcd", "create", o.gvk.String(), time.Since(startTime))
 	storageMetrics.UpdatePolicyReportMetrics("etcd", "create", obj, false)
 	return nil
 }
@@ -141,26 +135,21 @@ func (o *objectStoreNamespaced[T]) Update(ctx context.Context, obj T) error {
 	defer o.Unlock()
 	startTime := time.Now()
 	key := o.getKey(obj.GetName(), obj.GetNamespace())
-	resp, err := o.etcdclient.Get(ctx, key)
-	if err != nil {
-		klog.ErrorS(err, "failed to update report kind=%s", o.gvk.String())
-		return err
-	}
-	serverMetrics.UpdateDBRequestTotalMetrics("etcd", "update", o.gvk.String())
-	serverMetrics.UpdateDBRequestLatencyMetrics("etcd", "update", o.gvk.String(), time.Since(startTime))
-	if len(resp.Kvs) != 1 {
-		return errors.NewNotFound(o.gr, key)
-	}
 
 	bObject, err := json.Marshal(obj)
 	if err != nil {
 		return err
 	}
 
+	// Upsert behavior - Put creates if not exists, updates if exists
 	_, err = o.etcdclient.Put(ctx, key, string(bObject))
 	if err != nil {
+		klog.ErrorS(err, "failed to update report kind=%s", o.gvk.String())
 		return err
 	}
+
+	serverMetrics.UpdateDBRequestTotalMetrics("etcd", "update", o.gvk.String())
+	serverMetrics.UpdateDBRequestLatencyMetrics("etcd", "update", o.gvk.String(), time.Since(startTime))
 	storageMetrics.UpdatePolicyReportMetrics("etcd", "update", obj, false)
 	return nil
 }
