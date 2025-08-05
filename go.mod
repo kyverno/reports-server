@@ -4,6 +4,8 @@ go 1.23.10
 
 toolchain go1.24.4
 
+replace github.com/kyverno/kyverno => github.com/nirmata/enterprise-kyverno v1.13.6-n4k.nirmata.3
+
 require (
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/kyverno/kyverno v1.13.6
