@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/hashicorp/go-multierror"
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	kyverno "github.com/kyverno/kyverno/pkg/clients/kyverno"
 	"github.com/kyverno/reports-server/pkg/api"
@@ -14,6 +15,7 @@ import (
 	"github.com/kyverno/reports-server/pkg/storage/etcd"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
 	apimetrics "k8s.io/apiserver/pkg/endpoints/metrics"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -485,6 +487,52 @@ func (c Config) installApiServices() error {
 		return err
 	}
 	if err := c.createOrDeleteApiservice(c.APIServices.openreportsApiService, *apiRegClient, c.APIServices.StoreOpenreports); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c Config) CleanupApiServices() error {
+	apiRegClient, err := apiregistrationv1client.NewForConfig(c.Rest)
+	if err != nil {
+		return err
+	}
+	var finalErr error
+
+	if c.APIServices.StoreReports {
+		if err := c.toLocalApiService(c.APIServices.wgpolicyApiService.GetName(), *apiRegClient); err != nil {
+			finalErr = multierror.Append(finalErr, err)
+		}
+	}
+	if c.APIServices.StoreEphemeralReports {
+		if err := c.toLocalApiService(c.APIServices.v1ReportsApiService.GetName(), *apiRegClient); err != nil {
+			finalErr = multierror.Append(finalErr, err)
+		}
+	}
+	if c.APIServices.StoreOpenreports {
+		if err := c.toLocalApiService(c.APIServices.openreportsApiService.GetName(), *apiRegClient); err != nil {
+			finalErr = multierror.Append(finalErr, err)
+		}
+	}
+
+	return finalErr
+}
+
+func (c Config) toLocalApiService(apiSvcName string, client apiregistrationv1client.ApiregistrationV1Client) error {
+	_, err := client.APIServices().Get(context.TODO(), apiSvcName, metav1.GetOptions{})
+	if err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+	patch := []byte(`{
+		"spec": {
+		  "service": null,
+		  "insecureSkipTLSVerify": false
+		}
+	  }`)
+
+	_, err = client.APIServices().Patch(context.TODO(), apiSvcName, types.MergePatchType, patch, metav1.PatchOptions{})
+	if err != nil {
 		return err
 	}
 

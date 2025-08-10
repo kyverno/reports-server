@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/kyverno/reports-server/pkg/app/opts"
 	"github.com/spf13/cobra"
@@ -11,6 +13,7 @@ import (
 	"k8s.io/component-base/logs"
 	"k8s.io/component-base/term"
 	"k8s.io/component-base/version"
+	"k8s.io/klog/v2"
 )
 
 func NewPolicyServer(stopCh <-chan struct{}) *cobra.Command {
@@ -67,5 +70,26 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
-	return s.RunUntil(stopCh)
+	go func() {
+		if err := s.RunUntil(stopCh); err != nil {
+			klog.ErrorS(err, "failed to run server")
+			os.Exit(1)
+		}
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-sigChan
+		if err := config.CleanupApiServices(); err != nil {
+			klog.ErrorS(err, "failed to cleanup api-services during shutdown")
+		}
+		done <- true
+	}()
+
+	<-done
+	return nil
 }
