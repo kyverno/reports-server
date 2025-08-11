@@ -77,6 +77,7 @@ jobs:
           helm repo add reports-server https://kyverno.github.io/reports-server
           helm repo update
           helm install reports-server -n reports-server reports-server/reports-server --create-namespace
+          
       - name: Wait for report server ready
         run: |
           set -e
