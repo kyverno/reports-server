@@ -4,6 +4,12 @@ templating:
   enabled: false
 
 postgresql:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: 16.1.0-debian-11-r22
+    digest: ""
+
 
   # -- Deploy postgresql dependency chart
   enabled: true
