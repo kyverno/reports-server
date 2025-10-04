@@ -22,6 +22,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| postgresql.image.registry | string | `"docker.io"` |  |
+| postgresql.image.repository | string | `"bitnamilegacy/postgresql"` |  |
+| postgresql.image.tag | string | `"16.1.0-debian-11-r22"` |  |
+| postgresql.image.digest | string | `""` |  |
 | postgresql.enabled | bool | `true` | Deploy postgresql dependency chart |
 | postgresql.auth.postgresPassword | string | `"reports"` |  |
 | postgresql.auth.database | string | `"reportsdb"` |  |
