@@ -303,3 +303,5 @@ apiServicesManagement:
         - ALL
     seccompProfile:
       type: RuntimeDefault
+
+extraObjects: []
