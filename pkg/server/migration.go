@@ -157,26 +157,26 @@ func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interf
 	// book a slot in the worker chan
 	workerChan <- struct{}{}
 	switch r := report.(type) {
-	case *v1alpha2.ClusterPolicyReport:
-		err := c.Store.ClusterPolicyReports().Create(ctx, r)
+	case v1alpha2.ClusterPolicyReport:
+		err := c.Store.ClusterPolicyReports().Create(ctx, &r)
 		if err != nil {
 			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
 		policyClient.Wgpolicyk8sV1alpha2().ClusterPolicyReports().Delete(ctx, r.Name, metav1.DeleteOptions{})
-	case *v1alpha2.PolicyReport:
-		err := c.Store.PolicyReports().Create(ctx, r)
+	case v1alpha2.PolicyReport:
+		err := c.Store.PolicyReports().Create(ctx, &r)
 		if err != nil {
 			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
 		policyClient.Wgpolicyk8sV1alpha2().PolicyReports(r.Namespace).Delete(ctx, r.Name, metav1.DeleteOptions{})
-	case *v1.ClusterEphemeralReport:
-		err := c.Store.ClusterEphemeralReports().Create(ctx, r)
+	case v1.ClusterEphemeralReport:
+		err := c.Store.ClusterEphemeralReports().Create(ctx, &r)
 		if err != nil {
 			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
 		kyvernoClient.ReportsV1().ClusterEphemeralReports().Delete(ctx, r.Name, metav1.DeleteOptions{})
-	case *v1.EphemeralReport:
-		err := c.Store.EphemeralReports().Create(ctx, r)
+	case v1.EphemeralReport:
+		err := c.Store.EphemeralReports().Create(ctx, &r)
 		if err != nil {
 			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
