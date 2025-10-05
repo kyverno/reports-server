@@ -34,7 +34,7 @@ func (c *Config) migration(ctx context.Context) error {
 			return nil
 		}
 
-		var cpolrWg *sync.WaitGroup
+		cpolrWg := &sync.WaitGroup{}
 		cpolrWg.Add(len(cpolrs.Items))
 		for _, r := range cpolrs.Items {
 			applyReportsServerAnnotation(&r)
@@ -62,8 +62,8 @@ func (c *Config) migration(ctx context.Context) error {
 			return nil
 		}
 
-		var polrWg *sync.WaitGroup
-		polrWg.Add(len(cpolrs.Items))
+		polrWg := &sync.WaitGroup{}
+		polrWg.Add(len(polrs.Items))
 		for _, r := range polrs.Items {
 			applyReportsServerAnnotation(&r)
 			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, polrWg, r)
@@ -93,7 +93,7 @@ func (c *Config) migration(ctx context.Context) error {
 			return nil
 		}
 
-		var cephrWg *sync.WaitGroup
+		cephrWg := &sync.WaitGroup{}
 		cephrWg.Add(len(cephrs.Items))
 		for _, r := range cephrs.Items {
 			applyReportsServerAnnotation(&r)
@@ -120,7 +120,7 @@ func (c *Config) migration(ctx context.Context) error {
 		if err != nil {
 			return nil
 		}
-		var ephrWg *sync.WaitGroup
+		ephrWg := &sync.WaitGroup{}
 		ephrWg.Add(len(ephrs.Items))
 		for _, r := range ephrs.Items {
 			applyReportsServerAnnotation(&r)
