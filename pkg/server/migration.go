@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"sync"
 
 	v1 "github.com/kyverno/kyverno/api/reports/v1"
 	kyverno "github.com/kyverno/kyverno/pkg/clients/kyverno"
@@ -32,10 +33,15 @@ func (c *Config) migration(ctx context.Context) error {
 		if err != nil {
 			return nil
 		}
+
+		var cpolrWg *sync.WaitGroup
+		cpolrWg.Add(len(cpolrs.Items))
 		for _, r := range cpolrs.Items {
 			applyReportsServerAnnotation(&r)
-			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, r)
+			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, cpolrWg, r)
 		}
+		cpolrWg.Wait()
+
 		err = c.Store.SetResourceVersion(cpolrs.ResourceVersion)
 		if err != nil {
 			return err
@@ -55,10 +61,14 @@ func (c *Config) migration(ctx context.Context) error {
 		if err != nil {
 			return nil
 		}
+
+		var polrWg *sync.WaitGroup
+		polrWg.Add(len(cpolrs.Items))
 		for _, r := range polrs.Items {
 			applyReportsServerAnnotation(&r)
-			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, r)
+			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, polrWg, r)
 		}
+		polrWg.Wait()
 
 		err = c.Store.SetResourceVersion(cpolrs.ResourceVersion)
 		if err != nil {
@@ -82,10 +92,15 @@ func (c *Config) migration(ctx context.Context) error {
 		if err != nil {
 			return nil
 		}
+
+		var cephrWg *sync.WaitGroup
+		cephrWg.Add(len(cephrs.Items))
 		for _, r := range cephrs.Items {
 			applyReportsServerAnnotation(&r)
-			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, r)
+			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, cephrWg, r)
 		}
+		cephrWg.Wait()
+
 		err = c.Store.SetResourceVersion(cephrs.ResourceVersion)
 		if err != nil {
 			return err
@@ -105,10 +120,14 @@ func (c *Config) migration(ctx context.Context) error {
 		if err != nil {
 			return nil
 		}
+		var ephrWg *sync.WaitGroup
+		ephrWg.Add(len(ephrs.Items))
 		for _, r := range ephrs.Items {
 			applyReportsServerAnnotation(&r)
-			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, r)
+			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, ephrWg, r)
 		}
+		ephrWg.Wait()
+
 		err = c.Store.SetResourceVersion(ephrs.ResourceVersion)
 		if err != nil {
 			return err
@@ -132,7 +151,10 @@ func (c *Config) migration(ctx context.Context) error {
 	return c.Store.SetResourceVersion(fmt.Sprint((rv + 9999)))
 }
 
-func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interface, policyClient versioned.Interface, workerChan chan struct{}, report interface{}) {
+func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interface, policyClient versioned.Interface, workerChan chan struct{}, wg *sync.WaitGroup, report interface{}) {
+	defer wg.Done()
+
+	// book a slot in the worker chan
 	workerChan <- struct{}{}
 	switch r := report.(type) {
 	case *v1alpha2.ClusterPolicyReport:
@@ -161,4 +183,5 @@ func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interf
 		kyvernoClient.ReportsV1().EphemeralReports(r.Namespace).Delete(ctx, r.Name, metav1.DeleteOptions{})
 	}
 	<-workerChan
+	// free the worker slot
 }
