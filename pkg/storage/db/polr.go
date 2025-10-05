@@ -6,22 +6,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
 type polrdb struct {
-	sync.Mutex
 	db         *sql.DB
 	clusterUID string
 }
 
 func (p *polrdb) List(ctx context.Context, namespace string) ([]*v1alpha2.PolicyReport, error) {
-	p.Lock()
-	defer p.Unlock()
-
 	klog.Infof("listing all values for namespace:%s", namespace)
 	res := make([]*v1alpha2.PolicyReport, 0)
 	var jsonb string
@@ -58,9 +53,6 @@ func (p *polrdb) List(ctx context.Context, namespace string) ([]*v1alpha2.Policy
 }
 
 func (p *polrdb) Get(ctx context.Context, name, namespace string) (*v1alpha2.PolicyReport, error) {
-	p.Lock()
-	defer p.Unlock()
-
 	var jsonb string
 
 	row := p.db.QueryRow("SELECT report FROM policyreports WHERE cluster_id = $1 AND name = $2 AND namespace = $3", p.clusterUID, name, namespace)
@@ -81,9 +73,6 @@ func (p *polrdb) Get(ctx context.Context, name, namespace string) (*v1alpha2.Pol
 }
 
 func (p *polrdb) Create(ctx context.Context, polr *v1alpha2.PolicyReport) error {
-	p.Lock()
-	defer p.Unlock()
-
 	if polr == nil {
 		return errors.New("invalid policy report")
 	}
@@ -103,9 +92,6 @@ func (p *polrdb) Create(ctx context.Context, polr *v1alpha2.PolicyReport) error 
 }
 
 func (p *polrdb) Update(ctx context.Context, polr *v1alpha2.PolicyReport) error {
-	p.Lock()
-	defer p.Unlock()
-
 	if polr == nil {
 		return errors.New("invalid policy report")
 	}
@@ -124,9 +110,6 @@ func (p *polrdb) Update(ctx context.Context, polr *v1alpha2.PolicyReport) error 
 }
 
 func (p *polrdb) Delete(ctx context.Context, name, namespace string) error {
-	p.Lock()
-	defer p.Unlock()
-
 	_, err := p.db.Exec("DELETE FROM policyreports WHERE cluster_id = $1 AND namespace = $2 AND name = $3", p.clusterUID, namespace, name)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete policy report")

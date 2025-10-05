@@ -6,21 +6,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"k8s.io/klog/v2"
 )
 
 type cephr struct {
-	sync.Mutex
 	db         *sql.DB
 	clusterUID string
 }
 
 func (c *cephr) List(ctx context.Context) ([]*reportsv1.ClusterEphemeralReport, error) {
-	c.Lock()
-	defer c.Unlock()
 
 	klog.Infof("listing all values")
 	res := make([]*reportsv1.ClusterEphemeralReport, 0)
@@ -51,9 +47,6 @@ func (c *cephr) List(ctx context.Context) ([]*reportsv1.ClusterEphemeralReport, 
 }
 
 func (c *cephr) Get(ctx context.Context, name string) (*reportsv1.ClusterEphemeralReport, error) {
-	c.Lock()
-	defer c.Unlock()
-
 	var jsonb string
 
 	row := c.db.QueryRow("SELECT report FROM clusterephemeralreports WHERE cluster_id = $1 AND name = $2", c.clusterUID, name)
@@ -74,9 +67,6 @@ func (c *cephr) Get(ctx context.Context, name string) (*reportsv1.ClusterEphemer
 }
 
 func (c *cephr) Create(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error {
-	c.Lock()
-	defer c.Unlock()
-
 	if cephr == nil {
 		return errors.New("invalid cluster ephemeral report")
 	}
@@ -97,9 +87,6 @@ func (c *cephr) Create(ctx context.Context, cephr *reportsv1.ClusterEphemeralRep
 }
 
 func (c *cephr) Update(ctx context.Context, cephr *reportsv1.ClusterEphemeralReport) error {
-	c.Lock()
-	defer c.Unlock()
-
 	if cephr == nil {
 		return errors.New("invalid cluster ephemeral report")
 	}
@@ -118,9 +105,6 @@ func (c *cephr) Update(ctx context.Context, cephr *reportsv1.ClusterEphemeralRep
 }
 
 func (c *cephr) Delete(ctx context.Context, name string) error {
-	c.Lock()
-	defer c.Unlock()
-
 	_, err := c.db.Exec("DELETE FROM clusterephemeralreports WHERE cluster_id = $1 AND name = $2", c.clusterUID, name)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete cephr")
