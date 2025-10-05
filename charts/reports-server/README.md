@@ -109,6 +109,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | apiServicesManagement.podAnnotations | object | `{}` | Pod annotations. |
 | apiServicesManagement.nodeAffinity | object | `{}` | Node affinity constraints. |
 | apiServicesManagement.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsNonRoot":true,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Security context for the hook containers |
+| extraObjects | list | `[]` |  |
 
 ## Source Code
 
