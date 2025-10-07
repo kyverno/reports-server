@@ -34,7 +34,10 @@ func (c *Config) watchEphr(ctx context.Context, watchIface *watchtools.RetryWatc
 				}
 			case watch.Deleted:
 				ephr := event.Object.(*reportsv1.EphemeralReport)
-				applyReportsServerAnnotation(ephr)
+				// Skip deletion if report was already migrated to the store
+				if ephr.Annotations != nil && ephr.Annotations[api.ServedByReportsServerAnnotation] == api.ServedByReportsServerValue {
+					continue
+				}
 				err := c.Store.EphemeralReports().Delete(ctx, ephr.Name, ephr.Namespace)
 				if err != nil {
 					klog.Error(err)
@@ -67,7 +70,10 @@ func (c *Config) watchCephr(ctx context.Context, watchIface *watchtools.RetryWat
 				}
 			case watch.Deleted:
 				cephr := event.Object.(*reportsv1.ClusterEphemeralReport)
-				applyReportsServerAnnotation(cephr)
+				// Skip deletion if report was already migrated to the store
+				if cephr.Annotations != nil && cephr.Annotations[api.ServedByReportsServerAnnotation] == api.ServedByReportsServerValue {
+					continue
+				}
 				err := c.Store.ClusterEphemeralReports().Delete(ctx, cephr.Name)
 				if err != nil {
 					klog.Error(err)
@@ -100,7 +106,10 @@ func (c *Config) watchPolr(ctx context.Context, watchIface *watchtools.RetryWatc
 				}
 			case watch.Deleted:
 				polr := event.Object.(*v1alpha2.PolicyReport)
-				applyReportsServerAnnotation(polr)
+				// Skip deletion if report was already migrated to the store
+				if polr.Annotations != nil && polr.Annotations[api.ServedByReportsServerAnnotation] == api.ServedByReportsServerValue {
+					continue
+				}
 				err := c.Store.PolicyReports().Delete(ctx, polr.Name, polr.Namespace)
 				if err != nil {
 					klog.Error(err)
@@ -133,7 +142,10 @@ func (c *Config) watchCpolr(ctx context.Context, watchIface *watchtools.RetryWat
 				}
 			case watch.Deleted:
 				cpolr := event.Object.(*v1alpha2.ClusterPolicyReport)
-				applyReportsServerAnnotation(cpolr)
+				// Skip deletion if report was already migrated to the store
+				if cpolr.Annotations != nil && cpolr.Annotations[api.ServedByReportsServerAnnotation] == api.ServedByReportsServerValue {
+					continue
+				}
 				err := c.Store.ClusterPolicyReports().Delete(ctx, cpolr.Name)
 				if err != nil {
 					klog.Error(err)

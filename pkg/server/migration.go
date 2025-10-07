@@ -70,7 +70,7 @@ func (c *Config) migration(ctx context.Context) error {
 		}
 		polrWg.Wait()
 
-		err = c.Store.SetResourceVersion(cpolrs.ResourceVersion)
+		err = c.Store.SetResourceVersion(polrs.ResourceVersion)
 		if err != nil {
 			return err
 		}
@@ -162,11 +162,21 @@ func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interf
 		if err != nil {
 			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
+		// Update annotation in Kubernetes before deleting so watchers can identify it
+		_, err = policyClient.Wgpolicyk8sV1alpha2().ClusterPolicyReports().Update(ctx, &r, metav1.UpdateOptions{})
+		if err != nil {
+			klog.Errorf("failed to update annotation for report %s: %s", r.Name, err)
+		}
 		policyClient.Wgpolicyk8sV1alpha2().ClusterPolicyReports().Delete(ctx, r.Name, metav1.DeleteOptions{})
 	case v1alpha2.PolicyReport:
 		err := c.Store.PolicyReports().Create(ctx, &r)
 		if err != nil {
 			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
+		}
+		// Update annotation in Kubernetes before deleting so watchers can identify it
+		_, err = policyClient.Wgpolicyk8sV1alpha2().PolicyReports(r.Namespace).Update(ctx, &r, metav1.UpdateOptions{})
+		if err != nil {
+			klog.Errorf("failed to update annotation for report %s: %s", r.Name, err)
 		}
 		policyClient.Wgpolicyk8sV1alpha2().PolicyReports(r.Namespace).Delete(ctx, r.Name, metav1.DeleteOptions{})
 	case v1.ClusterEphemeralReport:
@@ -174,11 +184,21 @@ func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interf
 		if err != nil {
 			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
+		// Update annotation in Kubernetes before deleting so watchers can identify it
+		_, err = kyvernoClient.ReportsV1().ClusterEphemeralReports().Update(ctx, &r, metav1.UpdateOptions{})
+		if err != nil {
+			klog.Errorf("failed to update annotation for report %s: %s", r.Name, err)
+		}
 		kyvernoClient.ReportsV1().ClusterEphemeralReports().Delete(ctx, r.Name, metav1.DeleteOptions{})
 	case v1.EphemeralReport:
 		err := c.Store.EphemeralReports().Create(ctx, &r)
 		if err != nil {
 			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
+		}
+		// Update annotation in Kubernetes before deleting so watchers can identify it
+		_, err = kyvernoClient.ReportsV1().EphemeralReports(r.Namespace).Update(ctx, &r, metav1.UpdateOptions{})
+		if err != nil {
+			klog.Errorf("failed to update annotation for report %s: %s", r.Name, err)
 		}
 		kyvernoClient.ReportsV1().EphemeralReports(r.Namespace).Delete(ctx, r.Name, metav1.DeleteOptions{})
 	}
