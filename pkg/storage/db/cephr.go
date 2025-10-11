@@ -17,7 +17,6 @@ type cephr struct {
 }
 
 func (c *cephr) List(ctx context.Context) ([]*reportsv1.ClusterEphemeralReport, error) {
-
 	klog.Infof("listing all values")
 	res := make([]*reportsv1.ClusterEphemeralReport, 0)
 	var jsonb string

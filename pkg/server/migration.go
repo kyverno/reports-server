@@ -167,7 +167,9 @@ func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interf
 		if err != nil {
 			klog.Errorf("failed to update annotation for report %s: %s", r.Name, err)
 		}
-		policyClient.Wgpolicyk8sV1alpha2().ClusterPolicyReports().Delete(ctx, r.Name, metav1.DeleteOptions{})
+		if err := policyClient.Wgpolicyk8sV1alpha2().ClusterPolicyReports().Delete(ctx, r.Name, metav1.DeleteOptions{}); err != nil {
+			klog.Errorf("failed to delete cluster policy report %s: %s", r.Name, err)
+		}
 	case v1alpha2.PolicyReport:
 		err := c.Store.PolicyReports().Create(ctx, &r)
 		if err != nil {
@@ -178,7 +180,9 @@ func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interf
 		if err != nil {
 			klog.Errorf("failed to update annotation for report %s: %s", r.Name, err)
 		}
-		policyClient.Wgpolicyk8sV1alpha2().PolicyReports(r.Namespace).Delete(ctx, r.Name, metav1.DeleteOptions{})
+		if err := policyClient.Wgpolicyk8sV1alpha2().PolicyReports(r.Namespace).Delete(ctx, r.Name, metav1.DeleteOptions{}); err != nil {
+			klog.Errorf("failed to delete policy report %s: %s", r.Name, err)
+		}
 	case v1.ClusterEphemeralReport:
 		err := c.Store.ClusterEphemeralReports().Create(ctx, &r)
 		if err != nil {
@@ -189,7 +193,9 @@ func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interf
 		if err != nil {
 			klog.Errorf("failed to update annotation for report %s: %s", r.Name, err)
 		}
-		kyvernoClient.ReportsV1().ClusterEphemeralReports().Delete(ctx, r.Name, metav1.DeleteOptions{})
+		if err := kyvernoClient.ReportsV1().ClusterEphemeralReports().Delete(ctx, r.Name, metav1.DeleteOptions{}); err != nil {
+			klog.Errorf("failed to delete cluster ephemeral report %s: %s", r.Name, err)
+		}
 	case v1.EphemeralReport:
 		err := c.Store.EphemeralReports().Create(ctx, &r)
 		if err != nil {
@@ -200,7 +206,9 @@ func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interf
 		if err != nil {
 			klog.Errorf("failed to update annotation for report %s: %s", r.Name, err)
 		}
-		kyvernoClient.ReportsV1().EphemeralReports(r.Namespace).Delete(ctx, r.Name, metav1.DeleteOptions{})
+		if err := kyvernoClient.ReportsV1().EphemeralReports(r.Namespace).Delete(ctx, r.Name, metav1.DeleteOptions{}); err != nil {
+			klog.Errorf("failed to delete ephemeral report %s: %s", r.Name, err)
+		}
 	}
 	<-workerChan
 	// free the worker slot
