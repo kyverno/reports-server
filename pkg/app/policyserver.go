@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/kyverno/reports-server/pkg/app/opts"
+	"github.com/kyverno/reports-server/pkg/server"
 	"github.com/spf13/cobra"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/logs"
@@ -61,7 +62,7 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 	if len(errors) > 0 {
 		return errors[0]
 	}
-	config, err := o.ServerConfig()
+	config, err := server.NewServerConfig(*o)
 	if err != nil {
 		return err
 	}

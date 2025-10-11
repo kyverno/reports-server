@@ -6,22 +6,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 
 	"k8s.io/klog/v2"
 	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type orClusterReportDB struct {
-	sync.Mutex
 	db         *sql.DB
 	clusterUID string
 }
 
 func (o *orClusterReportDB) List(ctx context.Context) ([]*openreportsv1alpha1.ClusterReport, error) {
-	o.Lock()
-	defer o.Unlock()
-
 	klog.Infof("listing all values")
 	res := make([]*openreportsv1alpha1.ClusterReport, 0)
 	var jsonb string
@@ -51,9 +46,6 @@ func (o *orClusterReportDB) List(ctx context.Context) ([]*openreportsv1alpha1.Cl
 }
 
 func (o *orClusterReportDB) Get(ctx context.Context, name string) (*openreportsv1alpha1.ClusterReport, error) {
-	o.Lock()
-	defer o.Unlock()
-
 	var jsonb string
 
 	row := o.db.QueryRow("SELECT report FROM clusterreports WHERE cluster_id = $1 AND name = $2", o.clusterUID, name)
@@ -74,9 +66,6 @@ func (o *orClusterReportDB) Get(ctx context.Context, name string) (*openreportsv
 }
 
 func (o *orClusterReportDB) Create(ctx context.Context, cr *openreportsv1alpha1.ClusterReport) error {
-	o.Lock()
-	defer o.Unlock()
-
 	if cr == nil {
 		return errors.New("invalid cluster policy report")
 	}
@@ -97,9 +86,6 @@ func (o *orClusterReportDB) Create(ctx context.Context, cr *openreportsv1alpha1.
 }
 
 func (o *orClusterReportDB) Update(ctx context.Context, cr *openreportsv1alpha1.ClusterReport) error {
-	o.Lock()
-	defer o.Unlock()
-
 	if cr == nil {
 		return errors.New("invalid cluster report")
 	}
@@ -118,9 +104,6 @@ func (o *orClusterReportDB) Update(ctx context.Context, cr *openreportsv1alpha1.
 }
 
 func (o *orClusterReportDB) Delete(ctx context.Context, name string) error {
-	o.Lock()
-	defer o.Unlock()
-
 	_, err := o.db.Exec("DELETE FROM clusterreports WHERE cluster_id = $1 AND name = $2", o.clusterUID, name)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete clusterreport")

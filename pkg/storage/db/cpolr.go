@@ -6,22 +6,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
 type cpolrdb struct {
-	sync.Mutex
 	db         *sql.DB
 	clusterUID string
 }
 
 func (c *cpolrdb) List(ctx context.Context) ([]*v1alpha2.ClusterPolicyReport, error) {
-	c.Lock()
-	defer c.Unlock()
-
 	klog.Infof("listing all values")
 	res := make([]*v1alpha2.ClusterPolicyReport, 0)
 	var jsonb string
@@ -51,9 +46,6 @@ func (c *cpolrdb) List(ctx context.Context) ([]*v1alpha2.ClusterPolicyReport, er
 }
 
 func (c *cpolrdb) Get(ctx context.Context, name string) (*v1alpha2.ClusterPolicyReport, error) {
-	c.Lock()
-	defer c.Unlock()
-
 	var jsonb string
 
 	row := c.db.QueryRow("SELECT report FROM clusterpolicyreports WHERE cluster_id = $1 AND name = $2", c.clusterUID, name)
@@ -74,9 +66,6 @@ func (c *cpolrdb) Get(ctx context.Context, name string) (*v1alpha2.ClusterPolicy
 }
 
 func (c *cpolrdb) Create(ctx context.Context, cpolr *v1alpha2.ClusterPolicyReport) error {
-	c.Lock()
-	defer c.Unlock()
-
 	if cpolr == nil {
 		return errors.New("invalid cluster policy report")
 	}
@@ -97,9 +86,6 @@ func (c *cpolrdb) Create(ctx context.Context, cpolr *v1alpha2.ClusterPolicyRepor
 }
 
 func (c *cpolrdb) Update(ctx context.Context, cpolr *v1alpha2.ClusterPolicyReport) error {
-	c.Lock()
-	defer c.Unlock()
-
 	if cpolr == nil {
 		return errors.New("invalid cluster policy report")
 	}
@@ -118,9 +104,6 @@ func (c *cpolrdb) Update(ctx context.Context, cpolr *v1alpha2.ClusterPolicyRepor
 }
 
 func (c *cpolrdb) Delete(ctx context.Context, name string) error {
-	c.Lock()
-	defer c.Unlock()
-
 	_, err := c.db.Exec("DELETE FROM clusterpolicyreports WHERE cluster_id = $1 AND name = $2", c.clusterUID, name)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete cpolr")

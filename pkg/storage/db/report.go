@@ -6,22 +6,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 
 	"k8s.io/klog/v2"
 	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type orReportDB struct {
-	sync.Mutex
 	db         *sql.DB
 	clusterUID string
 }
 
 func (o *orReportDB) List(ctx context.Context, namespace string) ([]*openreportsv1alpha1.Report, error) {
-	o.Lock()
-	defer o.Unlock()
-
 	klog.Infof("listing all values for namespace:%s", namespace)
 	res := make([]*openreportsv1alpha1.Report, 0)
 	var jsonb string
@@ -58,9 +53,6 @@ func (o *orReportDB) List(ctx context.Context, namespace string) ([]*openreports
 }
 
 func (o *orReportDB) Get(ctx context.Context, name, namespace string) (*openreportsv1alpha1.Report, error) {
-	o.Lock()
-	defer o.Unlock()
-
 	var jsonb string
 
 	row := o.db.QueryRow("SELECT report FROM reports WHERE cluster_id = $1 AND name = $2 AND namespace = $3", o.clusterUID, name, namespace)
@@ -81,9 +73,6 @@ func (o *orReportDB) Get(ctx context.Context, name, namespace string) (*openrepo
 }
 
 func (o *orReportDB) Create(ctx context.Context, r *openreportsv1alpha1.Report) error {
-	o.Lock()
-	defer o.Unlock()
-
 	if r == nil {
 		return errors.New("invalid report")
 	}
@@ -103,9 +92,6 @@ func (o *orReportDB) Create(ctx context.Context, r *openreportsv1alpha1.Report) 
 }
 
 func (o *orReportDB) Update(ctx context.Context, r *openreportsv1alpha1.Report) error {
-	o.Lock()
-	defer o.Unlock()
-
 	if r == nil {
 		return errors.New("invalid report")
 	}
@@ -124,9 +110,6 @@ func (o *orReportDB) Update(ctx context.Context, r *openreportsv1alpha1.Report) 
 }
 
 func (o *orReportDB) Delete(ctx context.Context, name, namespace string) error {
-	o.Lock()
-	defer o.Unlock()
-
 	_, err := o.db.Exec("DELETE FROM reports WHERE cluster_id = $1 AND namespace = $2 AND name = $3", o.clusterUID, namespace, name)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete report")

@@ -9,8 +9,6 @@ import (
 
 	"github.com/kyverno/reports-server/pkg/api"
 	generatedopenapi "github.com/kyverno/reports-server/pkg/api/generated/openapi"
-	"github.com/kyverno/reports-server/pkg/server"
-	"github.com/kyverno/reports-server/pkg/storage/db"
 	"github.com/kyverno/reports-server/pkg/storage/etcd"
 	openapinamer "k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -116,48 +114,6 @@ func NewOptions() *Options {
 	}
 }
 
-func (o Options) ServerConfig() (*server.Config, error) {
-	apiserver, err := o.ApiserverConfig()
-	if err != nil {
-		return nil, err
-	}
-	restConfig, err := o.restConfig()
-	if err != nil {
-		return nil, err
-	}
-	err = o.dbConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	dbconfig := &db.PostgresConfig{
-		Host:        o.DBHost,
-		Port:        o.DBPort,
-		User:        o.DBUser,
-		Password:    o.DBPassword,
-		DBname:      o.DBName,
-		SSLMode:     o.DBSSLMode,
-		SSLRootCert: o.DBSSLRootCert,
-		SSLKey:      o.DBSSLKey,
-		SSLCert:     o.DBSSLCert,
-	}
-
-	apiservices := server.BuildApiServices(o.ServiceName, o.ServiceNamespace)
-	apiservices.StoreReports = o.StoreReports
-	apiservices.StoreEphemeralReports = o.StoreEphemeralReports
-	apiservices.StoreOpenreports = o.StoreOpenreports
-
-	return &server.Config{
-		Apiserver:   apiserver,
-		Rest:        restConfig,
-		Embedded:    o.Etcd,
-		EtcdConfig:  &o.EtcdConfig,
-		DBconfig:    dbconfig,
-		ClusterName: o.ClusterName,
-		APIServices: apiservices,
-	}, nil
-}
-
 func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	if err := o.SecureServing.MaybeDefaultWithSelfSignedCerts("localhost", nil, []net.IP{net.ParseIP("127.0.0.1")}); err != nil {
 		return nil, fmt.Errorf("error creating self-signed certificates: %v", err)
@@ -194,7 +150,7 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	return serverConfig, nil
 }
 
-func (o Options) restConfig() (*rest.Config, error) {
+func (o Options) RestConfig() (*rest.Config, error) {
 	var config *rest.Config
 	var err error
 	if len(o.Kubeconfig) > 0 {
@@ -222,7 +178,7 @@ func (o Options) restConfig() (*rest.Config, error) {
 // dbConfig reads the database configuration directly from environment variables
 // because these configurations contain sensitive data, this is not read directly from command line input,
 // to enable usecases of env variable injection, such as using vault-env
-func (o *Options) dbConfig() error {
+func (o *Options) DBConfig() error {
 	o.DBHost = os.Getenv("DB_HOST")
 	o.DBName = os.Getenv("DB_DATABASE")
 	o.DBUser = os.Getenv("DB_USER")
