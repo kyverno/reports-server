@@ -5,9 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"time"
 
-	serverMetrics "github.com/kyverno/reports-server/pkg/server/metrics"
 	"github.com/kyverno/reports-server/pkg/v2/storage"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
@@ -22,10 +20,6 @@ import (
 //   - Other errors for database/marshaling failures
 func (p *PostgresRepository[T]) Get(ctx context.Context, filter storage.Filter) (T, error) {
 	var nilObj T
-	startTime := time.Now()
-	defer func() {
-		serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "get", p.resourceType, time.Since(startTime))
-	}()
 
 	if err := filter.ValidateForGet(); err != nil {
 		return nilObj, err
@@ -56,8 +50,6 @@ func (p *PostgresRepository[T]) Get(ctx context.Context, filter storage.Filter) 
 		return nilObj, fmt.Errorf("failed to get %s %s/%s: %w", p.resourceType, filter.Namespace, filter.Name, err)
 	}
 
-	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "get", p.resourceType)
-
 	// Unmarshal JSON to typed object
 	var obj T
 	err = json.Unmarshal([]byte(jsonData), &obj)
@@ -87,11 +79,6 @@ func (p *PostgresRepository[T]) Get(ctx context.Context, filter storage.Filter) 
 //   - Slice of resources
 //   - Error if query fails
 func (p *PostgresRepository[T]) List(ctx context.Context, filter storage.Filter) ([]T, error) {
-	startTime := time.Now()
-	defer func() {
-		serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "list", p.resourceType, time.Since(startTime))
-	}()
-
 	query, args := p.getQueryAndArgsForSelect(filter)
 
 	// Query from read replica (or primary as fallback)
@@ -105,8 +92,6 @@ func (p *PostgresRepository[T]) List(ctx context.Context, filter storage.Filter)
 		return nil, fmt.Errorf("failed to list %s: %w", p.resourceType, err)
 	}
 	defer rows.Close()
-
-	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "list", p.resourceType)
 
 	// Collect results
 	results := make([]T, 0, 100) // Pre-allocate reasonable capacity

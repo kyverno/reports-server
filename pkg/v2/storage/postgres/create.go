@@ -4,10 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
-	serverMetrics "github.com/kyverno/reports-server/pkg/server/metrics"
-	storageMetrics "github.com/kyverno/reports-server/pkg/storage/metrics"
 	"github.com/kyverno/reports-server/pkg/v2/storage"
 	"k8s.io/klog/v2"
 )
@@ -21,11 +18,6 @@ import (
 //   - storage.ErrAlreadyExists if resource already exists
 //   - Other errors for database/marshaling failures
 func (p *PostgresRepository[T]) Create(ctx context.Context, obj T) error {
-	startTime := time.Now()
-	defer func() {
-		serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "create", p.resourceType, time.Since(startTime))
-	}()
-
 	// Check if resource already exists
 	filter := storage.NewFilter(obj.GetName(), obj.GetNamespace())
 	existing, err := p.Get(ctx, filter)
@@ -62,9 +54,6 @@ func (p *PostgresRepository[T]) Create(ctx context.Context, obj T) error {
 		)
 		return fmt.Errorf("failed to create %s: %w", p.resourceType, err)
 	}
-
-	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "create", p.resourceType)
-	storageMetrics.UpdatePolicyReportMetrics("postgres", "create", obj, false)
 
 	klog.V(4).InfoS("Created resource",
 		"type", p.resourceType,

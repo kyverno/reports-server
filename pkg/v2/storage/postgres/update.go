@@ -4,10 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
-	serverMetrics "github.com/kyverno/reports-server/pkg/server/metrics"
-	storageMetrics "github.com/kyverno/reports-server/pkg/storage/metrics"
 	"github.com/kyverno/reports-server/pkg/v2/storage"
 	"k8s.io/klog/v2"
 )
@@ -21,11 +18,6 @@ import (
 //   - storage.ErrNotFound if resource doesn't exist (rowsAffected=0)
 //   - Other errors for database/marshaling failures
 func (p *PostgresRepository[T]) Update(ctx context.Context, obj T) error {
-	startTime := time.Now()
-	defer func() {
-		serverMetrics.UpdateDBRequestLatencyMetrics("postgres", "update", p.resourceType, time.Since(startTime))
-	}()
-
 	// Marshal to JSON
 	jsonData, err := json.Marshal(obj)
 	if err != nil {
@@ -66,9 +58,6 @@ func (p *PostgresRepository[T]) Update(ctx context.Context, obj T) error {
 		)
 		return storage.NewNotFoundError(p.resourceType, obj.GetName(), obj.GetNamespace())
 	}
-
-	serverMetrics.UpdateDBRequestTotalMetrics("postgres", "update", p.resourceType)
-	storageMetrics.UpdatePolicyReportMetrics("postgres", "update", obj, false)
 
 	klog.V(4).InfoS("Updated resource",
 		"type", p.resourceType,
