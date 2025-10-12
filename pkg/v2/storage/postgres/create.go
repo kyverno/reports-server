@@ -70,10 +70,10 @@ func (p *PostgresRepository[T]) getQueryAndArgsForInsert(obj T, jsonData string)
 	var values []interface{}
 
 	if p.namespaced {
-		columns = []string{"name", "namespace", "report", "clusterId"}
+		columns = []string{"name", "namespace", "report", "cluster_id"}
 		values = []interface{}{obj.GetName(), obj.GetNamespace(), jsonData, p.clusterID}
 	} else {
-		columns = []string{"name", "report", "clusterId"}
+		columns = []string{"name", "report", "cluster_id"}
 		values = []interface{}{obj.GetName(), jsonData, p.clusterID}
 	}
 

@@ -59,7 +59,7 @@ func (qb *QueryBuilder) BuildSelect(tableName string, columns ...string) string 
 //
 // Generates:
 //
-//	UPDATE table SET col = $4 WHERE clusterId = $1 AND name = $2 AND namespace = $3
+//	UPDATE table SET col = $4 WHERE cluster_id = $1 AND name = $2 AND namespace = $3
 //	Args: [clusterID, name, namespace, value]
 //
 // Parameters:
@@ -94,7 +94,7 @@ func (qb *QueryBuilder) BuildUpdate(tableName, setColumn string, setValue interf
 //
 // Generates:
 //
-//	DELETE FROM policyreports WHERE clusterId = $1 AND name = $2 AND namespace = $3
+//	DELETE FROM policyreports WHERE cluster_id = $1 AND name = $2 AND namespace = $3
 //	Args: [clusterID, name, namespace]
 //
 // Parameters:
@@ -134,15 +134,15 @@ func (qb *QueryBuilder) BuildDelete(tableName string) string {
 //
 //	qb := NewQueryBuilder()
 //	query := qb.BuildInsert("policyreports",
-//	    []string{"name", "namespace", "report", "clusterId"},
+//	    []string{"name", "namespace", "report", "cluster_id"},
 //	    []interface{}{"my-report", "default", jsonData, "cluster-123"},
 //	    true)
 //
 // Generates:
 //
-//	INSERT INTO policyreports (name, namespace, report, clusterId)
+//	INSERT INTO policyreports (name, namespace, report, cluster_id)
 //	VALUES ($1, $2, $3, $4)
-//	ON CONFLICT (name, namespace, clusterId)
+//	ON CONFLICT (name, namespace, cluster_id)
 //	DO UPDATE SET report = EXCLUDED.report
 func (qb *QueryBuilder) BuildInsert(tableName string, columns []string, values []interface{}, upsert bool) string {
 	// Generate placeholders for values
@@ -227,9 +227,9 @@ func (qb *QueryBuilder) buildConflictColumns(columns []string) string {
 }
 
 // isPrimaryKeyColumn checks if a column is part of the primary key.
-// Primary keys for reports: name, namespace (if namespaced), clusterId
+// Primary keys for reports: name, namespace (if namespaced), cluster_id
 func (qb *QueryBuilder) isPrimaryKeyColumn(column string) bool {
-	return column == "name" || column == "namespace" || column == "clusterId"
+	return column == "name" || column == "namespace" || column == "cluster_id"
 }
 
 // WhereClause returns the combined WHERE clause from all conditions
@@ -257,7 +257,7 @@ func (qb *QueryBuilder) Args() []interface{} {
 //   - *QueryBuilder for method chaining
 func (qb *QueryBuilder) ApplyFilter(filter storage.Filter, clusterID string) *QueryBuilder {
 	// Always filter by cluster ID (multi-tenancy)
-	qb.Where("clusterId", clusterID)
+	qb.Where("cluster_id", clusterID)
 
 	// Add name filter if specified
 	if filter.Name != "" {

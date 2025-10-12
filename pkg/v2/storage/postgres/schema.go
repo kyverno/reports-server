@@ -53,18 +53,18 @@ func createTableIfNotExists(ctx context.Context, db *sql.DB, table TableDefiniti
 			CREATE TABLE IF NOT EXISTS %s (
 				name VARCHAR NOT NULL,
 				namespace VARCHAR NOT NULL,
-				clusterId VARCHAR NOT NULL,
+				cluster_id VARCHAR NOT NULL,
 				report JSONB NOT NULL,
-				PRIMARY KEY(name, namespace, clusterId)
+				PRIMARY KEY(name, namespace, cluster_id)
 			)
 		`, table.Name)
 	} else {
 		createSQL = fmt.Sprintf(`
 			CREATE TABLE IF NOT EXISTS %s (
 				name VARCHAR NOT NULL,
-				clusterId VARCHAR NOT NULL,
+				cluster_id VARCHAR NOT NULL,
 				report JSONB NOT NULL,
-				PRIMARY KEY(name, clusterId)
+				PRIMARY KEY(name, cluster_id)
 			)
 		`, table.Name)
 	}
@@ -81,8 +81,8 @@ func createTableIfNotExists(ctx context.Context, db *sql.DB, table TableDefiniti
 // createIndexes creates necessary indexes for a table
 func createIndexes(ctx context.Context, db *sql.DB, table TableDefinition) error {
 	indexes := []string{
-		// Index on clusterId for filtering by cluster (match v1 naming)
-		fmt.Sprintf("CREATE INDEX IF NOT EXISTS %scluster ON %s(clusterId)", table.Name, table.Name),
+		// Index on cluster_id for filtering by cluster (match v1 naming)
+		fmt.Sprintf("CREATE INDEX IF NOT EXISTS %scluster ON %s(cluster_id)", table.Name, table.Name),
 	}
 
 	// Add namespace index for namespaced resources
