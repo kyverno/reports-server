@@ -24,20 +24,14 @@ func (h *GenericRESTHandler[T]) Create(
 	options *metav1.CreateOptions,
 ) (runtime.Object, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
+	var err error
 
 	// Validate object
-	err := createValidation(ctx, obj)
+	err = createValidation(ctx, obj)
 	if err != nil {
-		switch options.FieldValidation {
-		case "Ignore":
-			// Ignore validation errors
-		case "Warn":
-			// Log warning but continue
-			klog.V(4).InfoS("Validation warning ignored", "error", err)
-		case "Strict":
-			return nil, err
-		default:
-			return nil, err
+		validationErr := handleValidationErrors(err, options)
+		if validationErr != nil {
+			return nil, validationErr
 		}
 	}
 
@@ -47,32 +41,15 @@ func (h *GenericRESTHandler[T]) Create(
 		return nil, errors.NewBadRequest(fmt.Sprintf("failed to validate %s", h.metadata.Kind))
 	}
 
-	// Get namespace from context
-	namespace := genericapirequest.NamespaceValue(ctx)
+	resource = h.setResourceNamespaceIfNotProvided(ctx, resource)
 
-	// Set namespace if not provided
-	if h.metadata.Namespaced && len(resource.GetNamespace()) == 0 {
-		resource.SetNamespace(namespace)
-	}
-
-	// Generate name if needed
-	if resource.GetName() == "" {
-		if resource.GetGenerateName() == "" {
-			return nil, errors.NewConflict(
-				h.metadata.ToGroupResource(),
-				resource.GetName(),
-				fmt.Errorf("name and generateName not provided"),
-			)
-		}
-		resource.SetName(nameGenerator.GenerateName(resource.GetGenerateName()))
+	resource, err = h.setResourceNameIfNotProvided(resource)
+	if err != nil {
+		return nil, err
 	}
 
 	// Set creation metadata
-	resource.SetAnnotations(labelReports(resource.GetAnnotations()))
-	resource.SetGeneration(1)
-	resource.SetResourceVersion(h.versioning.UseResourceVersion())
-	resource.SetUID(uuid.NewUUID())
-	resource.SetCreationTimestamp(metav1.Now())
+	resource = h.setCreationMetadata(resource)
 
 	klog.V(4).InfoS("Creating resource",
 		"kind", h.metadata.Kind,
@@ -80,23 +57,21 @@ func (h *GenericRESTHandler[T]) Create(
 		"namespace", resource.GetNamespace(),
 	)
 
-	// Persist if not dry-run
-	if !isDryRun {
-		err = h.repo.Create(ctx, resource)
-		if err != nil {
-			if errors.IsAlreadyExists(err) {
-				return nil, err
-			}
-			return nil, errors.NewAlreadyExists(h.metadata.ToGroupResource(), resource.GetName())
-		}
-
-		// Broadcast watch event
-		if err := h.broadcaster.Action(watch.Added, resource); err != nil {
-			klog.ErrorS(err, "Failed to broadcast event")
-		}
+	if isDryRun {
+		return resource, nil
 	}
 
-	return obj, nil
+	// Persist if not dry-run
+	err = h.repo.Create(ctx, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	// Broadcast watch event
+	if err := h.broadcaster.Action(watch.Added, resource); err != nil {
+		klog.ErrorS(err, "Failed to broadcast event")
+	}
+	return resource, nil
 }
 
 // labelReports adds the ServedByReportsServer annotation
@@ -108,3 +83,62 @@ func labelReports(annotations map[string]string) map[string]string {
 	return annotations
 }
 
+func handleValidationErrors(err error, options *metav1.CreateOptions) error {
+	switch options.FieldValidation {
+	case "Ignore":
+		return nil
+	case "Warn":
+		// Log warning but continue
+		klog.V(4).InfoS("Validation warning ignored", "error", err)
+		return nil
+	case "Strict":
+		return err
+	default:
+		return err
+	}
+}
+
+func (h *GenericRESTHandler[T]) setResourceNamespaceIfNotProvided(ctx context.Context, resource T) T {
+	if !h.metadata.Namespaced {
+		return resource
+	}
+
+	if len(resource.GetNamespace()) > 0 {
+		return resource
+	}
+
+	// Get namespace from context
+	namespace := genericapirequest.NamespaceValue(ctx)
+	resource.SetNamespace(namespace)
+
+	return resource
+}
+
+func (h *GenericRESTHandler[T]) setResourceNameIfNotProvided(resource T) (T, error) {
+
+	if resource.GetName() != "" {
+		return resource, nil
+	}
+
+	var nilObj T
+	if resource.GetGenerateName() == "" {
+		return nilObj, errors.NewConflict(
+			h.metadata.ToGroupResource(),
+			resource.GetName(),
+			fmt.Errorf("name and generateName not provided"),
+		)
+	}
+
+	resource.SetName(nameGenerator.GenerateName(resource.GetGenerateName()))
+
+	return resource, nil
+}
+
+func (h *GenericRESTHandler[T]) setCreationMetadata(resource T) T {
+	resource.SetAnnotations(labelReports(resource.GetAnnotations()))
+	resource.SetGeneration(1)
+	resource.SetResourceVersion(h.versioning.UseResourceVersion())
+	resource.SetUID(uuid.NewUUID())
+	resource.SetCreationTimestamp(metav1.Now())
+	return resource
+}

@@ -26,9 +26,9 @@ func (h *GenericRESTHandler[T]) Delete(
 ) (runtime.Object, bool, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
 	namespace := genericapirequest.NamespaceValue(ctx)
-
-	// Get the object to delete
 	filter := v2storage.NewFilter(name, namespace)
+
+	// Get the object to delete (needed for validation and return value)
 	obj, err := h.repo.Get(ctx, filter)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find resource",
@@ -40,8 +40,7 @@ func (h *GenericRESTHandler[T]) Delete(
 	}
 
 	// Validate deletion
-	err = deleteValidation(ctx, obj)
-	if err != nil {
+	if err := deleteValidation(ctx, obj); err != nil {
 		return nil, false, err
 	}
 
@@ -51,20 +50,21 @@ func (h *GenericRESTHandler[T]) Delete(
 		"namespace", namespace,
 	)
 
-	// Delete if not dry-run
-	if !isDryRun {
-		err = h.repo.Delete(ctx, filter)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil, false, err
-			}
-			return nil, false, fmt.Errorf("failed to delete %s: %w", h.metadata.Kind, err)
-		}
+	if isDryRun {
+		return obj, true, nil
+	}
 
-		// Broadcast watch event
-		if err := h.broadcaster.Action(watch.Deleted, obj); err != nil {
-			klog.ErrorS(err, "Failed to broadcast event")
+	// Delete if not dry-run
+	if err := h.repo.Delete(ctx, filter); err != nil {
+		if errors.IsNotFound(err) {
+			return nil, false, err
 		}
+		return nil, false, fmt.Errorf("failed to delete %s: %w", h.metadata.Kind, err)
+	}
+
+	// Broadcast watch event
+	if err := h.broadcaster.Action(watch.Deleted, obj); err != nil {
+		klog.ErrorS(err, "Failed to broadcast delete event")
 	}
 
 	return obj, true, nil
@@ -91,29 +91,81 @@ func (h *GenericRESTHandler[T]) DeleteCollection(
 		return nil, errors.NewBadRequest(fmt.Sprintf("Failed to find %s", h.metadata.Kind))
 	}
 
-	// Delete each resource if not dry-run
-	if !isDryRun {
-		items := h.metadata.ListItemsFunc(obj)
-		for _, item := range items {
-			itemObj, ok := item.(T)
-			if !ok {
-				continue
-			}
+	items := h.metadata.ListItemsFunc(obj)
+	itemObjs := h.convertRuntimeObjectsToGenericObjects(items)
 
-			_, isDeleted, err := h.Delete(ctx, itemObj.GetName(), deleteValidation, options)
-			if !isDeleted {
-				klog.ErrorS(err, "Failed to delete resource",
-					"kind", h.metadata.Kind,
-					"name", itemObj.GetName(),
-					"namespace", namespace,
-				)
-				return nil, errors.NewBadRequest(fmt.Sprintf("Failed to delete %s: %s/%s",
-					h.metadata.Kind, itemObj.GetNamespace(), itemObj.GetName()))
-			}
+	// Validate all items first (even for dry-run)
+	err = h.validateDeleteForObjects(ctx, itemObjs, deleteValidation)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return early if dry-run (after validation)
+	if isDryRun {
+		return obj, nil
+	}
+
+	// Delete each resource if not dry-run
+	for _, itemObj := range itemObjs {
+		filter := v2storage.NewFilter(itemObj.GetName(), itemObj.GetNamespace())
+		if err := h.repo.Delete(ctx, filter); err != nil {
+			klog.ErrorS(err, "Failed to delete resource",
+				"kind", h.metadata.Kind,
+				"name", itemObj.GetName(),
+				"namespace", itemObj.GetNamespace(),
+			)
+			return nil, fmt.Errorf("failed to delete %s %s/%s: %w",
+				h.metadata.Kind, itemObj.GetNamespace(), itemObj.GetName(), err)
+		}
+
+		klog.V(4).InfoS("Deleted resource",
+			"kind", h.metadata.Kind,
+			"name", itemObj.GetName(),
+			"namespace", itemObj.GetNamespace(),
+		)
+
+		// Broadcast watch event
+		if err := h.broadcaster.Action(watch.Deleted, itemObj); err != nil {
+			klog.ErrorS(err, "Failed to broadcast delete event")
 		}
 	}
 
 	return obj, nil
 }
 
+func (h *GenericRESTHandler[T]) validateDeleteForObjects(
+	ctx context.Context,
+	objects []T,
+	deleteValidation rest.ValidateObjectFunc,
+) error {
+	for _, obj := range objects {
+		if err := deleteValidation(ctx, obj); err != nil {
+			return fmt.Errorf("validation failed for %s %s/%s: %w",
+				h.metadata.Kind, obj.GetNamespace(), obj.GetName(), err)
+		}
+	}
 
+	return nil
+}
+
+func (h *GenericRESTHandler[T]) convertRuntimeObjectsToGenericObjects(
+	objects []runtime.Object,
+) []T {
+	// Pre-allocate with capacity for best case (all objects are type T)
+	genericObjects := make([]T, 0, len(objects))
+
+	for _, obj := range objects {
+		typedObj, ok := obj.(T)
+		if !ok {
+			klog.V(4).InfoS("Skipping object with unexpected type",
+				"kind", h.metadata.Kind,
+				"expectedType", fmt.Sprintf("%T", *new(T)),
+				"actualType", fmt.Sprintf("%T", obj),
+			)
+			continue
+		}
+		genericObjects = append(genericObjects, typedObj)
+	}
+
+	return genericObjects
+}

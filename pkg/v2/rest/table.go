@@ -9,9 +9,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// TableConverterFunc is a function that knows how to convert specific resource types to table rows
-type TableConverterFunc func(table *metav1beta1.Table, objects ...runtime.Object)
-
 // ConvertToTable converts a resource or list to table format for kubectl output
 // Implements rest.TableConvertor
 func (h *GenericRESTHandler[T]) ConvertToTable(
@@ -19,56 +16,100 @@ func (h *GenericRESTHandler[T]) ConvertToTable(
 	object runtime.Object,
 	tableOptions runtime.Object,
 ) (*metav1beta1.Table, error) {
-	var table metav1beta1.Table
+	table := &metav1beta1.Table{}
 
 	// Handle single resource vs list
 	switch t := object.(type) {
 	case T:
-		// Single resource
-		table.ResourceVersion = t.GetResourceVersion()
-		if h.metadata.TableConverter != nil {
-			h.metadata.TableConverter(&table, t)
-		} else {
-			// Default: Add basic row with name
-			addDefaultTableRow(&table, t)
-		}
-
+		h.convertSingleObject(table, t)
 	case metav1.ListMetaAccessor:
-		// List of resources
-		table.ResourceVersion = t.GetListMeta().GetResourceVersion()
-		table.Continue = t.GetListMeta().GetContinue()
-
-		items := h.metadata.ListItemsFunc(object)
-		if h.metadata.TableConverter != nil {
-			h.metadata.TableConverter(&table, items...)
-		} else {
-			// Default: Add rows for all items
-			for _, item := range items {
-				if obj, ok := item.(metav1.Object); ok {
-					addDefaultTableRow(&table, obj)
-				}
-			}
-		}
-
+		h.convertListOfObjects(table, object, t)
 	default:
-		// Unknown type - try to handle as generic object
-		if h.metadata.TableConverter != nil {
-			h.metadata.TableConverter(&table, object)
-		}
+		h.convertUnknownObject(table, object)
 	}
 
-	return &table, nil
+	return table, nil
+}
+
+// convertSingleObject converts a single resource to table format
+func (h *GenericRESTHandler[T]) convertSingleObject(table *metav1beta1.Table, obj T) {
+	table.ResourceVersion = obj.GetResourceVersion()
+
+	if h.metadata.TableConverter != nil {
+		h.metadata.TableConverter(table, obj)
+		return
+	}
+
+	h.addDefaultTableRow(table, obj)
+}
+
+// convertListOfObjects converts a list of resources to table format
+func (h *GenericRESTHandler[T]) convertListOfObjects(
+	table *metav1beta1.Table,
+	listObject runtime.Object,
+	listMeta metav1.ListMetaAccessor,
+) {
+	// Set list metadata
+	table.ResourceVersion = listMeta.GetListMeta().GetResourceVersion()
+
+	// Extract and convert items
+	items := h.metadata.ListItemsFunc(listObject)
+	typedItems := h.extractTypedItems(items)
+
+	// Convert to table rows
+	if h.metadata.TableConverter != nil {
+		runtimeItems := h.convertToRuntimeObjects(typedItems)
+		h.metadata.TableConverter(table, runtimeItems...)
+		return
+	}
+
+	// Use default converter
+	for _, item := range typedItems {
+		h.addDefaultTableRow(table, item)
+	}
+}
+
+// convertUnknownObject attempts to convert an unknown object type
+func (h *GenericRESTHandler[T]) convertUnknownObject(table *metav1beta1.Table, obj runtime.Object) {
+	if h.metadata.TableConverter != nil {
+		h.metadata.TableConverter(table, obj)
+	}
+}
+
+// extractTypedItems converts []runtime.Object to []T
+func (h *GenericRESTHandler[T]) extractTypedItems(items []runtime.Object) []T {
+	typedItems := make([]T, 0, len(items))
+	for _, item := range items {
+		if typedItem, ok := item.(T); ok {
+			typedItems = append(typedItems, typedItem)
+		}
+	}
+	return typedItems
+}
+
+// convertToRuntimeObjects converts []T to []runtime.Object
+func (h *GenericRESTHandler[T]) convertToRuntimeObjects(items []T) []runtime.Object {
+	runtimeItems := make([]runtime.Object, len(items))
+	for i, item := range items {
+		runtimeItems[i] = item
+	}
+	return runtimeItems
+}
+
+// getDefaultColumnDefinitions returns the default table column definitions
+func getDefaultColumnDefinitions() []metav1beta1.TableColumnDefinition {
+	return []metav1beta1.TableColumnDefinition{
+		{Name: "Name", Type: "string", Format: "name"},
+		{Name: "Namespace", Type: "string", Format: ""},
+		{Name: "Age", Type: "string", Format: ""},
+	}
 }
 
 // addDefaultTableRow adds a basic table row with name, namespace, and age
-func addDefaultTableRow(table *metav1beta1.Table, obj metav1.Object) {
-	// Define columns if not already defined
+func (h *GenericRESTHandler[T]) addDefaultTableRow(table *metav1beta1.Table, obj T) {
+	// Ensure columns are defined
 	if len(table.ColumnDefinitions) == 0 {
-		table.ColumnDefinitions = []metav1beta1.TableColumnDefinition{
-			{Name: "Name", Type: "string", Format: "name"},
-			{Name: "Namespace", Type: "string", Format: ""},
-			{Name: "Age", Type: "string", Format: ""},
-		}
+		table.ColumnDefinitions = getDefaultColumnDefinitions()
 	}
 
 	// Add row
@@ -78,7 +119,7 @@ func addDefaultTableRow(table *metav1beta1.Table, obj metav1.Object) {
 			obj.GetNamespace(),
 			translateTimestampSince(obj.GetCreationTimestamp()),
 		},
-		Object: runtime.RawExtension{Object: obj.(runtime.Object)},
+		Object: runtime.RawExtension{Object: obj},
 	}
 	table.Rows = append(table.Rows, row)
 }
@@ -102,4 +143,3 @@ func translateTimestampSince(timestamp metav1.Time) string {
 		return fmt.Sprintf("%dd", int(duration.Hours()/24))
 	}
 }
-

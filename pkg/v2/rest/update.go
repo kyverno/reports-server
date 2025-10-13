@@ -110,4 +110,3 @@ func (h *GenericRESTHandler[T]) Update(
 
 	return updatedObject, false, nil
 }
-

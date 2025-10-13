@@ -46,4 +46,3 @@ func (h *GenericRESTHandler[T]) Watch(ctx context.Context, options *metainternal
 	// Watch with initial events (bookmarked watch)
 	return h.broadcaster.WatchWithPrefix(events)
 }
-
