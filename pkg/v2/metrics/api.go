@@ -12,6 +12,9 @@ type APIMetrics struct {
 	requestDuration  *metrics.HistogramVec
 	watchersActive   *metrics.GaugeVec
 	validationErrors *metrics.CounterVec
+	requestsInFlight *metrics.GaugeVec
+	requestSize      *metrics.HistogramVec
+	responseSize     *metrics.HistogramVec
 }
 
 // NewAPIMetrics creates API metrics collectors
@@ -19,8 +22,8 @@ func NewAPIMetrics() *APIMetrics {
 	return &APIMetrics{
 		requestsTotal: metrics.NewCounterVec(
 			&metrics.CounterOpts{
-				Namespace: "reports_server",
-				Subsystem: "api",
+				Namespace: Namespace,
+				Subsystem: SubsystemAPI,
 				Name:      "requests_total",
 				Help:      "Total number of API requests",
 			},
@@ -29,8 +32,8 @@ func NewAPIMetrics() *APIMetrics {
 
 		requestDuration: metrics.NewHistogramVec(
 			&metrics.HistogramOpts{
-				Namespace: "reports_server",
-				Subsystem: "api",
+				Namespace: Namespace,
+				Subsystem: SubsystemAPI,
 				Name:      "request_duration_seconds",
 				Help:      "Duration of API requests",
 				Buckets:   metrics.DefBuckets,
@@ -40,8 +43,8 @@ func NewAPIMetrics() *APIMetrics {
 
 		watchersActive: metrics.NewGaugeVec(
 			&metrics.GaugeOpts{
-				Namespace: "reports_server",
-				Subsystem: "api",
+				Namespace: Namespace,
+				Subsystem: SubsystemAPI,
 				Name:      "watchers_active",
 				Help:      "Number of active watchers",
 			},
@@ -50,12 +53,44 @@ func NewAPIMetrics() *APIMetrics {
 
 		validationErrors: metrics.NewCounterVec(
 			&metrics.CounterOpts{
-				Namespace: "reports_server",
-				Subsystem: "api",
+				Namespace: Namespace,
+				Subsystem: SubsystemAPI,
 				Name:      "validation_errors_total",
 				Help:      "Total number of validation errors",
 			},
 			[]string{"resource", "operation"},
+		),
+
+		requestsInFlight: metrics.NewGaugeVec(
+			&metrics.GaugeOpts{
+				Namespace: Namespace,
+				Subsystem: SubsystemAPI,
+				Name:      "requests_inflight",
+				Help:      "Number of API requests currently being processed",
+			},
+			[]string{"resource", "verb"},
+		),
+
+		requestSize: metrics.NewHistogramVec(
+			&metrics.HistogramOpts{
+				Namespace: Namespace,
+				Subsystem: SubsystemAPI,
+				Name:      "request_size_bytes",
+				Help:      "Size of API request payloads in bytes",
+				Buckets:   metrics.ExponentialBuckets(100, 10, 8), // 100B to ~10MB
+			},
+			[]string{"resource", "verb"},
+		),
+
+		responseSize: metrics.NewHistogramVec(
+			&metrics.HistogramOpts{
+				Namespace: Namespace,
+				Subsystem: SubsystemAPI,
+				Name:      "response_size_bytes",
+				Help:      "Size of API response payloads in bytes",
+				Buckets:   metrics.ExponentialBuckets(100, 10, 8), // 100B to ~10MB
+			},
+			[]string{"resource", "verb"},
 		),
 	}
 }
@@ -67,6 +102,9 @@ func (a *APIMetrics) Register(registry metrics.KubeRegistry) error {
 		a.requestDuration,
 		a.watchersActive,
 		a.validationErrors,
+		a.requestsInFlight,
+		a.requestSize,
+		a.responseSize,
 	}
 
 	for _, collector := range collectors {
@@ -92,4 +130,24 @@ func (a *APIMetrics) SetActiveWatchers(resource string, count int) {
 // RecordValidationError records a validation error
 func (a *APIMetrics) RecordValidationError(resource, operation string) {
 	a.validationErrors.WithLabelValues(resource, operation).Inc()
+}
+
+// IncrementInflightRequests increments the in-flight request gauge
+func (a *APIMetrics) IncrementInflightRequests(resource, verb string) {
+	a.requestsInFlight.WithLabelValues(resource, verb).Inc()
+}
+
+// DecrementInflightRequests decrements the in-flight request gauge
+func (a *APIMetrics) DecrementInflightRequests(resource, verb string) {
+	a.requestsInFlight.WithLabelValues(resource, verb).Dec()
+}
+
+// ObserveRequestSize records the size of an API request payload
+func (a *APIMetrics) ObserveRequestSize(resource, verb string, sizeBytes int) {
+	a.requestSize.WithLabelValues(resource, verb).Observe(float64(sizeBytes))
+}
+
+// ObserveResponseSize records the size of an API response payload
+func (a *APIMetrics) ObserveResponseSize(resource, verb string, sizeBytes int) {
+	a.responseSize.WithLabelValues(resource, verb).Observe(float64(sizeBytes))
 }
