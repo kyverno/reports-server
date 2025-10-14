@@ -27,7 +27,7 @@ type Server struct {
 // Run starts the server and blocks until the stop channel is closed
 func (s *Server) Run(ctx context.Context) error {
 	serverStartTime := time.Now()
-	
+
 	klog.V(logging.LevelInfo).InfoS("Starting reports-server v2",
 		"storageBackend", s.config.Storage.Backend,
 		"enabledAPIGroups", s.countEnabledAPIGroups(),
@@ -55,12 +55,12 @@ func (s *Server) Run(ctx context.Context) error {
 
 	// Start the generic API server
 	preparedServer := s.GenericAPIServer.PrepareRun()
-	
+
 	klog.V(logging.LevelInfo).InfoS("Reports-server v2 is ready",
 		"address", s.GenericAPIServer.LoopbackClientConfig.Host,
 		"uptime", time.Since(serverStartTime),
 	)
-	
+
 	return preparedServer.Run(ctx.Done())
 }
 

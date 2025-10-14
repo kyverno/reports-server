@@ -105,7 +105,7 @@ func (h *GenericRESTHandler[T]) Update(
 		opStart := time.Now()
 		err = h.repo.Update(ctx, resource)
 		opDuration := time.Since(opStart)
-		
+
 		if err != nil {
 			if errors.IsNotFound(err) {
 				h.metrics.Storage().RecordOperation(h.metadata.Kind, metrics.OpUpdate, metrics.StatusNotFound, opDuration)

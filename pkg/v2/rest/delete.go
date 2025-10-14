@@ -81,13 +81,13 @@ func (h *GenericRESTHandler[T]) Delete(
 	opStart := time.Now()
 	if err := h.repo.Delete(ctx, filter); err != nil {
 		opDuration := time.Since(opStart)
-		
+
 		if errors.IsNotFound(err) {
 			h.metrics.Storage().RecordOperation(resourceType, metrics.OpDelete, metrics.StatusNotFound, opDuration)
 			statusCode = "404"
 			return nil, false, err
 		}
-		
+
 		h.metrics.Storage().RecordOperation(resourceType, metrics.OpDelete, metrics.StatusError, opDuration)
 		statusCode = "500"
 		klog.ErrorS(err, "Failed to delete resource from storage",

@@ -42,12 +42,12 @@ func (h *GenericRESTHandler[T]) Get(ctx context.Context, name string, options *m
 	)
 
 	filter := storage.NewFilter(name, namespace)
-	
+
 	// Measure storage operation
 	opStart := time.Now()
 	obj, err := h.repo.Get(ctx, filter)
 	opDuration := time.Since(opStart)
-	
+
 	if err != nil {
 		if errors.IsNotFound(err) {
 			h.metrics.Storage().RecordOperation(resourceType, metrics.OpGet, metrics.StatusNotFound, opDuration)
@@ -98,11 +98,11 @@ func (h *GenericRESTHandler[T]) List(ctx context.Context, options *metainternalv
 
 	// Step 1: Fetch all items from storage
 	filter := storage.Filter{Namespace: namespace}
-	
+
 	opStart := time.Now()
 	allItems, err := h.repo.List(ctx, filter)
 	opDuration := time.Since(opStart)
-	
+
 	if err != nil {
 		h.metrics.Storage().RecordOperation(resourceType, metrics.OpList, metrics.StatusError, opDuration)
 		statusCode = "500"

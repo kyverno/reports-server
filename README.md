@@ -169,6 +169,234 @@ When a resource changes:
   kubectl displays: "ADDED report-1" or "MODIFIED report-1"
 ```
 
+### Kyverno Integration: How Reports Flow Into the Server
+
+When Kyverno creates a PolicyReport, here's how it flows through the system:
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ 1. Kyverno Policy Engine                                 │
+│    • Evaluates policies against resources                │
+│    • Generates PolicyReport                              │
+│    • Calls: k8sClient.Create(policyReport)               │
+└───────────────────┬──────────────────────────────────────┘
+                    │
+                    ↓
+┌──────────────────────────────────────────────────────────┐
+│ 2. Kubernetes API Server                                 │
+│    • Receives: POST /apis/wgpolicyk8s.io/v1alpha2/       │
+│                namespaces/default/policyreports          │
+│    • Looks up APIService for wgpolicyk8s.io              │
+│    • Routes to reports-server aggregated API             │
+└───────────────────┬──────────────────────────────────────┘
+                    │
+                    ↓
+┌──────────────────────────────────────────────────────────┐
+│ 3. Reports Server - REST Layer                           │
+│    pkg/v2/rest/create.go:Create()                        │
+│    ├─> Validates the PolicyReport                        │
+│    ├─> Sets namespace (from context)                     │
+│    ├─> Generates name (if generateName used)             │
+│    ├─> Sets metadata (UID, resourceVersion, timestamps)  │
+│    ├─> Adds annotation:                                  │
+│    │   "reports.kyverno.io/served-by-reports-server=true"│
+│    └─> Metrics: Track API request, validation            │
+└───────────────────┬──────────────────────────────────────┘
+                    │
+                    ↓
+┌──────────────────────────────────────────────────────────┐
+│ 4. Storage Layer                                         │
+│    pkg/v2/storage/postgres/create.go:Create()            │
+│    ├─> Marshals PolicyReport to JSON                     │
+│    ├─> Executes: INSERT INTO policyreports (...)         │
+│    │   VALUES (name, namespace, cluster_id, data, ...)   │
+│    ├─> Returns success or AlreadyExists error            │
+│    └─> Metrics: Track storage operation timing           │
+└───────────────────┬──────────────────────────────────────┘
+                    │
+                    ↓
+┌──────────────────────────────────────────────────────────┐
+│ 5. Database (PostgreSQL/etcd/memory)                     │
+│    • Stores the report persistently                      │
+│    • Returns success                                     │
+└───────────────────┬──────────────────────────────────────┘
+                    │
+         Success flows back up
+                    │
+                    ↓
+┌──────────────────────────────────────────────────────────┐
+│ 6. Watch Event Broadcasting                              │
+│    pkg/v2/rest/create.go                                 │
+│    ├─> broadcaster.Action(watch.Added, policyReport)     │
+│    └─> All active watchers receive the event             │
+│         • kubectl get policyreports --watch               │
+│         • Kyverno controllers watching for changes       │
+│         • External monitoring tools                      │
+│    └─> Metrics: Track watch events sent/dropped          │
+└───────────────────┬──────────────────────────────────────┘
+                    │
+                    ↓
+┌──────────────────────────────────────────────────────────┐
+│ 7. Response to Kyverno                                   │
+│    • HTTP 201 Created                                    │
+│    • Returns created PolicyReport with:                  │
+│      - resourceVersion (for optimistic concurrency)      │
+│      - UID (unique identifier)                           │
+│      - timestamps (creationTimestamp)                    │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Detailed Code Flow: Kyverno → Reports Server
+
+#### Step 1: Kyverno Creates Report
+```go
+// In Kyverno controller
+policyReport := &v1alpha2.PolicyReport{
+    ObjectMeta: metav1.ObjectMeta{
+        Name:      "pod-policy-report",
+        Namespace: "default",
+    },
+    Results: []v1alpha2.PolicyReportResult{...},
+}
+
+// Kyverno calls Kubernetes API
+client.PolicyReports("default").Create(ctx, policyReport)
+```
+
+#### Step 2: Request Arrives at Reports Server
+```go
+// pkg/v2/rest/create.go:Create()
+
+// 1. Extract namespace from request context
+namespace := genericapirequest.NamespaceValue(ctx)
+
+// 2. Validate the object
+err := createValidation(ctx, policyReport)
+// Metrics: Record validation errors if any
+
+// 3. Set metadata
+resource.SetUID(uuid.NewUUID())
+resource.SetResourceVersion(versioning.UseResourceVersion())
+resource.SetCreationTimestamp(metav1.Now())
+resource.SetGeneration(1)
+
+// 4. Add our annotation
+resource.SetAnnotations(map[string]string{
+    "reports.kyverno.io/served-by-reports-server": "true",
+})
+```
+
+#### Step 3: Persist to Storage
+```go
+// pkg/v2/rest/create.go calls storage
+err = h.repo.Create(ctx, resource)
+
+// ↓ Goes to pkg/v2/storage/postgres/create.go
+
+// 1. Check if already exists (strict semantics)
+existing, _ := p.repo.Get(ctx, filter)
+if existing != nil {
+    return storage.ErrAlreadyExists
+}
+
+// 2. Marshal to JSON
+data, _ := json.Marshal(resource)
+
+// 3. Execute INSERT
+INSERT INTO policyreports (
+    name, namespace, cluster_id, 
+    uid, resource_version, data, created_at
+) VALUES ($1, $2, $3, $4, $5, $6, $7)
+
+// Metrics: Record storage operation timing
+```
+
+#### Step 4: Broadcast to Watchers
+```go
+// Back in pkg/v2/rest/create.go
+
+// Notify all active watchers
+broadcaster.Action(watch.Added, resource)
+
+// Any kubectl watching gets notified:
+$ kubectl get policyreports --watch
+NAME                 AGE
+pod-policy-report    1s   ← Just appeared!
+
+// Metrics: Track watch event sent/dropped
+```
+
+#### Step 5: Return to Kyverno
+```go
+// Response: HTTP 201 Created
+{
+    "apiVersion": "wgpolicyk8s.io/v1alpha2",
+    "kind": "PolicyReport",
+    "metadata": {
+        "name": "pod-policy-report",
+        "namespace": "default",
+        "uid": "abc-123",
+        "resourceVersion": "12345",
+        "creationTimestamp": "2024-01-01T00:00:00Z",
+        "annotations": {
+            "reports.kyverno.io/served-by-reports-server": "true"
+        }
+    },
+    "results": [...]
+}
+
+// Metrics: Record API request completed (201, duration)
+```
+
+### Kyverno Update Flow
+
+When Kyverno updates a report:
+
+```
+Kyverno Updates Report
+  ↓
+GET /apis/.../policyreports/report-name
+  ├─> pkg/v2/rest/retrieve.go:Get()
+  ├─> Fetches current version from storage
+  └─> Returns to Kyverno
+
+Kyverno Modifies Report
+  ↓
+PUT /apis/.../policyreports/report-name
+  ├─> pkg/v2/rest/update.go:Update()
+  ├─> Validates update
+  ├─> Checks resourceVersion (optimistic concurrency)
+  ├─> Stores updated version
+  ├─> Broadcasts watch.Modified event
+  └─> Returns updated report
+
+All watchers notified:
+  kubectl get policyreports --watch
+  → MODIFIED pod-policy-report
+```
+
+### Kyverno Delete Flow
+
+When Kyverno deletes a report:
+
+```
+DELETE /apis/.../policyreports/report-name
+  ↓
+pkg/v2/rest/delete.go:Delete()
+  ├─> Gets report from storage (for return value)
+  ├─> Validates deletion
+  ├─> Deletes from storage
+  ├─> Broadcasts watch.Deleted event
+  └─> Returns deleted report
+
+All watchers notified:
+  kubectl get policyreports --watch
+  → DELETED pod-policy-report
+
+Storage cleaned up:
+  PostgreSQL: DELETE FROM policyreports WHERE name=...
+```
+
 ### Supported Storage Backends
 
 #### PostgreSQL (Production)

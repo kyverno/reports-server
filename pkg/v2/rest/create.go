@@ -40,7 +40,7 @@ func (h *GenericRESTHandler[T]) Create(
 	defer func() {
 		// Record API request metrics
 		h.metrics.API().RecordRequest(h.metadata.Resource, metrics.VerbCreate, statusCode, time.Since(startTime))
-		
+
 		klog.V(logging.LevelDebug).InfoS("Create operation completed",
 			"kind", h.metadata.Kind,
 			"duration", time.Since(startTime),
@@ -97,7 +97,7 @@ func (h *GenericRESTHandler[T]) Create(
 	opStart := time.Now()
 	err = h.repo.Create(ctx, resource)
 	opDuration := time.Since(opStart)
-	
+
 	if err != nil {
 		h.metrics.Storage().RecordOperation(resourceType, metrics.OpCreate, metrics.StatusError, opDuration)
 		statusCode = "500"
