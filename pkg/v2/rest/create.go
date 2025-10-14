@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"time"
 
+	"github.com/kyverno/reports-server/pkg/v2/logging"
+	"github.com/kyverno/reports-server/pkg/v2/metrics"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -23,14 +26,39 @@ func (h *GenericRESTHandler[T]) Create(
 	createValidation rest.ValidateObjectFunc,
 	options *metav1.CreateOptions,
 ) (runtime.Object, error) {
+	startTime := time.Now()
 	isDryRun := slices.Contains(options.DryRun, "All")
+	resourceType := h.metadata.Kind
+
+	// Track in-flight requests
+	h.metrics.API().IncrementInflightRequests(h.metadata.Resource, metrics.VerbCreate)
+	defer h.metrics.API().DecrementInflightRequests(h.metadata.Resource, metrics.VerbCreate)
+
 	var err error
+	var statusCode string
+
+	defer func() {
+		// Record API request metrics
+		h.metrics.API().RecordRequest(h.metadata.Resource, metrics.VerbCreate, statusCode, time.Since(startTime))
+		
+		klog.V(logging.LevelDebug).InfoS("Create operation completed",
+			"kind", h.metadata.Kind,
+			"duration", time.Since(startTime),
+			"status", statusCode,
+			"dryRun", isDryRun,
+		)
+	}()
 
 	// Validate object
 	err = createValidation(ctx, obj)
 	if err != nil {
 		validationErr := handleValidationErrors(err, options)
 		if validationErr != nil {
+			h.metrics.API().RecordValidationError(h.metadata.Resource, metrics.VerbCreate)
+			statusCode = "400"
+			klog.V(logging.LevelWarning).InfoS("Validation failed",
+				"kind", h.metadata.Kind,
+				"error", validationErr)
 			return nil, validationErr
 		}
 	}
@@ -38,6 +66,7 @@ func (h *GenericRESTHandler[T]) Create(
 	// Type assert to our generic type
 	resource, ok := obj.(T)
 	if !ok {
+		statusCode = "400"
 		return nil, errors.NewBadRequest(fmt.Sprintf("failed to validate %s", h.metadata.Kind))
 	}
 
@@ -45,32 +74,57 @@ func (h *GenericRESTHandler[T]) Create(
 
 	resource, err = h.setResourceNameIfNotProvided(resource)
 	if err != nil {
+		statusCode = "409"
 		return nil, err
 	}
 
 	// Set creation metadata
 	resource = h.setCreationMetadata(resource)
 
-	klog.V(4).InfoS("Creating resource",
+	klog.V(logging.LevelDebug).InfoS("Creating resource",
 		"kind", h.metadata.Kind,
 		"name", resource.GetName(),
 		"namespace", resource.GetNamespace(),
+		"dryRun", isDryRun,
 	)
 
 	if isDryRun {
+		statusCode = "200"
 		return resource, nil
 	}
 
 	// Persist if not dry-run
+	opStart := time.Now()
 	err = h.repo.Create(ctx, resource)
+	opDuration := time.Since(opStart)
+	
 	if err != nil {
+		h.metrics.Storage().RecordOperation(resourceType, metrics.OpCreate, metrics.StatusError, opDuration)
+		statusCode = "500"
+		if errors.IsAlreadyExists(err) {
+			statusCode = "409"
+		}
+		klog.ErrorS(err, "Failed to create resource in storage",
+			"kind", h.metadata.Kind,
+			"name", resource.GetName(),
+			"namespace", resource.GetNamespace())
 		return nil, err
 	}
 
+	// Success
+	h.metrics.Storage().RecordOperation(resourceType, metrics.OpCreate, metrics.StatusSuccess, opDuration)
+	statusCode = "201"
+
 	// Broadcast watch event
 	if err := h.broadcaster.Action(watch.Added, resource); err != nil {
-		klog.ErrorS(err, "Failed to broadcast event")
+		klog.ErrorS(err, "Failed to broadcast watch event",
+			"kind", h.metadata.Kind,
+			"name", resource.GetName())
+		h.metrics.Watch().RecordEventDropped(resourceType, "broadcast_error")
+	} else {
+		h.metrics.Watch().RecordEvent(resourceType, "added")
 	}
+
 	return resource, nil
 }
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kyverno/reports-server/pkg/v2/logging"
+	"github.com/kyverno/reports-server/pkg/v2/metrics"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
@@ -25,11 +27,12 @@ type APIServiceConfig struct {
 // This tells Kubernetes to route API requests to our aggregated API server
 func (c *Config) InstallAPIServices() error {
 	if c.RESTConfig == nil {
-		klog.Warning("No REST config provided, skipping APIService installation")
+		klog.V(logging.LevelWarning).Info("No REST config provided, skipping APIService installation")
 		return nil
 	}
 
-	klog.Info("Installing APIServices")
+	klog.V(logging.LevelInfo).Info("Installing APIServices")
+	managedCount := 0
 
 	// Create API registration client
 	apiRegClient, err := apiregistrationv1client.NewForConfig(c.RESTConfig)
@@ -70,7 +73,16 @@ func (c *Config) InstallAPIServices() error {
 		if err := c.ensureAPIService(apiRegClient, svcCfg); err != nil {
 			return fmt.Errorf("failed to ensure APIService %s: %w", svcCfg.Name, err)
 		}
+		if svcCfg.Enabled {
+			managedCount++
+		}
 	}
+
+	// Record metrics
+	metrics.Global().Server().SetAPIServicesManaged(managedCount)
+
+	klog.V(logging.LevelInfo).InfoS("APIServices installation complete",
+		"managed", managedCount)
 
 	return nil
 }
@@ -95,7 +107,7 @@ func (c *Config) ensureAPIService(
 			if err != nil && !errors.IsAlreadyExists(err) {
 				return fmt.Errorf("failed to create APIService: %w", err)
 			}
-			klog.InfoS("Created APIService", "name", cfg.Name)
+			klog.V(logging.LevelInfo).InfoS("Created APIService", "name", cfg.Name, "group", cfg.Group)
 			return nil
 		}
 
@@ -110,9 +122,9 @@ func (c *Config) ensureAPIService(
 			if err != nil {
 				return fmt.Errorf("failed to update APIService: %w", err)
 			}
-			klog.InfoS("Updated APIService", "name", cfg.Name)
+			klog.V(logging.LevelInfo).InfoS("Updated APIService", "name", cfg.Name, "group", cfg.Group)
 		} else {
-			klog.V(4).InfoS("APIService already up to date", "name", cfg.Name)
+			klog.V(logging.LevelDebug).InfoS("APIService already up to date", "name", cfg.Name)
 		}
 
 		return nil
@@ -120,13 +132,13 @@ func (c *Config) ensureAPIService(
 
 	// Disabled - delete if exists
 	if err == nil {
-		klog.InfoS("APIService disabled, deleting", "name", cfg.Name)
+		klog.V(logging.LevelInfo).InfoS("APIService disabled, deleting", "name", cfg.Name)
 		if err := client.APIServices().Delete(ctx, cfg.Name, metav1.DeleteOptions{}); err != nil {
 			if !errors.IsNotFound(err) {
 				return fmt.Errorf("failed to delete APIService: %w", err)
 			}
 		}
-		klog.InfoS("Deleted APIService", "name", cfg.Name)
+		klog.V(logging.LevelInfo).InfoS("Deleted APIService", "name", cfg.Name)
 	}
 
 	return nil

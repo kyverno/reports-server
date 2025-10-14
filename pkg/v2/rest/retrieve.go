@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
+	"github.com/kyverno/reports-server/pkg/v2/logging"
+	"github.com/kyverno/reports-server/pkg/v2/metrics"
 	"github.com/kyverno/reports-server/pkg/v2/storage"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -19,27 +22,55 @@ import (
 // Get retrieves a single resource by name
 // Implements rest.Getter
 func (h *GenericRESTHandler[T]) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
+	startTime := time.Now()
 	namespace := genericapirequest.NamespaceValue(ctx)
+	resourceType := h.metadata.Kind
 
-	klog.V(4).InfoS("Getting resource",
+	// Track in-flight requests
+	h.metrics.API().IncrementInflightRequests(h.metadata.Resource, metrics.VerbGet)
+	defer h.metrics.API().DecrementInflightRequests(h.metadata.Resource, metrics.VerbGet)
+
+	var statusCode string
+	defer func() {
+		h.metrics.API().RecordRequest(h.metadata.Resource, metrics.VerbGet, statusCode, time.Since(startTime))
+	}()
+
+	klog.V(logging.LevelDebug).InfoS("Getting resource",
 		"kind", h.metadata.Kind,
 		"name", name,
 		"namespace", namespace,
 	)
 
 	filter := storage.NewFilter(name, namespace)
+	
+	// Measure storage operation
+	opStart := time.Now()
 	obj, err := h.repo.Get(ctx, filter)
+	opDuration := time.Since(opStart)
+	
 	if err != nil {
 		if errors.IsNotFound(err) {
-			klog.V(4).InfoS("Resource not found",
+			h.metrics.Storage().RecordOperation(resourceType, metrics.OpGet, metrics.StatusNotFound, opDuration)
+			statusCode = "404"
+			klog.V(logging.LevelDebug).InfoS("Resource not found",
 				"kind", h.metadata.Kind,
 				"name", name,
 				"namespace", namespace,
 			)
 			return nil, err
 		}
+		h.metrics.Storage().RecordOperation(resourceType, metrics.OpGet, metrics.StatusError, opDuration)
+		statusCode = "500"
+		klog.ErrorS(err, "Failed to get resource from storage",
+			"kind", h.metadata.Kind,
+			"name", name,
+			"namespace", namespace)
 		return nil, errorpkg.Wrapf(err, "could not find %s in store", h.metadata.Kind)
 	}
+
+	// Success
+	h.metrics.Storage().RecordOperation(resourceType, metrics.OpGet, metrics.StatusSuccess, opDuration)
+	statusCode = "200"
 
 	return obj, nil
 }
@@ -47,34 +78,75 @@ func (h *GenericRESTHandler[T]) Get(ctx context.Context, name string, options *m
 // List retrieves all resources, optionally filtered by namespace and labels
 // Implements rest.Lister
 func (h *GenericRESTHandler[T]) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
+	startTime := time.Now()
 	namespace := genericapirequest.NamespaceValue(ctx)
+	resourceType := h.metadata.Kind
 
-	klog.V(4).InfoS("Listing resources",
+	// Track in-flight requests
+	h.metrics.API().IncrementInflightRequests(h.metadata.Resource, metrics.VerbList)
+	defer h.metrics.API().DecrementInflightRequests(h.metadata.Resource, metrics.VerbList)
+
+	var statusCode string
+	defer func() {
+		h.metrics.API().RecordRequest(h.metadata.Resource, metrics.VerbList, statusCode, time.Since(startTime))
+	}()
+
+	klog.V(logging.LevelDebug).InfoS("Listing resources",
 		"kind", h.metadata.Kind,
 		"namespace", namespace,
 	)
 
 	// Step 1: Fetch all items from storage
 	filter := storage.Filter{Namespace: namespace}
+	
+	opStart := time.Now()
 	allItems, err := h.repo.List(ctx, filter)
+	opDuration := time.Since(opStart)
+	
 	if err != nil {
+		h.metrics.Storage().RecordOperation(resourceType, metrics.OpList, metrics.StatusError, opDuration)
+		statusCode = "500"
+		klog.ErrorS(err, "Failed to list resources from storage",
+			"kind", h.metadata.Kind,
+			"namespace", namespace)
 		return nil, errors.NewBadRequest(fmt.Sprintf("failed to list resource %s", h.metadata.Kind))
 	}
+
+	h.metrics.Storage().RecordOperation(resourceType, metrics.OpList, metrics.StatusSuccess, opDuration)
 
 	// Step 2: Filter items based on user criteria (labels, resource version)
 	matchingItems, collectionVersion := h.filterItems(allItems, options)
 
+	// Record filter efficiency
+	h.metrics.Storage().ObserveFilterEfficiency(resourceType, len(matchingItems), len(allItems))
+
 	// Step 3: Build Kubernetes list response
 	listResponse := h.buildListObject(matchingItems, collectionVersion)
 
-	klog.V(4).InfoS("Listed resources",
+	statusCode = "200"
+
+	klog.V(logging.LevelDebug).InfoS("Listed resources",
 		"kind", h.metadata.Kind,
 		"namespace", namespace,
 		"total", len(allItems),
 		"matching", len(matchingItems),
+		"efficiency", fmt.Sprintf("%.2f%%", float64(len(matchingItems))*100/float64(max(len(allItems), 1))),
 	)
 
+	// Update inventory metrics
+	if namespace == "" {
+		// Cluster-wide list - update total count
+		h.metrics.Storage().SetReportsTotal(resourceType, h.metadata.Resource, len(allItems))
+	}
+
 	return listResponse, nil
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 // filterItems filters items by label selector and resource version

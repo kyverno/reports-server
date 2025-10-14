@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"github.com/kyverno/reports-server/pkg/v2/metrics"
 	"github.com/kyverno/reports-server/pkg/v2/storage"
 	"github.com/kyverno/reports-server/pkg/v2/versioning"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -52,6 +53,9 @@ type GenericRESTHandler[T Object] struct {
 
 	// metadata contains resource-specific information
 	metadata ResourceMetadata
+
+	// metrics is the metrics registry for recording operations
+	metrics *metrics.Registry
 }
 
 // NewGenericRESTHandler creates a new generic REST handler
@@ -75,6 +79,7 @@ func NewGenericRESTHandler[T Object](
 		versioning:  v,
 		broadcaster: broadcaster,
 		metadata:    metadata,
+		metrics:     metrics.Global(),
 	}
 }
 

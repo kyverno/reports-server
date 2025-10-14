@@ -6,11 +6,11 @@ import (
 
 // WatchMetrics tracks watch-related metrics
 type WatchMetrics struct {
-	connectionsActive *metrics.GaugeVec
-	connectionsTotal  *metrics.CounterVec
-	eventsTotal       *metrics.CounterVec
-	eventsSent        *metrics.CounterVec
-	eventsDropped     *metrics.CounterVec
+	connectionsActive  *metrics.GaugeVec
+	connectionsTotal   *metrics.CounterVec
+	eventsTotal        *metrics.CounterVec
+	eventsSent         *metrics.CounterVec
+	eventsDropped      *metrics.CounterVec
 	connectionDuration *metrics.HistogramVec
 }
 
@@ -134,4 +134,3 @@ func (w *WatchMetrics) RecordEventDropped(resource, reason string) {
 func (w *WatchMetrics) ObserveConnectionDuration(resource string, durationSeconds float64) {
 	w.connectionDuration.WithLabelValues(resource).Observe(durationSeconds)
 }
-

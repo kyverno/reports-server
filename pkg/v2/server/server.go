@@ -3,7 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/kyverno/reports-server/pkg/v2/logging"
+	"github.com/kyverno/reports-server/pkg/v2/metrics"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/klog/v2"
@@ -23,7 +26,12 @@ type Server struct {
 
 // Run starts the server and blocks until the stop channel is closed
 func (s *Server) Run(ctx context.Context) error {
-	klog.Info("Starting reports-server v2")
+	serverStartTime := time.Now()
+	
+	klog.V(logging.LevelInfo).InfoS("Starting reports-server v2",
+		"storageBackend", s.config.Storage.Backend,
+		"enabledAPIGroups", s.countEnabledAPIGroups(),
+	)
 
 	// Install API groups
 	if err := s.InstallAPIGroups(); err != nil {
@@ -35,19 +43,55 @@ func (s *Server) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to install health checks: %w", err)
 	}
 
+	// Track uptime
+	go s.trackUptime(ctx, serverStartTime)
+
 	// Setup graceful shutdown
 	go func() {
 		<-ctx.Done()
-		klog.Info("Shutdown signal received, cleaning up...")
+		klog.V(logging.LevelInfo).Info("Shutdown signal received, cleaning up...")
 		s.Shutdown()
 	}()
 
 	// Start the generic API server
 	preparedServer := s.GenericAPIServer.PrepareRun()
-
-	klog.Info("Reports-server v2 is ready")
-
+	
+	klog.V(logging.LevelInfo).InfoS("Reports-server v2 is ready",
+		"address", s.GenericAPIServer.LoopbackClientConfig.Host,
+		"uptime", time.Since(serverStartTime),
+	)
+	
 	return preparedServer.Run(ctx.Done())
+}
+
+// trackUptime periodically updates the uptime metric
+func (s *Server) trackUptime(ctx context.Context, startTime time.Time) {
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			metrics.Global().Server().SetUptime(time.Since(startTime).Seconds())
+		}
+	}
+}
+
+// countEnabledAPIGroups counts how many API groups are enabled
+func (s *Server) countEnabledAPIGroups() int {
+	count := 0
+	if s.config.Server.EnablePolicyReports {
+		count++
+	}
+	if s.config.Server.EnableEphemeralReports {
+		count++
+	}
+	if s.config.Server.EnableOpenReports {
+		count++
+	}
+	return count
 }
 
 // Shutdown performs graceful shutdown of the server
@@ -64,14 +108,20 @@ func (s *Server) Shutdown() {
 
 // InstallAPIGroups installs all configured API groups
 func (s *Server) InstallAPIGroups() error {
-	klog.Info("Installing API groups")
+	klog.V(logging.LevelInfo).Info("Installing API groups")
+	installedCount := 0
 
 	// Install wgpolicyk8s.io (PolicyReports, ClusterPolicyReports)
 	if s.config.Server.EnablePolicyReports {
 		if err := s.installPolicyReportsAPI(); err != nil {
 			return fmt.Errorf("failed to install policy reports API: %w", err)
 		}
-		klog.Info("Installed wgpolicyk8s.io/v1alpha2 API group")
+		installedCount++
+		klog.V(logging.LevelInfo).InfoS("Installed API group",
+			"group", "wgpolicyk8s.io",
+			"version", "v1alpha2",
+			"resources", 2,
+		)
 	}
 
 	// Install reports.kyverno.io (EphemeralReports, ClusterEphemeralReports)
@@ -79,7 +129,12 @@ func (s *Server) InstallAPIGroups() error {
 		if err := s.installEphemeralReportsAPI(); err != nil {
 			return fmt.Errorf("failed to install ephemeral reports API: %w", err)
 		}
-		klog.Info("Installed reports.kyverno.io/v1 API group")
+		installedCount++
+		klog.V(logging.LevelInfo).InfoS("Installed API group",
+			"group", "reports.kyverno.io",
+			"version", "v1",
+			"resources", 2,
+		)
 	}
 
 	// Install openreports.io (Reports, ClusterReports)
@@ -87,8 +142,19 @@ func (s *Server) InstallAPIGroups() error {
 		if err := s.installOpenReportsAPI(); err != nil {
 			return fmt.Errorf("failed to install open reports API: %w", err)
 		}
-		klog.Info("Installed openreports.io/v1alpha1 API group")
+		installedCount++
+		klog.V(logging.LevelInfo).InfoS("Installed API group",
+			"group", "openreports.io",
+			"version", "v1alpha1",
+			"resources", 2,
+		)
 	}
+
+	// Record metric
+	metrics.Global().Server().SetAPIGroupsInstalled(installedCount)
+
+	klog.V(logging.LevelInfo).InfoS("API groups installation complete",
+		"totalInstalled", installedCount)
 
 	return nil
 }
@@ -179,7 +245,7 @@ func (s *Server) installOpenReportsAPI() error {
 
 // InstallHealthChecks installs health check endpoints
 func (s *Server) InstallHealthChecks() error {
-	klog.Info("Installing health checks")
+	klog.V(logging.LevelInfo).Info("Installing health checks")
 
 	// Readiness check - verifies storage is accessible
 	storageCheck := NewStorageHealthChecker("storage-ready", s.repositories)
@@ -193,6 +259,12 @@ func (s *Server) InstallHealthChecks() error {
 		return fmt.Errorf("failed to add liveness check: %w", err)
 	}
 
-	klog.Info("Health checks installed successfully")
+	// Initialize health check metrics
+	metrics.Global().Server().SetHealthCheckStatus("storage-ready", true)
+	metrics.Global().Server().SetHealthCheckStatus("ping", true)
+
+	klog.V(logging.LevelInfo).InfoS("Health checks installed",
+		"checks", 2,
+	)
 	return nil
 }

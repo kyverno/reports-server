@@ -14,11 +14,11 @@ const (
 
 // Operation types for storage
 const (
-	OpCreate         = "create"
-	OpGet            = "get"
-	OpList           = "list"
-	OpUpdate         = "update"
-	OpDelete         = "delete"
+	OpCreate           = "create"
+	OpGet              = "get"
+	OpList             = "list"
+	OpUpdate           = "update"
+	OpDelete           = "delete"
 	OpDeleteCollection = "delete_collection"
 )
 
@@ -35,8 +35,8 @@ const (
 
 // Status codes
 const (
-	StatusSuccess = "success"
-	StatusError   = "error"
+	StatusSuccess  = "success"
+	StatusError    = "error"
 	StatusNotFound = "not_found"
 	StatusConflict = "conflict"
 	StatusInvalid  = "invalid"
@@ -44,11 +44,10 @@ const (
 
 // Resource types
 const (
-	ResourcePolicyReport            = "PolicyReport"
-	ResourceClusterPolicyReport     = "ClusterPolicyReport"
-	ResourceEphemeralReport         = "EphemeralReport"
-	ResourceClusterEphemeralReport  = "ClusterEphemeralReport"
-	ResourceReport                  = "Report"
-	ResourceClusterReport           = "ClusterReport"
+	ResourcePolicyReport           = "PolicyReport"
+	ResourceClusterPolicyReport    = "ClusterPolicyReport"
+	ResourceEphemeralReport        = "EphemeralReport"
+	ResourceClusterEphemeralReport = "ClusterEphemeralReport"
+	ResourceReport                 = "Report"
+	ResourceClusterReport          = "ClusterReport"
 )
-

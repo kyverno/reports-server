@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyverno/reports-server/pkg/v2/metrics"
 	"github.com/kyverno/reports-server/pkg/v2/storage"
 	"k8s.io/apiserver/pkg/server/healthz"
 	"k8s.io/klog/v2"
@@ -40,10 +41,12 @@ func (s *StorageHealthChecker) Check(req *http.Request) error {
 		_, err := s.repositories.PolicyReports.List(ctx, storage.Filter{})
 		if err != nil {
 			klog.V(4).InfoS("Storage health check failed", "error", err)
+			metrics.Global().Server().SetHealthCheckStatus(s.name, false)
 			return fmt.Errorf("storage not accessible: %w", err)
 		}
 	}
 
+	metrics.Global().Server().SetHealthCheckStatus(s.name, true)
 	return nil
 }
 

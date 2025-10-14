@@ -43,4 +43,3 @@ const (
 //
 // Use klog.V(6).InfoS() for trace/verbose debugging:
 //   klog.V(6).InfoS("Filtering items", "total", total, "matched", matched, "labels", labels)
-

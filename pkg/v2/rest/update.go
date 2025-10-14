@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"time"
 
+	"github.com/kyverno/reports-server/pkg/v2/logging"
+	"github.com/kyverno/reports-server/pkg/v2/metrics"
 	"github.com/kyverno/reports-server/pkg/v2/storage"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -86,25 +89,45 @@ func (h *GenericRESTHandler[T]) Update(
 	// Set resource version
 	resource.SetResourceVersion(h.versioning.UseResourceVersion())
 
-	klog.V(4).InfoS("Updating resource",
+	klog.V(logging.LevelDebug).InfoS("Updating resource",
 		"kind", h.metadata.Kind,
 		"name", resource.GetName(),
 		"namespace", resource.GetNamespace(),
+		"dryRun", isDryRun,
 	)
+
+	// Track in-flight
+	h.metrics.API().IncrementInflightRequests(h.metadata.Resource, metrics.VerbUpdate)
+	defer h.metrics.API().DecrementInflightRequests(h.metadata.Resource, metrics.VerbUpdate)
 
 	// Persist if not dry-run
 	if !isDryRun {
+		opStart := time.Now()
 		err = h.repo.Update(ctx, resource)
+		opDuration := time.Since(opStart)
+		
 		if err != nil {
 			if errors.IsNotFound(err) {
+				h.metrics.Storage().RecordOperation(h.metadata.Kind, metrics.OpUpdate, metrics.StatusNotFound, opDuration)
 				return nil, false, err
 			}
+			h.metrics.Storage().RecordOperation(h.metadata.Kind, metrics.OpUpdate, metrics.StatusError, opDuration)
+			klog.ErrorS(err, "Failed to update resource in storage",
+				"kind", h.metadata.Kind,
+				"name", resource.GetName())
 			return nil, false, errorpkg.Wrapf(err, "failed to update %s", h.metadata.Kind)
 		}
 
+		h.metrics.Storage().RecordOperation(h.metadata.Kind, metrics.OpUpdate, metrics.StatusSuccess, opDuration)
+
 		// Broadcast watch event
 		if err := h.broadcaster.Action(watch.Modified, resource); err != nil {
-			klog.ErrorS(err, "Failed to broadcast event")
+			klog.ErrorS(err, "Failed to broadcast update event",
+				"kind", h.metadata.Kind,
+				"name", resource.GetName())
+			h.metrics.Watch().RecordEventDropped(h.metadata.Kind, "broadcast_error")
+		} else {
+			h.metrics.Watch().RecordEvent(h.metadata.Kind, "modified")
 		}
 	}
 

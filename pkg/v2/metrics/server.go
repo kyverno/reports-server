@@ -6,11 +6,11 @@ import (
 
 // ServerMetrics tracks server-level metrics
 type ServerMetrics struct {
-	uptime              *metrics.GaugeVec
-	apiGroupsInstalled  *metrics.GaugeVec
-	healthCheckStatus   *metrics.GaugeVec
-	apiServicesManaged  *metrics.GaugeVec
-	configReloadTotal   *metrics.CounterVec
+	uptime             *metrics.GaugeVec
+	apiGroupsInstalled *metrics.GaugeVec
+	healthCheckStatus  *metrics.GaugeVec
+	apiServicesManaged *metrics.GaugeVec
+	configReloadTotal  *metrics.CounterVec
 }
 
 // NewServerMetrics creates server metrics collectors
@@ -115,4 +115,3 @@ func (s *ServerMetrics) SetAPIServicesManaged(count int) {
 func (s *ServerMetrics) RecordConfigReload(status string) {
 	s.configReloadTotal.WithLabelValues(status).Inc()
 }
-

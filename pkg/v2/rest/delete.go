@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"time"
 
+	"github.com/kyverno/reports-server/pkg/v2/logging"
+	"github.com/kyverno/reports-server/pkg/v2/metrics"
 	"github.com/kyverno/reports-server/pkg/v2/storage"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
@@ -24,14 +27,26 @@ func (h *GenericRESTHandler[T]) Delete(
 	deleteValidation rest.ValidateObjectFunc,
 	options *metav1.DeleteOptions,
 ) (runtime.Object, bool, error) {
+	startTime := time.Now()
 	isDryRun := slices.Contains(options.DryRun, "All")
 	namespace := genericapirequest.NamespaceValue(ctx)
+	resourceType := h.metadata.Kind
 	filter := storage.NewFilter(name, namespace)
+
+	// Track in-flight requests
+	h.metrics.API().IncrementInflightRequests(h.metadata.Resource, metrics.VerbDelete)
+	defer h.metrics.API().DecrementInflightRequests(h.metadata.Resource, metrics.VerbDelete)
+
+	var statusCode string
+	defer func() {
+		h.metrics.API().RecordRequest(h.metadata.Resource, metrics.VerbDelete, statusCode, time.Since(startTime))
+	}()
 
 	// Get the object to delete (needed for validation and return value)
 	obj, err := h.repo.Get(ctx, filter)
 	if err != nil {
-		klog.ErrorS(err, "Failed to find resource",
+		statusCode = "404"
+		klog.V(logging.LevelWarning).InfoS("Resource not found for deletion",
 			"kind", h.metadata.Kind,
 			"name", name,
 			"namespace", namespace,
@@ -41,30 +56,57 @@ func (h *GenericRESTHandler[T]) Delete(
 
 	// Validate deletion
 	if err := deleteValidation(ctx, obj); err != nil {
+		h.metrics.API().RecordValidationError(h.metadata.Resource, metrics.VerbDelete)
+		statusCode = "422"
+		klog.V(logging.LevelWarning).InfoS("Delete validation failed",
+			"kind", h.metadata.Kind,
+			"name", name,
+			"error", err)
 		return nil, false, err
 	}
 
-	klog.V(4).InfoS("Deleting resource",
+	klog.V(logging.LevelDebug).InfoS("Deleting resource",
 		"kind", h.metadata.Kind,
 		"name", name,
 		"namespace", namespace,
+		"dryRun", isDryRun,
 	)
 
 	if isDryRun {
+		statusCode = "200"
 		return obj, true, nil
 	}
 
 	// Delete if not dry-run
+	opStart := time.Now()
 	if err := h.repo.Delete(ctx, filter); err != nil {
+		opDuration := time.Since(opStart)
+		
 		if errors.IsNotFound(err) {
+			h.metrics.Storage().RecordOperation(resourceType, metrics.OpDelete, metrics.StatusNotFound, opDuration)
+			statusCode = "404"
 			return nil, false, err
 		}
+		
+		h.metrics.Storage().RecordOperation(resourceType, metrics.OpDelete, metrics.StatusError, opDuration)
+		statusCode = "500"
+		klog.ErrorS(err, "Failed to delete resource from storage",
+			"kind", h.metadata.Kind,
+			"name", name)
 		return nil, false, fmt.Errorf("failed to delete %s: %w", h.metadata.Kind, err)
 	}
 
+	h.metrics.Storage().RecordOperation(resourceType, metrics.OpDelete, metrics.StatusSuccess, time.Since(opStart))
+	statusCode = "200"
+
 	// Broadcast watch event
 	if err := h.broadcaster.Action(watch.Deleted, obj); err != nil {
-		klog.ErrorS(err, "Failed to broadcast delete event")
+		klog.ErrorS(err, "Failed to broadcast delete event",
+			"kind", h.metadata.Kind,
+			"name", name)
+		h.metrics.Watch().RecordEventDropped(resourceType, "broadcast_error")
+	} else {
+		h.metrics.Watch().RecordEvent(resourceType, "deleted")
 	}
 
 	return obj, true, nil

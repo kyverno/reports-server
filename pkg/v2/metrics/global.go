@@ -25,4 +25,3 @@ func ResetGlobal() {
 	globalRegistry = nil
 	once = sync.Once{}
 }
-
