@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"slices"
 
-	v2storage "github.com/kyverno/reports-server/pkg/v2/storage"
+	"github.com/kyverno/reports-server/pkg/v2/storage"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +26,7 @@ func (h *GenericRESTHandler[T]) Delete(
 ) (runtime.Object, bool, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
 	namespace := genericapirequest.NamespaceValue(ctx)
-	filter := v2storage.NewFilter(name, namespace)
+	filter := storage.NewFilter(name, namespace)
 
 	// Get the object to delete (needed for validation and return value)
 	obj, err := h.repo.Get(ctx, filter)
@@ -107,7 +107,7 @@ func (h *GenericRESTHandler[T]) DeleteCollection(
 
 	// Delete each resource if not dry-run
 	for _, itemObj := range itemObjs {
-		filter := v2storage.NewFilter(itemObj.GetName(), itemObj.GetNamespace())
+		filter := storage.NewFilter(itemObj.GetName(), itemObj.GetNamespace())
 		if err := h.repo.Delete(ctx, filter); err != nil {
 			klog.ErrorS(err, "Failed to delete resource",
 				"kind", h.metadata.Kind,

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"slices"
 
-	v2storage "github.com/kyverno/reports-server/pkg/v2/storage"
+	"github.com/kyverno/reports-server/pkg/v2/storage"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +31,7 @@ func (h *GenericRESTHandler[T]) Update(
 	namespace := genericapirequest.NamespaceValue(ctx)
 
 	// Get existing object
-	filter := v2storage.NewFilter(name, namespace)
+	filter := storage.NewFilter(name, namespace)
 	oldObj, err := h.repo.Get(ctx, filter)
 	if err != nil && !forceAllowCreate {
 		return nil, false, err

@@ -1,8 +1,8 @@
 package rest
 
 import (
-	"github.com/kyverno/reports-server/pkg/storage/api"
-	v2storage "github.com/kyverno/reports-server/pkg/v2/storage"
+	"github.com/kyverno/reports-server/pkg/v2/storage"
+	"github.com/kyverno/reports-server/pkg/v2/versioning"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
@@ -41,11 +41,11 @@ import (
 //	    },
 //	)
 type GenericRESTHandler[T Object] struct {
-	// repo is the v2 storage repository for CRUD operations
-	repo v2storage.IRepository[T]
+	// repo is the storage repository for CRUD operations
+	repo storage.IRepository[T]
 
 	// versioning manages resource versions for optimistic concurrency
-	versioning api.Versioning
+	versioning versioning.Versioning
 
 	// broadcaster handles watch events for real-time updates
 	broadcaster *watch.Broadcaster
@@ -57,22 +57,22 @@ type GenericRESTHandler[T Object] struct {
 // NewGenericRESTHandler creates a new generic REST handler
 //
 // Parameters:
-//   - repo: v2 storage repository
-//   - versioning: Resource version manager
+//   - repo: storage repository
+//   - v: Resource version manager
 //   - metadata: Resource metadata (kind, names, scope, etc.)
 //
 // Returns:
 //   - A handler implementing rest.Storage and related interfaces
 func NewGenericRESTHandler[T Object](
-	repo v2storage.IRepository[T],
-	versioning api.Versioning,
+	repo storage.IRepository[T],
+	v versioning.Versioning,
 	metadata ResourceMetadata,
 ) IRestHandler {
 	broadcaster := watch.NewBroadcaster(1000, watch.WaitIfChannelFull)
 
 	return &GenericRESTHandler[T]{
 		repo:        repo,
-		versioning:  versioning,
+		versioning:  v,
 		broadcaster: broadcaster,
 		metadata:    metadata,
 	}

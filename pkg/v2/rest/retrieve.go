@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	v2storage "github.com/kyverno/reports-server/pkg/v2/storage"
+	"github.com/kyverno/reports-server/pkg/v2/storage"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
@@ -27,7 +27,7 @@ func (h *GenericRESTHandler[T]) Get(ctx context.Context, name string, options *m
 		"namespace", namespace,
 	)
 
-	filter := v2storage.NewFilter(name, namespace)
+	filter := storage.NewFilter(name, namespace)
 	obj, err := h.repo.Get(ctx, filter)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -55,7 +55,7 @@ func (h *GenericRESTHandler[T]) List(ctx context.Context, options *metainternalv
 	)
 
 	// Step 1: Fetch all items from storage
-	filter := v2storage.Filter{Namespace: namespace}
+	filter := storage.Filter{Namespace: namespace}
 	allItems, err := h.repo.List(ctx, filter)
 	if err != nil {
 		return nil, errors.NewBadRequest(fmt.Sprintf("failed to list resource %s", h.metadata.Kind))
