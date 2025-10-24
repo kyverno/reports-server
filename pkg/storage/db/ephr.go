@@ -6,22 +6,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"k8s.io/klog/v2"
 )
 
 type ephrdb struct {
-	sync.Mutex
 	db         *sql.DB
 	clusterUID string
 }
 
 func (p *ephrdb) List(ctx context.Context, namespace string) ([]*reportsv1.EphemeralReport, error) {
-	p.Lock()
-	defer p.Unlock()
-
 	klog.Infof("listing all values for namespace:%s", namespace)
 	res := make([]*reportsv1.EphemeralReport, 0)
 	var jsonb string
@@ -57,9 +52,6 @@ func (p *ephrdb) List(ctx context.Context, namespace string) ([]*reportsv1.Ephem
 }
 
 func (p *ephrdb) Get(ctx context.Context, name, namespace string) (*reportsv1.EphemeralReport, error) {
-	p.Lock()
-	defer p.Unlock()
-
 	var jsonb string
 
 	row := p.db.QueryRow("SELECT report FROM ephemeralreports WHERE cluster_id = $1 AND name = $2 AND namespace = $3", p.clusterUID, name, namespace)
@@ -80,9 +72,6 @@ func (p *ephrdb) Get(ctx context.Context, name, namespace string) (*reportsv1.Ep
 }
 
 func (p *ephrdb) Create(ctx context.Context, polr *reportsv1.EphemeralReport) error {
-	p.Lock()
-	defer p.Unlock()
-
 	if polr == nil {
 		return errors.New("invalid ephemeral report")
 	}
@@ -102,9 +91,6 @@ func (p *ephrdb) Create(ctx context.Context, polr *reportsv1.EphemeralReport) er
 }
 
 func (p *ephrdb) Update(ctx context.Context, polr *reportsv1.EphemeralReport) error {
-	p.Lock()
-	defer p.Unlock()
-
 	if polr == nil {
 		return errors.New("invalid ephemeral report")
 	}
@@ -123,9 +109,6 @@ func (p *ephrdb) Update(ctx context.Context, polr *reportsv1.EphemeralReport) er
 }
 
 func (p *ephrdb) Delete(ctx context.Context, name, namespace string) error {
-	p.Lock()
-	defer p.Unlock()
-
 	_, err := p.db.Exec("DELETE FROM ephemeralreports WHERE cluster_id = $1 AND namespace = $2 AND name = $3", p.clusterUID, namespace, name)
 	if err != nil {
 		klog.ErrorS(err, "failed to delete ephemeral report")
