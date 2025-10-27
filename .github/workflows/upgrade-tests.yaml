@@ -25,9 +25,9 @@ jobs:
           - name: v1.31
             version: v1.31.4
           - name: v1.32
-            version: v1.32.9
+            version: v1.32.8
           - name: v1.33
-            version: v1.33.5
+            version: v1.33.4
         tests:
           - ^reports$
     runs-on: ubuntu-latest
