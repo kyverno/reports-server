@@ -230,7 +230,7 @@ kind-install-etcd: $(HELM) kind-load ## Build image, load it in kind cluster and
 		--set postgresql.enabled=false \
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA)
- 
+
 .PHONY: kind-apply
 kind-apply: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
 	@echo Install chart... >&2
@@ -259,7 +259,7 @@ kind-apply-api-services: $(HELM) kind-load ## Build image, load it in kind clust
 			| kubectl apply -f -
 
 .PHONY: install-pss-policies
-install-pss-policies: $(HELM) 
+install-pss-policies: $(HELM)
 	@echo Install pss policies... >&2
 	@$(HELM) repo add kyverno https://kyverno.github.io/kyverno/
 	@$(HELM) upgrade --install kyverno-policies kyverno/kyverno-policies \
