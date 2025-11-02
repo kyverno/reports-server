@@ -71,10 +71,9 @@ jobs:
       - name: Install report server
         run: |
           set -e
+          kubectl create ns reports-server
           export HELM=${{ steps.helm.outputs.helm-path }}
-          helm repo add reports-server https://kyverno.github.io/reports-server
-          helm repo update
-          helm install reports-server -n reports-server reports-server/reports-server --create-namespace
+          make kind-install
       - name: Wait for report server ready
         run: |
           set -e
