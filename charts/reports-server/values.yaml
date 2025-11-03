@@ -76,7 +76,7 @@ podEnv: {}
 securityContext:
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000
@@ -135,13 +135,13 @@ metrics:
 resources:
   # -- Container resource limits
   limits:
-    # cpu: 100m
-    # memory: 128Mi
+  # cpu: 100m
+  # memory: 128Mi
 
   # -- Container resource requests
   requests:
-    # cpu: 100m
-    # memory: 128Mi
+  # cpu: 100m
+  # memory: 128Mi
 
 autoscaling:
   # -- Enable autoscaling
@@ -156,8 +156,8 @@ autoscaling:
   # -- Target CPU utilisation
   targetCPUUtilizationPercentage: 80
 
-  # -- Target Memory utilisation
-  targetMemoryUtilizationPercentage: ~
+  # -- Configurable scaling behavior
+  behavior: {}
 
 
 # -- Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica
