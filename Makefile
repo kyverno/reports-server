@@ -209,9 +209,19 @@ kind-delete: $(KIND) ## Delete kind cluster
 	@$(KIND) delete cluster --name $(KIND_NAME)
 
 .PHONY: kind-load
-kind-load: $(KIND) ko-build docker-save-image ## Build image and load in kind cluster
+kind-load: $(KIND) ko-build docker-save-image wait-containerd ## Build image and load in kind cluster
 	@echo Load image... >&2
 		@$(KIND) load image-archive reports-server.tar --name $(KIND_NAME)
+
+
+wait-containerd:
+	@echo "Waiting for kind node containerd to be ready..."
+	@for i in $$(seq 1 30); do \
+		docker exec $$(kind get nodes --name $(KIND_NAME) | head -n1) \
+			bash -c "ctr -n=k8s.io snapshot ls" >/dev/null 2>&1 && break; \
+		echo "...containerd not ready yet"; \
+		sleep 2; \
+	done
 
 .PHONY: docker-save-image
 docker-save-image: $(KIND) ko-build ## Save docker images in archive
