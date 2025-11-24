@@ -209,9 +209,13 @@ kind-delete: $(KIND) ## Delete kind cluster
 	@$(KIND) delete cluster --name $(KIND_NAME)
 
 .PHONY: kind-load
-kind-load: $(KIND) ko-build ## Build image and load in kind cluster
+kind-load: $(KIND) ko-build docker-save-image ## Build image and load in kind cluster
 	@echo Load image... >&2
-	@$(KIND) load docker-image --name $(KIND_NAME) $(KO_REGISTRY)/$(PACKAGE):$(GIT_SHA)
+		@$(KIND) load image-archive reports-server.tar --name $(KIND_NAME)
+
+.PHONY: docker-save-image
+docker-save-image: $(KIND) ko-build ## Save docker images in archive
+	docker save $(KO_REGISTRY)/$(PACKAGE):$(GIT_SHA) > reports-server.tar
 
 .PHONY: kind-install
 kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
