@@ -153,12 +153,30 @@ autoscaling:
   # -- Max number of replicas
   maxReplicas: 100
 
-  # -- Target CPU utilisation
+  # -- Target CPU utilisation percentage
   targetCPUUtilizationPercentage: 80
 
-  # -- Configurable scaling behavior
-  behavior: {}
+  # -- Target memory utilization percentage
+  targetMemoryUtilizationPercentage: ~
 
+  # -- Configures custom HPA metrics
+  # Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  metrics: []
+
+  # -- Configures the scaling behavior of the target in both Up and Down directions.
+  behavior: {}
+  # scaleDown:
+  #  stabilizationWindowSeconds: 300
+  #  policies:
+  #    - type: Pods
+  #      value: 1
+  #      periodSeconds: 180
+  # scaleUp:
+  #   stabilizationWindowSeconds: 300
+  #   policies:
+  #     - type: Pods
+  #       value: 2
+  #       periodSeconds: 60
 
 # -- Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica
 pdb:
