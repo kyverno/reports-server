@@ -22,7 +22,7 @@ REGISTER_GEN                       := $(TOOLS_DIR)/register-gen
 OPENAPI_GEN                        := $(TOOLS_DIR)/openapi-gen
 CODE_GEN_VERSION                   := v0.28.0
 KIND                               := $(TOOLS_DIR)/kind
-KIND_VERSION                       := v0.23.0
+KIND_VERSION                       := v0.30.0
 KO                                 := $(TOOLS_DIR)/ko
 KO_VERSION                         := v0.14.1
 HELM                               := $(TOOLS_DIR)/helm
@@ -195,7 +195,7 @@ verify-codegen: codegen ## Verify all generated code and docs are up to date
 # KIND #
 ########
 
-KIND_IMAGE     ?= kindest/node:v1.30.0
+KIND_IMAGE     ?= kindest/node:v1.33.4
 KIND_NAME      ?= kind
 
 .PHONY: kind-create
@@ -209,9 +209,13 @@ kind-delete: $(KIND) ## Delete kind cluster
 	@$(KIND) delete cluster --name $(KIND_NAME)
 
 .PHONY: kind-load
-kind-load: $(KIND) ko-build ## Build image and load in kind cluster
+kind-load: $(KIND) ko-build docker-save-image ## Build image and load in kind cluster
 	@echo Load image... >&2
-	@$(KIND) load docker-image --name $(KIND_NAME) $(KO_REGISTRY)/$(PACKAGE):$(GIT_SHA)
+		@$(KIND) load image-archive reports-server.tar --name $(KIND_NAME)
+
+.PHONY: docker-save-image
+docker-save-image: $(KIND) ko-build ## Save docker images in archive
+	docker save $(KO_REGISTRY)/$(PACKAGE):$(GIT_SHA) > reports-server.tar
 
 .PHONY: kind-install
 kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
@@ -230,7 +234,7 @@ kind-install-etcd: $(HELM) kind-load ## Build image, load it in kind cluster and
 		--set postgresql.enabled=false \
 		--set image.repository=$(PACKAGE) \
 		--set image.tag=$(GIT_SHA)
- 
+
 .PHONY: kind-apply
 kind-apply: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
 	@echo Install chart... >&2
@@ -259,7 +263,7 @@ kind-apply-api-services: $(HELM) kind-load ## Build image, load it in kind clust
 			| kubectl apply -f -
 
 .PHONY: install-pss-policies
-install-pss-policies: $(HELM) 
+install-pss-policies: $(HELM)
 	@echo Install pss policies... >&2
 	@$(HELM) repo add kyverno https://kyverno.github.io/kyverno/
 	@$(HELM) upgrade --install kyverno-policies kyverno/kyverno-policies \
