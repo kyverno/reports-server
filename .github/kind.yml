@@ -36,4 +36,3 @@ nodes:
         containerPath: /data
   - role: worker
   - role: worker
-  - role: worker
