@@ -10,12 +10,10 @@ postgresql:
     tag: 16.1.0-debian-11-r22
     digest: ""
 
-
   # -- Deploy postgresql dependency chart
   enabled: true
 
   auth:
-
     postgresPassword: reports
 
     database: reportsdb
@@ -76,7 +74,7 @@ podEnv: {}
 securityContext:
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000
@@ -159,7 +157,6 @@ autoscaling:
   # -- Target Memory utilisation
   targetMemoryUtilizationPercentage: ~
 
-
 # -- Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica
 pdb:
   # -- Enable PodDisruptionBudget
@@ -186,7 +183,6 @@ service:
   port: 443
 
 config:
-
   etcd:
     enabled: false
     endpoints: ~
@@ -241,7 +237,6 @@ apiServicesManagement:
 
   # -- Install api services in manifest
   installApiServices:
-
     # -- Store reports in reports-server
     enabled: true
 
@@ -255,10 +250,10 @@ apiServicesManagement:
     # -- (string) Image registry
     registry: docker.io
     # -- Image repository
-    repository: bitnami/kubectl
+    repository: bitnamilegacy/kubectl
     # -- Image tag
     # Defaults to `latest` if omitted
-    tag: '1.30.2'
+    tag: "1.30.2"
     # -- (string) Image pull policy
     # Defaults to image.pullPolicy if omitted
     pullPolicy: ~

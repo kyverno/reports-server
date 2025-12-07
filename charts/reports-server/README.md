@@ -1,6 +1,6 @@
 # reports-server
 
-![Version: 0.1.4-rc.1](https://img.shields.io/badge/Version-0.1.4--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.4-rc.1](https://img.shields.io/badge/AppVersion-v0.1.4--rc.1-informational?style=flat-square)
+![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.6](https://img.shields.io/badge/AppVersion-v0.1.6-informational?style=flat-square)
 
 TODO
 
@@ -96,7 +96,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
 | apiServicesManagement.installApiServices.installOpenreportsService | bool | `true` | Store open reports in reports-server |
 | apiServicesManagement.image.registry | string | `"docker.io"` | Image registry |
-| apiServicesManagement.image.repository | string | `"bitnami/kubectl"` | Image repository |
+| apiServicesManagement.image.repository | string | `"bitnamilegacy/kubectl"` | Image repository |
 | apiServicesManagement.image.tag | string | `"1.30.2"` | Image tag Defaults to `latest` if omitted |
 | apiServicesManagement.image.pullPolicy | string | `nil` | Image pull policy Defaults to image.pullPolicy if omitted |
 | apiServicesManagement.imagePullSecrets | list | `[]` | Image pull secrets |
