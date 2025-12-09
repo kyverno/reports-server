@@ -18,6 +18,10 @@ import (
 )
 
 func (c *Config) migration(ctx context.Context) error {
+	if c.SkipMigration {
+		klog.Info("Skipping database migration as per configuration")
+		return nil
+	}
 	kyvernoClient, err := kyverno.NewForConfig(c.Rest)
 	if err != nil {
 		return err
