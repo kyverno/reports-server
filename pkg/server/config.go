@@ -28,14 +28,15 @@ import (
 const numWorkers = 50
 
 type Config struct {
-	Apiserver   *genericapiserver.Config
-	Rest        *rest.Config
-	Embedded    bool
-	EtcdConfig  *etcd.EtcdConfig
-	DBconfig    *db.PostgresConfig
-	ClusterName string
-	APIServices APIServices
-	Store       storage.Interface
+	Apiserver     *genericapiserver.Config
+	Rest          *rest.Config
+	Embedded      bool
+	EtcdConfig    *etcd.EtcdConfig
+	DBconfig      *db.PostgresConfig
+	ClusterName   string
+	APIServices   APIServices
+	Store         storage.Interface
+	SkipMigration bool
 }
 
 func NewServerConfig(o opts.Options) (*Config, error) {
@@ -84,14 +85,15 @@ func NewServerConfig(o opts.Options) (*Config, error) {
 	}
 
 	config := &Config{
-		Apiserver:   apiserver,
-		Rest:        restConfig,
-		Embedded:    o.Etcd,
-		EtcdConfig:  &o.EtcdConfig,
-		DBconfig:    dbconfig,
-		ClusterName: o.ClusterName,
-		APIServices: apiservices,
-		Store:       store,
+		Apiserver:     apiserver,
+		Rest:          restConfig,
+		Embedded:      o.Etcd,
+		EtcdConfig:    &o.EtcdConfig,
+		DBconfig:      dbconfig,
+		ClusterName:   o.ClusterName,
+		APIServices:   apiservices,
+		Store:         store,
+		SkipMigration: o.SkipMigration,
 	}
 
 	return config, nil
