@@ -61,10 +61,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 | autoscaling.enabled | bool | `false` | Enable autoscaling |
 | autoscaling.minReplicas | int | `1` | Min number of replicas |
 | autoscaling.maxReplicas | int | `100` | Max number of replicas |
-| autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation |
-| autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target Memory utilisation |
-| autoscaling.metrics | list | `[]` | Configures custom HPA metrics. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ |
-| autoscaling.behavior | object | `{}` | Configurable scaling behavior |
+| autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation percentage |
+| autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilization percentage |
+| autoscaling.metrics | list | `[]` | Configures custom HPA metrics Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ |
+| autoscaling.behavior | object | `{}` | Configures the scaling behavior of the target in both Up and Down directions. |
 | pdb | object | `{"enabled":true,"maxUnavailable":"50%","minAvailable":null}` | Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica |
 | pdb.enabled | bool | `true` | Enable PodDisruptionBudget |
 | pdb.minAvailable | string | `nil` | minAvailable pods for PDB, cannot be used together with maxUnavailable |
