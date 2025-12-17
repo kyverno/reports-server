@@ -18,10 +18,6 @@ import (
 )
 
 func (c *Config) migration(ctx context.Context) error {
-	if c.SkipMigration {
-		klog.Info("Skipping database migration as per configuration")
-		return nil
-	}
 	kyvernoClient, err := kyverno.NewForConfig(c.Rest)
 	if err != nil {
 		return err
@@ -38,13 +34,15 @@ func (c *Config) migration(ctx context.Context) error {
 			return nil
 		}
 
-		cpolrWg := &sync.WaitGroup{}
-		cpolrWg.Add(len(cpolrs.Items))
-		for _, r := range cpolrs.Items {
-			applyReportsServerAnnotation(&r)
-			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, cpolrWg, r)
+		if !c.SkipMigration {
+			cpolrWg := &sync.WaitGroup{}
+			cpolrWg.Add(len(cpolrs.Items))
+			for _, r := range cpolrs.Items {
+				applyReportsServerAnnotation(&r)
+				go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, cpolrWg, r)
+			}
+			cpolrWg.Wait()
 		}
-		cpolrWg.Wait()
 
 		err = c.Store.SetResourceVersion(cpolrs.ResourceVersion)
 		if err != nil {
@@ -66,13 +64,15 @@ func (c *Config) migration(ctx context.Context) error {
 			return nil
 		}
 
-		polrWg := &sync.WaitGroup{}
-		polrWg.Add(len(polrs.Items))
-		for _, r := range polrs.Items {
-			applyReportsServerAnnotation(&r)
-			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, polrWg, r)
+		if !c.SkipMigration {
+			polrWg := &sync.WaitGroup{}
+			polrWg.Add(len(polrs.Items))
+			for _, r := range polrs.Items {
+				applyReportsServerAnnotation(&r)
+				go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, polrWg, r)
+			}
+			polrWg.Wait()
 		}
-		polrWg.Wait()
 
 		err = c.Store.SetResourceVersion(polrs.ResourceVersion)
 		if err != nil {
@@ -97,13 +97,15 @@ func (c *Config) migration(ctx context.Context) error {
 			return nil
 		}
 
-		cephrWg := &sync.WaitGroup{}
-		cephrWg.Add(len(cephrs.Items))
-		for _, r := range cephrs.Items {
-			applyReportsServerAnnotation(&r)
-			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, cephrWg, r)
+		if !c.SkipMigration {
+			cephrWg := &sync.WaitGroup{}
+			cephrWg.Add(len(cephrs.Items))
+			for _, r := range cephrs.Items {
+				applyReportsServerAnnotation(&r)
+				go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, cephrWg, r)
+			}
+			cephrWg.Wait()
 		}
-		cephrWg.Wait()
 
 		err = c.Store.SetResourceVersion(cephrs.ResourceVersion)
 		if err != nil {
@@ -124,13 +126,16 @@ func (c *Config) migration(ctx context.Context) error {
 		if err != nil {
 			return nil
 		}
-		ephrWg := &sync.WaitGroup{}
-		ephrWg.Add(len(ephrs.Items))
-		for _, r := range ephrs.Items {
-			applyReportsServerAnnotation(&r)
-			go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, ephrWg, r)
+
+		if !c.SkipMigration {
+			ephrWg := &sync.WaitGroup{}
+			ephrWg.Add(len(ephrs.Items))
+			for _, r := range ephrs.Items {
+				applyReportsServerAnnotation(&r)
+				go c.migrateReport(ctx, kyvernoClient, policyClient, workerChan, ephrWg, r)
+			}
+			ephrWg.Wait()
 		}
-		ephrWg.Wait()
 
 		err = c.Store.SetResourceVersion(ephrs.ResourceVersion)
 		if err != nil {
