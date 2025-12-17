@@ -1,6 +1,6 @@
 # reports-server
 
-![Version: 0.1.4-rc.1](https://img.shields.io/badge/Version-0.1.4--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.4-rc.1](https://img.shields.io/badge/AppVersion-v0.1.4--rc.1-informational?style=flat-square)
+![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.1.6](https://img.shields.io/badge/AppVersion-v0.1.6-informational?style=flat-square)
 
 TODO
 
@@ -22,6 +22,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| postgresql.image.registry | string | `"docker.io"` |  |
+| postgresql.image.repository | string | `"bitnamilegacy/postgresql"` |  |
+| postgresql.image.tag | string | `"16.1.0-debian-11-r22"` |  |
+| postgresql.image.digest | string | `""` |  |
 | postgresql.enabled | bool | `true` | Deploy postgresql dependency chart |
 | postgresql.auth.postgresPassword | string | `"reports"` |  |
 | postgresql.auth.database | string | `"reportsdb"` |  |
@@ -57,8 +61,10 @@ helm install reports-server --namespace reports-server --create-namespace report
 | autoscaling.enabled | bool | `false` | Enable autoscaling |
 | autoscaling.minReplicas | int | `1` | Min number of replicas |
 | autoscaling.maxReplicas | int | `100` | Max number of replicas |
-| autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation |
-| autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target Memory utilisation |
+| autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation percentage |
+| autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilization percentage |
+| autoscaling.metrics | list | `[]` | Configures custom HPA metrics Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ |
+| autoscaling.behavior | object | `{}` | Configures the scaling behavior of the target in both Up and Down directions. |
 | pdb | object | `{"enabled":true,"maxUnavailable":"50%","minAvailable":null}` | Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica |
 | pdb.enabled | bool | `true` | Enable PodDisruptionBudget |
 | pdb.minAvailable | string | `nil` | minAvailable pods for PDB, cannot be used together with maxUnavailable |
@@ -92,7 +98,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
 | apiServicesManagement.installApiServices.installOpenreportsService | bool | `true` | Store open reports in reports-server |
 | apiServicesManagement.image.registry | string | `"docker.io"` | Image registry |
-| apiServicesManagement.image.repository | string | `"bitnami/kubectl"` | Image repository |
+| apiServicesManagement.image.repository | string | `"bitnamilegacy/kubectl"` | Image repository |
 | apiServicesManagement.image.tag | string | `"1.30.2"` | Image tag Defaults to `latest` if omitted |
 | apiServicesManagement.image.pullPolicy | string | `nil` | Image pull policy Defaults to image.pullPolicy if omitted |
 | apiServicesManagement.imagePullSecrets | list | `[]` | Image pull secrets |
@@ -105,6 +111,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | apiServicesManagement.podAnnotations | object | `{}` | Pod annotations. |
 | apiServicesManagement.nodeAffinity | object | `{}` | Node affinity constraints. |
 | apiServicesManagement.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsNonRoot":true,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Security context for the hook containers |
+| extraObjects | list | `[]` |  |
 
 ## Source Code
 

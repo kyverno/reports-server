@@ -4,12 +4,16 @@ templating:
   enabled: false
 
 postgresql:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: 16.1.0-debian-11-r22
+    digest: ""
 
   # -- Deploy postgresql dependency chart
   enabled: true
 
   auth:
-
     postgresPassword: reports
 
     database: reportsdb
@@ -70,7 +74,7 @@ podEnv: {}
 securityContext:
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000
@@ -129,13 +133,13 @@ metrics:
 resources:
   # -- Container resource limits
   limits:
-    # cpu: 100m
-    # memory: 128Mi
+  # cpu: 100m
+  # memory: 128Mi
 
   # -- Container resource requests
   requests:
-    # cpu: 100m
-    # memory: 128Mi
+  # cpu: 100m
+  # memory: 128Mi
 
 autoscaling:
   # -- Enable autoscaling
@@ -147,12 +151,30 @@ autoscaling:
   # -- Max number of replicas
   maxReplicas: 100
 
-  # -- Target CPU utilisation
+  # -- Target CPU utilisation percentage
   targetCPUUtilizationPercentage: 80
 
-  # -- Target Memory utilisation
+  # -- Target memory utilization percentage
   targetMemoryUtilizationPercentage: ~
 
+  # -- Configures custom HPA metrics
+  # Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  metrics: []
+
+  # -- Configures the scaling behavior of the target in both Up and Down directions.
+  behavior: {}
+  # scaleDown:
+  #  stabilizationWindowSeconds: 300
+  #  policies:
+  #    - type: Pods
+  #      value: 1
+  #      periodSeconds: 180
+  # scaleUp:
+  #   stabilizationWindowSeconds: 300
+  #   policies:
+  #     - type: Pods
+  #       value: 2
+  #       periodSeconds: 60
 
 # -- Using a PDB is highly recommended for highly available deployments. Defaults to enabled. The default configuration doesn't prevent disruption when using a single replica
 pdb:
@@ -180,7 +202,6 @@ service:
   port: 443
 
 config:
-
   etcd:
     enabled: false
     endpoints: ~
@@ -235,7 +256,6 @@ apiServicesManagement:
 
   # -- Install api services in manifest
   installApiServices:
-
     # -- Store reports in reports-server
     enabled: true
 
@@ -249,10 +269,10 @@ apiServicesManagement:
     # -- (string) Image registry
     registry: docker.io
     # -- Image repository
-    repository: bitnami/kubectl
+    repository: bitnamilegacy/kubectl
     # -- Image tag
     # Defaults to `latest` if omitted
-    tag: '1.30.2'
+    tag: "1.30.2"
     # -- (string) Image pull policy
     # Defaults to image.pullPolicy if omitted
     pullPolicy: ~
@@ -297,3 +317,5 @@ apiServicesManagement:
         - ALL
     seccompProfile:
       type: RuntimeDefault
+
+extraObjects: []
