@@ -74,6 +74,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | affinity | object | `{}` | Affinity |
 | service.type | string | `"ClusterIP"` | Service type |
 | service.port | int | `443` | Service port |
+| config.skipMigration | bool | `false` | Skip database migration on startup |
 | config.etcd.enabled | bool | `false` |  |
 | config.etcd.endpoints | string | `nil` |  |
 | config.etcd.insecure | bool | `true` |  |

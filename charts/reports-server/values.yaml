@@ -202,6 +202,9 @@ service:
   port: 443
 
 config:
+  # -- Skip database migration on startup
+  skipMigration: false
+
   etcd:
     enabled: false
     endpoints: ~

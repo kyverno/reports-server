@@ -31,10 +31,11 @@ type Options struct {
 	Features       *genericoptions.FeatureOptions
 	Logging        *logs.Options
 
-	ShowVersion bool
-	Etcd        bool
-	Kubeconfig  string
-	ClusterName string
+	ShowVersion   bool
+	SkipMigration bool
+	Etcd          bool
+	Kubeconfig    string
+	ClusterName   string
 
 	// dbopts
 	EtcdConfig    etcd.EtcdConfig
@@ -91,6 +92,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.BoolVar(&o.StoreReports, "storereports", true, "Whether or not to store and manage Policy Reports.")
 	msfs.BoolVar(&o.StoreOpenreports, "storeopenreports", true, "Whether or not to store and manage Open Reports.")
 	msfs.BoolVar(&o.StoreEphemeralReports, "storeephemeralreports", true, "Whether or not to store and manage Ephemeral Reports.")
+	msfs.BoolVar(&o.SkipMigration, "skipmigration", false, "Skip database migration on startup.")
 
 	o.SecureServing.AddFlags(fs.FlagSet("apiserver secure serving"))
 	o.Authentication.AddFlags(fs.FlagSet("apiserver authentication"))
