@@ -55,6 +55,9 @@ spec:
             - --storereports={{ .Values.apiServicesManagement.installApiServices.enabled }}
             - --storeephemeralreports={{ .Values.apiServicesManagement.installApiServices.installEphemeralReportsService }}
             - --storeopenreports={{ .Values.apiServicesManagement.installApiServices.installOpenreportsService }}
+            {{- if .Values.config.skipMigration }}
+            - --skipmigration=true
+            {{- end }}
             - --cert-dir=/tmp
             - --secure-port=4443
             {{- if .Values.metrics.enabled }}
