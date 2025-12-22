@@ -98,9 +98,9 @@ helm install reports-server --namespace reports-server --create-namespace report
 | apiServicesManagement.installApiServices.enabled | bool | `true` | Store reports in reports-server |
 | apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
 | apiServicesManagement.installApiServices.installOpenreportsService | bool | `true` | Store open reports in reports-server |
-| apiServicesManagement.image.registry | string | `"docker.io"` | Image registry |
-| apiServicesManagement.image.repository | string | `"bitnamilegacy/kubectl"` | Image repository |
-| apiServicesManagement.image.tag | string | `"1.30.2"` | Image tag Defaults to `latest` if omitted |
+| apiServicesManagement.image.registry | string | `"registry.k8s.io"` | Image registry |
+| apiServicesManagement.image.repository | string | `"kubectl"` | Image repository |
+| apiServicesManagement.image.tag | string | `"v1.34.1"` | Image tag |
 | apiServicesManagement.image.pullPolicy | string | `nil` | Image pull policy Defaults to image.pullPolicy if omitted |
 | apiServicesManagement.imagePullSecrets | list | `[]` | Image pull secrets |
 | apiServicesManagement.podSecurityContext | object | `{}` | Security context for the pod |

@@ -270,12 +270,11 @@ apiServicesManagement:
 
   image:
     # -- (string) Image registry
-    registry: docker.io
+    registry: registry.k8s.io
     # -- Image repository
-    repository: bitnamilegacy/kubectl
+    repository: kubectl
     # -- Image tag
-    # Defaults to `latest` if omitted
-    tag: "1.30.2"
+    tag: v1.34.1
     # -- (string) Image pull policy
     # Defaults to image.pullPolicy if omitted
     pullPolicy: ~
