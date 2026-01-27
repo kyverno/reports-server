@@ -92,7 +92,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.BoolVar(&o.StoreReports, "storereports", true, "Whether or not to store and manage Policy Reports.")
 	msfs.BoolVar(&o.StoreOpenreports, "storeopenreports", true, "Whether or not to store and manage Open Reports.")
 	msfs.BoolVar(&o.StoreEphemeralReports, "storeephemeralreports", true, "Whether or not to store and manage Ephemeral Reports.")
-	msfs.BoolVar(&o.SkipMigration, "skipmigration", false, "Skip database migration on startup.")
+	msfs.BoolVar(&o.SkipMigration, "skipmigration", false, "Skip database migration on startup. By default, migration is automatically skipped if reports already exist in the database.")
 
 	o.SecureServing.AddFlags(fs.FlagSet("apiserver secure serving"))
 	o.Authentication.AddFlags(fs.FlagSet("apiserver authentication"))
