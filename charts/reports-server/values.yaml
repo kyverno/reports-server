@@ -321,3 +321,7 @@ apiServicesManagement:
       type: RuntimeDefault
 
 extraObjects: []
+
+openreports:
+  # -- Deploy openreports-api CRDs
+  enabled: false

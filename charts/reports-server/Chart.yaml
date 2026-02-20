@@ -19,3 +19,7 @@ dependencies:
     name: postgresql
     version: 13.4.1
     repository: oci://registry-1.docker.io/bitnamicharts
+  - condition: openreports.enabled
+    name: openreports
+    repository: oci://ghcr.io/openreports/charts
+    version: 0.2.1
