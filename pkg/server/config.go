@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/kyverno/reports-server/pkg/api"
@@ -211,6 +212,28 @@ func (c *Config) installApiServices() error {
 	}
 
 	return nil
+}
+
+func (c *Config) StartAPIServiceReconciler(ctx context.Context) {
+	if !c.APIServices.StoreReports && !c.APIServices.StoreEphemeralReports && !c.APIServices.StoreOpenreports {
+		klog.Info("No APIServices enabled, skipping reconciler")
+		return
+	}
+	const reconcileInterval = 10 * time.Second
+	ticker := time.NewTicker(reconcileInterval)
+	defer ticker.Stop()
+	klog.Info("Starting APIService reconciler")
+	for {
+		select {
+		case <-ctx.Done():
+			klog.Info("Stopping APIService reconciler")
+			return
+		case <-ticker.C:
+			if err := c.installApiServices(); err != nil {
+				klog.Errorf("APIService reconciliation failed: %v", err)
+			}
+		}
+	}
 }
 
 func (c *Config) toLocalApiService(apiSvcName string, client apiregistrationv1client.ApiregistrationV1Client) error {
