@@ -36,8 +36,9 @@ type Config struct {
 	DBconfig      *db.PostgresConfig
 	ClusterName   string
 	APIServices   APIServices
-	Store         storage.Interface
-	SkipMigration bool
+	Store                       storage.Interface
+	SkipMigration               bool
+	APIServiceReconcileInterval time.Duration
 }
 
 func NewServerConfig(o opts.Options) (*Config, error) {
@@ -93,8 +94,9 @@ func NewServerConfig(o opts.Options) (*Config, error) {
 		DBconfig:      dbconfig,
 		ClusterName:   o.ClusterName,
 		APIServices:   apiservices,
-		Store:         store,
-		SkipMigration: o.SkipMigration,
+		Store:                       store,
+		SkipMigration:               o.SkipMigration,
+		APIServiceReconcileInterval: o.APIServiceReconcileInterval,
 	}
 
 	return config, nil
@@ -219,8 +221,7 @@ func (c *Config) StartAPIServiceReconciler(ctx context.Context) {
 		klog.Info("No APIServices enabled, skipping reconciler")
 		return
 	}
-	const reconcileInterval = 10 * time.Second
-	ticker := time.NewTicker(reconcileInterval)
+	ticker := time.NewTicker(c.APIServiceReconcileInterval)
 	defer ticker.Stop()
 	klog.Info("Starting APIService reconciler")
 	for {
