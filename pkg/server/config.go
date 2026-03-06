@@ -194,6 +194,7 @@ func applyReportsServerAnnotation(o metav1.Object) {
 	if a == nil {
 		a = make(map[string]string)
 	}
+
 	a[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 	o.SetAnnotations(a)
 }
