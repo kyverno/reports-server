@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -78,6 +79,13 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 		}
 	}()
 
+	reconcilerCtx, reconcilerCancel := context.WithCancel(context.Background())
+	reconcilerDone := make(chan struct{})
+	go func() {
+		config.StartAPIServiceReconciler(reconcilerCtx)
+		close(reconcilerDone)
+	}()
+
 	sigChan := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
 
@@ -85,6 +93,8 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 
 	go func() {
 		<-sigChan
+		reconcilerCancel()
+		<-reconcilerDone
 		if err := config.CleanupApiServices(); err != nil {
 			klog.ErrorS(err, "failed to cleanup api-services during shutdown")
 		}
