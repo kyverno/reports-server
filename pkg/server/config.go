@@ -9,6 +9,8 @@ import (
 	"github.com/kyverno/reports-server/pkg/api"
 	"github.com/kyverno/reports-server/pkg/app/opts"
 	"github.com/kyverno/reports-server/pkg/storage"
+
+	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/storage/db"
 	"github.com/kyverno/reports-server/pkg/storage/etcd"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -36,7 +38,7 @@ type Config struct {
 	DBconfig                    *db.PostgresConfig
 	ClusterName                 string
 	APIServices                 APIServices
-	Store                       storage.Interface
+	Store                       storageapi.Storage
 	SkipMigration               bool
 	APIServiceReconcileInterval time.Duration
 }

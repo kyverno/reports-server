@@ -1,79 +1,53 @@
 package inmemory
 
 import (
-	"context"
-	"sync"
-
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	"github.com/kyverno/reports-server/pkg/storage/api"
+	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
 	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
 type inMemoryDb struct {
-	sync.Mutex
-
-	cpolrdb   *cpolrdb
-	polrdb    *polrdb
-	cephrdb   *cephrdb
-	ephrdb    *ephrdb
-	reportdb  *orreportdb
-	creportdb *orcreportdb
+	polrdb    *genericInMemStore[v1alpha2.PolicyReport, *v1alpha2.PolicyReport]
+	cpolrdb   *genericClusterInMemStore[v1alpha2.ClusterPolicyReport, *v1alpha2.ClusterPolicyReport]
+	ephrdb    *genericInMemStore[reportsv1.EphemeralReport, *reportsv1.EphemeralReport]
+	cephrdb   *genericClusterInMemStore[reportsv1.ClusterEphemeralReport, *reportsv1.ClusterEphemeralReport]
+	reportdb  *genericInMemStore[openreportsv1alpha1.Report, *openreportsv1alpha1.Report]
+	creportdb *genericClusterInMemStore[openreportsv1alpha1.ClusterReport, *openreportsv1alpha1.ClusterReport]
 }
 
-type ClusterPolicyReportsInterface interface {
-	Get(ctx context.Context, name string) (v1alpha2.ClusterPolicyReport, error)
-	List(ctx context.Context, name string) ([]v1alpha2.ClusterPolicyReport, error)
-	Create(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport) error
-	Update(ctx context.Context, cpolr v1alpha2.ClusterPolicyReport) error
-	Delete(ctx context.Context, name string) error
-}
-
-func New() api.Storage {
-	inMemoryDb := &inMemoryDb{
-		cpolrdb: &cpolrdb{
-			db: make(map[string]*v1alpha2.ClusterPolicyReport),
-		},
-		polrdb: &polrdb{
-			db: make(map[string]*v1alpha2.PolicyReport),
-		},
-		cephrdb: &cephrdb{
-			db: make(map[string]*reportsv1.ClusterEphemeralReport),
-		},
-		ephrdb: &ephrdb{
-			db: make(map[string]*reportsv1.EphemeralReport),
-		},
-		reportdb: &orreportdb{
-			db: make(map[string]*openreportsv1alpha1.Report),
-		},
-		creportdb: &orcreportdb{
-			db: make(map[string]*openreportsv1alpha1.ClusterReport),
-		},
+func New() storageapi.Storage {
+	return &inMemoryDb{
+		polrdb:    newGenericInMemStore[v1alpha2.PolicyReport]("polr"),
+		cpolrdb:   newGenericClusterInMemStore[v1alpha2.ClusterPolicyReport]("cpolr"),
+		ephrdb:    newGenericInMemStore[reportsv1.EphemeralReport]("ephr"),
+		cephrdb:   newGenericClusterInMemStore[reportsv1.ClusterEphemeralReport]("cephr"),
+		reportdb:  newGenericInMemStore[openreportsv1alpha1.Report]("report"),
+		creportdb: newGenericClusterInMemStore[openreportsv1alpha1.ClusterReport]("clusterreport"),
 	}
-	return inMemoryDb
 }
 
-func (i *inMemoryDb) PolicyReports() api.PolicyReportsInterface {
+func (i *inMemoryDb) PolicyReports() storageapi.GenericIface[*v1alpha2.PolicyReport] {
 	return i.polrdb
 }
 
-func (i *inMemoryDb) ClusterPolicyReports() api.ClusterPolicyReportsInterface {
+func (i *inMemoryDb) ClusterPolicyReports() storageapi.GenericClusterIface[*v1alpha2.ClusterPolicyReport] {
 	return i.cpolrdb
 }
 
-func (i *inMemoryDb) EphemeralReports() api.EphemeralReportsInterface {
+func (i *inMemoryDb) EphemeralReports() storageapi.GenericIface[*reportsv1.EphemeralReport] {
 	return i.ephrdb
 }
 
-func (i *inMemoryDb) ClusterEphemeralReports() api.ClusterEphemeralReportsInterface {
+func (i *inMemoryDb) ClusterEphemeralReports() storageapi.GenericClusterIface[*reportsv1.ClusterEphemeralReport] {
 	return i.cephrdb
 }
 
-func (i *inMemoryDb) Reports() api.ReportInterface {
+func (i *inMemoryDb) Reports() storageapi.GenericIface[*openreportsv1alpha1.Report] {
 	return i.reportdb
 }
 
-func (i *inMemoryDb) ClusterReports() api.ClusterReportInterface {
+func (i *inMemoryDb) ClusterReports() storageapi.GenericClusterIface[*openreportsv1alpha1.ClusterReport] {
 	return i.creportdb
 }
 

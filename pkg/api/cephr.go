@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	"github.com/kyverno/reports-server/pkg/storage"
+	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/utils"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -24,10 +24,10 @@ import (
 
 type cephrStore struct {
 	broadcaster *watch.Broadcaster
-	store       storage.Interface
+	store       storageapi.GenericClusterIface[*reportsv1.ClusterEphemeralReport]
 }
 
-func ClusterEphemeralReportStore(store storage.Interface) API {
+func ClusterEphemeralReportStore(store storageapi.GenericClusterIface[*reportsv1.ClusterEphemeralReport]) API {
 	broadcaster := watch.NewBroadcaster(1000, watch.WaitIfChannelFull)
 
 	return &cephrStore{
@@ -59,7 +59,7 @@ func (c *cephrStore) List(ctx context.Context, options *metainternalversion.List
 		}
 	}
 	klog.Infof("listing cluster ephemeral reports")
-	list, err := c.listCephr()
+	list, err := c.listCephr(ctx)
 	if err != nil {
 		return nil, errors.NewBadRequest("failed to list resource clusterephemeralreport")
 	}
@@ -98,7 +98,7 @@ func (c *cephrStore) List(ctx context.Context, options *metainternalversion.List
 
 func (c *cephrStore) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
 	klog.Infof("getting cluster ephemeral reports name=%s", name)
-	report, err := c.getCephr(name)
+	report, err := c.getCephr(ctx, name)
 	if err != nil || report == nil {
 		return nil, errors.NewNotFound(utils.ClusterEphemeralReportsGR, name)
 	}
@@ -133,7 +133,7 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 	cephr.Generation += 1
 	klog.Infof("creating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
-		r, err := c.createCephr(cephr)
+		r, err := c.createCephr(ctx, cephr)
 		if err != nil {
 			return nil, errors.NewBadRequest(fmt.Sprintf("cannot create cluster ephemeral report: %s", err.Error()))
 		}
@@ -148,7 +148,7 @@ func (c *cephrStore) Create(ctx context.Context, obj runtime.Object, createValid
 func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
 
-	oldObj, err := c.getCephr(name)
+	oldObj, err := c.getCephr(ctx, name)
 	if err != nil && !forceAllowCreate {
 		return nil, false, err
 	}
@@ -159,7 +159,7 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 	}
 	cephr := updatedObject.(*reportsv1.ClusterEphemeralReport)
 	if forceAllowCreate {
-		r, err := c.updateCephr(cephr, oldObj)
+		r, err := c.updateCephr(ctx, cephr, oldObj)
 		if err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
@@ -188,7 +188,7 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 	cephr.Generation += 1
 	klog.Infof("updating cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
-		r, err := c.updateCephr(cephr, oldObj)
+		r, err := c.updateCephr(ctx, cephr, oldObj)
 		if err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create cluster ephemeral report: %s", err.Error()))
 		}
@@ -203,7 +203,7 @@ func (c *cephrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 func (c *cephrStore) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (runtime.Object, bool, error) {
 	isDryRun := slices.Contains(options.DryRun, "All")
 
-	cephr, err := c.getCephr(name)
+	cephr, err := c.getCephr(ctx, name)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find cephrs", "name", name)
 		return nil, false, errors.NewNotFound(utils.ClusterEphemeralReportsGR, name)
@@ -217,7 +217,7 @@ func (c *cephrStore) Delete(ctx context.Context, name string, deleteValidation r
 
 	klog.Infof("deleting cluster ephemeral reports name=%s", cephr.Name)
 	if !isDryRun {
-		if err = c.deleteCephr(cephr); err != nil {
+		if err = c.deleteCephr(ctx, cephr); err != nil {
 			klog.ErrorS(err, "failed to delete cephr", "name", name)
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("failed to delete clusterephemeralreport: %s", err.Error()))
 		}
@@ -314,17 +314,16 @@ func (c *cephrStore) ShortNames() []string {
 	return []string{"cephr"}
 }
 
-func (c *cephrStore) getCephr(name string) (*reportsv1.ClusterEphemeralReport, error) {
-	val, err := c.store.ClusterEphemeralReports().Get(context.TODO(), name)
+func (c *cephrStore) getCephr(ctx context.Context, name string) (*reportsv1.ClusterEphemeralReport, error) {
+	val, err := c.store.Get(ctx, name)
 	if err != nil {
 		return nil, errorpkg.Wrapf(err, "could not find cluster ephemeral report in store")
 	}
-
 	return val, nil
 }
 
-func (c *cephrStore) listCephr() (*reportsv1.ClusterEphemeralReportList, error) {
-	valList, err := c.store.ClusterEphemeralReports().List(context.TODO())
+func (c *cephrStore) listCephr(ctx context.Context) (*reportsv1.ClusterEphemeralReportList, error) {
+	valList, err := c.store.List(ctx)
 	if err != nil {
 		return nil, errorpkg.Wrapf(err, "could not find cluster ephemeral report in store")
 	}
@@ -332,7 +331,6 @@ func (c *cephrStore) listCephr() (*reportsv1.ClusterEphemeralReportList, error) 
 	reportList := &reportsv1.ClusterEphemeralReportList{
 		Items: make([]reportsv1.ClusterEphemeralReport, 0, len(valList)),
 	}
-
 	for _, v := range valList {
 		reportList.Items = append(reportList.Items, *v.DeepCopy())
 	}
@@ -341,19 +339,18 @@ func (c *cephrStore) listCephr() (*reportsv1.ClusterEphemeralReportList, error) 
 	return reportList, nil
 }
 
-func (c *cephrStore) createCephr(report *reportsv1.ClusterEphemeralReport) (*reportsv1.ClusterEphemeralReport, error) {
+func (c *cephrStore) createCephr(ctx context.Context, report *reportsv1.ClusterEphemeralReport) (*reportsv1.ClusterEphemeralReport, error) {
 	report.ResourceVersion = c.store.UseResourceVersion()
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
-
-	return report, c.store.ClusterEphemeralReports().Create(context.TODO(), report)
+	return report, c.store.Create(ctx, report)
 }
 
-func (c *cephrStore) updateCephr(report *reportsv1.ClusterEphemeralReport, _ *reportsv1.ClusterEphemeralReport) (*reportsv1.ClusterEphemeralReport, error) {
+func (c *cephrStore) updateCephr(ctx context.Context, report *reportsv1.ClusterEphemeralReport, _ *reportsv1.ClusterEphemeralReport) (*reportsv1.ClusterEphemeralReport, error) {
 	report.ResourceVersion = c.store.UseResourceVersion()
-	return report, c.store.ClusterEphemeralReports().Update(context.TODO(), report)
+	return report, c.store.Update(ctx, report)
 }
 
-func (c *cephrStore) deleteCephr(report *reportsv1.ClusterEphemeralReport) error {
-	return c.store.ClusterEphemeralReports().Delete(context.TODO(), report.Name)
+func (c *cephrStore) deleteCephr(ctx context.Context, report *reportsv1.ClusterEphemeralReport) error {
+	return c.store.Delete(ctx, report.Name)
 }

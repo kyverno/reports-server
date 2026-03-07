@@ -1,24 +1,22 @@
-package storage
+package versioning
 
 import (
 	"strconv"
 	"sync"
-
-	"github.com/kyverno/reports-server/pkg/storage/api"
 )
 
-type resourceVersion struct {
+type ResourceVersion struct {
 	sync.Mutex
 	version uint64
 }
 
-func NewVersioning() api.Versioning {
-	return &resourceVersion{
+func NewVersioning() *ResourceVersion {
+	return &ResourceVersion{
 		version: 1,
 	}
 }
 
-func (r *resourceVersion) SetResourceVersion(val string) error {
+func (r *ResourceVersion) SetResourceVersion(val string) error {
 	r.Lock()
 	defer r.Unlock()
 	number, err := strconv.ParseUint(val, 10, 64)
@@ -31,7 +29,7 @@ func (r *resourceVersion) SetResourceVersion(val string) error {
 	return nil
 }
 
-func (r *resourceVersion) UseResourceVersion() string {
+func (r *ResourceVersion) UseResourceVersion() string {
 	r.Lock()
 	defer r.Unlock()
 	number := strconv.FormatUint(r.version, 10)

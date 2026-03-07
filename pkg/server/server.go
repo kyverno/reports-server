@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyverno/reports-server/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/storage/api"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/apiserver/pkg/server/healthz"
 	"k8s.io/component-base/metrics"
@@ -27,7 +27,7 @@ func RegisterServerMetrics(registrationFunc func(metrics.Registerable) error) er
 
 func NewServer(
 	apiserver *genericapiserver.GenericAPIServer,
-	storage storage.Interface,
+	storage api.Storage,
 ) *server {
 	return &server{
 		GenericAPIServer: apiserver,
@@ -37,7 +37,7 @@ func NewServer(
 
 type server struct {
 	*genericapiserver.GenericAPIServer
-	storage storage.Interface
+	storage api.Storage
 }
 
 // RunUntil starts background scraping goroutine and runs apiserver serving metrics.

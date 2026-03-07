@@ -2,8 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 	"sync"
 
 	v1 "github.com/kyverno/kyverno/api/reports/v1"
@@ -44,7 +42,7 @@ func (c *Config) migration(ctx context.Context) error {
 			cpolrWg.Wait()
 		}
 
-		err = c.Store.SetResourceVersion(cpolrs.ResourceVersion)
+		err = c.Store.ClusterPolicyReports().SetResourceVersion(cpolrs.ResourceVersion)
 		if err != nil {
 			return err
 		}
@@ -74,7 +72,7 @@ func (c *Config) migration(ctx context.Context) error {
 			polrWg.Wait()
 		}
 
-		err = c.Store.SetResourceVersion(polrs.ResourceVersion)
+		err = c.Store.PolicyReports().SetResourceVersion(polrs.ResourceVersion)
 		if err != nil {
 			return err
 		}
@@ -107,7 +105,7 @@ func (c *Config) migration(ctx context.Context) error {
 			cephrWg.Wait()
 		}
 
-		err = c.Store.SetResourceVersion(cephrs.ResourceVersion)
+		err = c.Store.ClusterEphemeralReports().SetResourceVersion(cephrs.ResourceVersion)
 		if err != nil {
 			return err
 		}
@@ -137,7 +135,7 @@ func (c *Config) migration(ctx context.Context) error {
 			ephrWg.Wait()
 		}
 
-		err = c.Store.SetResourceVersion(ephrs.ResourceVersion)
+		err = c.Store.ClusterEphemeralReports().SetResourceVersion(ephrs.ResourceVersion)
 		if err != nil {
 			return err
 		}
@@ -152,12 +150,13 @@ func (c *Config) migration(ctx context.Context) error {
 		}
 		go c.watchEphr(ctx, ephrWatchInterface)
 	}
-	rv, err := strconv.ParseUint(c.Store.UseResourceVersion(), 10, 64)
-	if err != nil {
-		return err
-	}
-	// use leave some versions for resources added using watchers
-	return c.Store.SetResourceVersion(fmt.Sprint((rv + 9999)))
+	// rv, err := strconv.ParseUint(c.Store.UseResourceVersion(), 10, 64)
+	// if err != nil {
+	// 	return err
+	// }
+	// // use leave some versions for resources added using watchers
+	// return c.Store.SetResourceVersion(fmt.Sprint((rv + 9999)))
+	return nil
 }
 
 func (c *Config) migrateReport(ctx context.Context, kyvernoClient kyverno.Interface, policyClient versioned.Interface, workerChan chan struct{}, wg *sync.WaitGroup, report interface{}) {
