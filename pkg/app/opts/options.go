@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kyverno/reports-server/pkg/api"
 	generatedopenapi "github.com/kyverno/reports-server/pkg/api/generated/openapi"
@@ -57,6 +58,9 @@ type Options struct {
 	StoreEphemeralReports bool
 	StoreOpenreports      bool
 
+	// reconciler config
+	APIServiceReconcileInterval time.Duration
+
 	// Only to be used to for testing
 	DisableAuthForTesting bool
 }
@@ -93,6 +97,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.BoolVar(&o.StoreOpenreports, "storeopenreports", true, "Whether or not to store and manage Open Reports.")
 	msfs.BoolVar(&o.StoreEphemeralReports, "storeephemeralreports", true, "Whether or not to store and manage Ephemeral Reports.")
 	msfs.BoolVar(&o.SkipMigration, "skipmigration", false, "Skip database migration on startup.")
+	msfs.DurationVar(&o.APIServiceReconcileInterval, "apiservicereconcileinterval", 10*time.Second, "Interval between APIService reconciliation runs.")
 
 	o.SecureServing.AddFlags(fs.FlagSet("apiserver secure serving"))
 	o.Authentication.AddFlags(fs.FlagSet("apiserver authentication"))
