@@ -113,6 +113,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | apiServicesManagement.nodeAffinity | object | `{}` | Node affinity constraints. |
 | apiServicesManagement.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsNonRoot":true,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Security context for the hook containers |
 | extraObjects | list | `[]` |  |
+| openreports.enabled | bool | `false` | Deploy openreports-api CRDs |
 
 ## Source Code
 
@@ -124,6 +125,7 @@ Kubernetes: `>=1.16.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
+| oci://ghcr.io/openreports/charts | openreports | 0.2.1 |
 | oci://registry-1.docker.io/bitnamicharts | postgresql | 13.4.1 |
 
 ## Maintainers
