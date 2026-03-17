@@ -64,7 +64,7 @@ func (s *reportStore) List(ctx context.Context, options *metainternalversion.Lis
 	klog.Infof("listing reports for namespace=%s", namespace)
 	list, err := s.listRep(ctx, namespace)
 	if err != nil {
-		return nil, errors.NewBadRequest("failed to list resource policyreport")
+		return nil, errors.NewBadRequest("failed to list resource report")
 	}
 	repList := &openreportsv1alpha1.ReportList{
 		Items:    make([]openreportsv1alpha1.Report, 0),
@@ -104,7 +104,7 @@ func (s *reportStore) Get(ctx context.Context, name string, options *metav1.GetO
 	klog.Infof("getting reports name=%s namespace=%s", name, namespace)
 	report, err := s.getRep(ctx, name, namespace)
 	if err != nil || report == nil {
-		return nil, errors.NewNotFound(utils.PolicyReportsGR, name)
+		return nil, errors.NewNotFound(utils.OpenreportsReportGR, name)
 	}
 	return report, nil
 }
@@ -134,7 +134,7 @@ func (s *reportStore) Create(ctx context.Context, obj runtime.Object, createVali
 	}
 	if rep.Name == "" {
 		if rep.GenerateName == "" {
-			return nil, errors.NewConflict(utils.PolicyReportsGR, rep.Name, fmt.Errorf("name and generate name not provided"))
+			return nil, errors.NewConflict(utils.OpenreportsReportGR, rep.Name, fmt.Errorf("name and generate name not provided"))
 		}
 		rep.Name = nameGenerator.GenerateName(rep.GenerateName)
 	}
@@ -145,7 +145,7 @@ func (s *reportStore) Create(ctx context.Context, obj runtime.Object, createVali
 	if !isDryRun {
 		r, err := s.createRep(ctx, rep)
 		if err != nil {
-			return nil, errors.NewAlreadyExists(utils.PolicyReportsGR, rep.Name)
+			return nil, errors.NewAlreadyExists(utils.OpenreportsReportGR, rep.Name)
 		}
 		if err := s.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
@@ -223,7 +223,7 @@ func (s *reportStore) Delete(ctx context.Context, name string, deleteValidation 
 	rep, err := s.getRep(ctx, name, namespace)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find reports", "name", name, "namespace", klog.KRef("", namespace))
-		return nil, false, errors.NewNotFound(utils.PolicyReportsGR, name)
+		return nil, false, errors.NewNotFound(utils.OpenreportsReportGR, name)
 	}
 
 	err = deleteValidation(ctx, rep)
@@ -237,7 +237,7 @@ func (s *reportStore) Delete(ctx context.Context, name string, deleteValidation 
 		err = s.deleteRep(ctx, rep)
 		if err != nil {
 			klog.ErrorS(err, "failed to delete reports", "name", name, "namespace", klog.KRef("", namespace))
-			return nil, false, errors.NewBadRequest(fmt.Sprintf("failed to delete policyreport: %s", err.Error()))
+			return nil, false, errors.NewBadRequest(fmt.Sprintf("failed to delete report: %s", err.Error()))
 		}
 		if err := s.broadcaster.Action(watch.Deleted, rep); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
