@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/kyverno/reports-server/pkg/storage/versioning"
-	"github.com/kyverno/reports-server/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -21,15 +20,17 @@ type genericClusterInMemStore[T any, PT interface {
 	sync.Mutex
 	*versioning.ResourceVersion
 	typeName string
+	gr       schema.GroupResource
 	db       map[string]PT
 }
 
 func newGenericClusterInMemStore[T any, PT interface {
 	*T
 	metav1.Object
-}](typeName string) *genericClusterInMemStore[T, PT] {
+}](typeName string, gr schema.GroupResource) *genericClusterInMemStore[T, PT] {
 	return &genericClusterInMemStore[T, PT]{
 		typeName:        typeName,
+		gr:              gr,
 		ResourceVersion: versioning.NewVersioning(),
 		db:              make(map[string]PT),
 	}
@@ -65,7 +66,7 @@ func (c *genericClusterInMemStore[T, PT]) Get(ctx context.Context, name string) 
 		return val, nil
 	} else {
 		klog.Errorf("value not found for key:%s", key)
-		return nil, errors.NewNotFound(utils.ClusterEphemeralReportsGR, key)
+		return nil, errors.NewNotFound(c.gr, key)
 	}
 }
 
@@ -77,7 +78,7 @@ func (c *genericClusterInMemStore[T, PT]) Create(ctx context.Context, obj PT) er
 	klog.Infof("creating entry for key:%s", key)
 	if _, found := c.db[key]; found {
 		klog.Errorf("entry already exists k:%s", key)
-		return errors.NewAlreadyExists(utils.ClusterEphemeralReportsGR, key)
+		return errors.NewAlreadyExists(c.gr, key)
 	} else {
 		c.db[key] = obj
 		klog.Infof("entry created for key:%s", key)
@@ -93,7 +94,7 @@ func (c *genericClusterInMemStore[T, PT]) Update(ctx context.Context, obj PT) er
 	klog.Infof("updating entry for key:%s", key)
 	if _, found := c.db[key]; !found {
 		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(utils.ClusterEphemeralReportsGR, key)
+		return errors.NewNotFound(c.gr, key)
 	} else {
 		c.db[key] = obj
 		klog.Infof("entry updated for key:%s", key)
@@ -109,7 +110,7 @@ func (c *genericClusterInMemStore[T, PT]) Delete(ctx context.Context, name strin
 	klog.Infof("deleting entry for key:%s", key)
 	if _, found := c.db[key]; !found {
 		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(utils.ClusterEphemeralReportsGR, key)
+		return errors.NewNotFound(c.gr, key)
 	} else {
 		delete(c.db, key)
 		klog.Infof("entry deleted for key:%s", key)
@@ -124,16 +125,18 @@ type genericInMemStore[T any, PT interface {
 	sync.Mutex
 	*versioning.ResourceVersion
 	typeName string
+	gr       schema.GroupResource
 	db       map[string]PT
 }
 
 func newGenericInMemStore[T any, PT interface {
 	*T
 	metav1.Object
-}](typeName string) *genericInMemStore[T, PT] {
+}](typeName string, gr schema.GroupResource) *genericInMemStore[T, PT] {
 	return &genericInMemStore[T, PT]{
 		typeName:        typeName,
 		ResourceVersion: versioning.NewVersioning(),
+		gr:              gr,
 		db:              make(map[string]PT),
 	}
 }

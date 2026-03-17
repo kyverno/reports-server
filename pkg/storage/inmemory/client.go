@@ -3,6 +3,7 @@ package inmemory
 import (
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
+	"github.com/kyverno/reports-server/pkg/utils"
 	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
@@ -18,12 +19,12 @@ type inMemoryDb struct {
 
 func New() storageapi.Storage {
 	return &inMemoryDb{
-		polrdb:    newGenericInMemStore[v1alpha2.PolicyReport]("polr"),
-		cpolrdb:   newGenericClusterInMemStore[v1alpha2.ClusterPolicyReport]("cpolr"),
-		ephrdb:    newGenericInMemStore[reportsv1.EphemeralReport]("ephr"),
-		cephrdb:   newGenericClusterInMemStore[reportsv1.ClusterEphemeralReport]("cephr"),
-		reportdb:  newGenericInMemStore[openreportsv1alpha1.Report]("report"),
-		creportdb: newGenericClusterInMemStore[openreportsv1alpha1.ClusterReport]("clusterreport"),
+		polrdb:    newGenericInMemStore[v1alpha2.PolicyReport]("polr", utils.PolicyReportsGR),
+		cpolrdb:   newGenericClusterInMemStore[v1alpha2.ClusterPolicyReport]("cpolr", utils.ClusterPolicyReportsGR),
+		ephrdb:    newGenericInMemStore[reportsv1.EphemeralReport]("ephr", utils.EphemeralReportsGR),
+		cephrdb:   newGenericClusterInMemStore[reportsv1.ClusterEphemeralReport]("cephr", utils.ClusterEphemeralReportsGR),
+		reportdb:  newGenericInMemStore[openreportsv1alpha1.Report]("report", utils.OpenreportsReportGR),
+		creportdb: newGenericClusterInMemStore[openreportsv1alpha1.ClusterReport]("clusterreport", utils.OpenreportsClusterReportGR),
 	}
 }
 
