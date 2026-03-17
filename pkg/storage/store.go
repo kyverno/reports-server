@@ -63,12 +63,3 @@ func (s *store) ClusterReports() api.GenericClusterIface[*openreportsv1alpha1.Cl
 func (s *store) Ready() bool {
 	return s.db.Ready()
 }
-
-// why was there a need for storage level cluster version in the first place
-// func (s *store) SetResourceVersion(val string) error {
-// 	return s.versioning.SetResourceVersion(val)
-// }
-
-// func (s *store) UseResourceVersion() string {
-// 	return s.versioning.UseResourceVersion()
-// }
