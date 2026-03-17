@@ -10,6 +10,7 @@ import (
 	"github.com/kyverno/reports-server/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
 )
 
@@ -141,6 +142,10 @@ func (g *genericInMemStore[T, PT]) key(name, namespace string) string {
 	return fmt.Sprintf("%s/%s/%s", g.typeName, namespace, name)
 }
 
+func (g *genericInMemStore[T, PT]) groupResource() schema.GroupResource {
+	return schema.ParseGroupResource(g.typeName)
+}
+
 func (g *genericInMemStore[T, PT]) List(ctx context.Context, namespace string) ([]PT, error) {
 	g.Lock()
 	defer g.Unlock()
@@ -171,7 +176,7 @@ func (g *genericInMemStore[T, PT]) Get(ctx context.Context, name, namespace stri
 		return val, nil
 	}
 	klog.Errorf("value not found for key:%s", key)
-	return nil, errors.NewNotFound(utils.PolicyReportsGR, key)
+	return nil, errors.NewNotFound(g.groupResource(), key)
 }
 
 func (g *genericInMemStore[T, PT]) Create(ctx context.Context, obj PT) error {
@@ -182,7 +187,7 @@ func (g *genericInMemStore[T, PT]) Create(ctx context.Context, obj PT) error {
 	klog.Infof("creating entry for key:%s", key)
 	if _, found := g.db[key]; found {
 		klog.Errorf("entry already exists k:%s", key)
-		return errors.NewAlreadyExists(utils.PolicyReportsGR, key)
+		return errors.NewAlreadyExists(g.groupResource(), key)
 	}
 	g.db[key] = obj
 	klog.Infof("entry created for key:%s", key)
@@ -197,7 +202,7 @@ func (g *genericInMemStore[T, PT]) Update(ctx context.Context, obj PT) error {
 	klog.Infof("updating entry for key:%s", key)
 	if _, found := g.db[key]; !found {
 		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(utils.PolicyReportsGR, key)
+		return errors.NewNotFound(g.groupResource(), key)
 	}
 	g.db[key] = obj
 	klog.Infof("entry updated for key:%s", key)
@@ -212,7 +217,7 @@ func (g *genericInMemStore[T, PT]) Delete(ctx context.Context, name, namespace s
 	klog.Infof("deleting entry for key:%s", key)
 	if _, found := g.db[key]; !found {
 		klog.Errorf("entry does not exist k:%s", key)
-		return errors.NewNotFound(utils.PolicyReportsGR, key)
+		return errors.NewNotFound(g.groupResource(), key)
 	}
 	delete(g.db, key)
 	klog.Infof("entry deleted for key:%s", key)
