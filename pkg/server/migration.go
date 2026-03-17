@@ -135,7 +135,7 @@ func (c *Config) migration(ctx context.Context) error {
 			ephrWg.Wait()
 		}
 
-		err = c.Store.ClusterEphemeralReports().SetResourceVersion(ephrs.ResourceVersion)
+		err = c.Store.EphemeralReports().SetResourceVersion(ephrs.ResourceVersion)
 		if err != nil {
 			return err
 		}
