@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/kyverno/reports-server/pkg/storage"
+	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/utils"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -25,10 +25,10 @@ import (
 
 type reportStore struct {
 	broadcaster *watch.Broadcaster
-	store       storage.Interface
+	store       storageapi.GenericIface[*openreportsv1alpha1.Report]
 }
 
-func ReportStore(store storage.Interface) API {
+func ReportStore(store storageapi.GenericIface[*openreportsv1alpha1.Report]) API {
 	broadcaster := watch.NewBroadcaster(1000, watch.WaitIfChannelFull)
 
 	return &reportStore{
@@ -62,9 +62,9 @@ func (s *reportStore) List(ctx context.Context, options *metainternalversion.Lis
 	namespace := genericapirequest.NamespaceValue(ctx)
 
 	klog.Infof("listing reports for namespace=%s", namespace)
-	list, err := s.listRep(namespace)
+	list, err := s.listRep(ctx, namespace)
 	if err != nil {
-		return nil, errors.NewBadRequest("failed to list resource policyreport")
+		return nil, errors.NewBadRequest("failed to list resource report")
 	}
 	repList := &openreportsv1alpha1.ReportList{
 		Items:    make([]openreportsv1alpha1.Report, 0),
@@ -102,9 +102,9 @@ func (s *reportStore) Get(ctx context.Context, name string, options *metav1.GetO
 	namespace := genericapirequest.NamespaceValue(ctx)
 
 	klog.Infof("getting reports name=%s namespace=%s", name, namespace)
-	report, err := s.getRep(name, namespace)
+	report, err := s.getRep(ctx, name, namespace)
 	if err != nil || report == nil {
-		return nil, errors.NewNotFound(utils.PolicyReportsGR, name)
+		return nil, errors.NewNotFound(utils.OpenreportsReportGR, name)
 	}
 	return report, nil
 }
@@ -134,7 +134,7 @@ func (s *reportStore) Create(ctx context.Context, obj runtime.Object, createVali
 	}
 	if rep.Name == "" {
 		if rep.GenerateName == "" {
-			return nil, errors.NewConflict(utils.PolicyReportsGR, rep.Name, fmt.Errorf("name and generate name not provided"))
+			return nil, errors.NewConflict(utils.OpenreportsReportGR, rep.Name, fmt.Errorf("name and generate name not provided"))
 		}
 		rep.Name = nameGenerator.GenerateName(rep.GenerateName)
 	}
@@ -143,9 +143,9 @@ func (s *reportStore) Create(ctx context.Context, obj runtime.Object, createVali
 	rep.Generation = 1
 	klog.Infof("creating reports name=%s namespace=%s", rep.Name, rep.Namespace)
 	if !isDryRun {
-		r, err := s.createRep(rep)
+		r, err := s.createRep(ctx, rep)
 		if err != nil {
-			return nil, errors.NewAlreadyExists(utils.PolicyReportsGR, rep.Name)
+			return nil, errors.NewAlreadyExists(utils.OpenreportsReportGR, rep.Name)
 		}
 		if err := s.broadcaster.Action(watch.Added, r); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
@@ -159,7 +159,7 @@ func (s *reportStore) Update(ctx context.Context, name string, objInfo rest.Upda
 	isDryRun := slices.Contains(options.DryRun, "All")
 	namespace := genericapirequest.NamespaceValue(ctx)
 
-	oldObj, err := s.getRep(name, namespace)
+	oldObj, err := s.getRep(ctx, name, namespace)
 	if err != nil && !forceAllowCreate {
 		return nil, false, err
 	}
@@ -171,7 +171,7 @@ func (s *reportStore) Update(ctx context.Context, name string, objInfo rest.Upda
 	rep := updatedObject.(*openreportsv1alpha1.Report)
 
 	if forceAllowCreate {
-		r, err := s.updateRep(rep, oldObj)
+		r, err := s.updateRep(ctx, rep, oldObj)
 		if err != nil {
 			klog.ErrorS(err, "failed to update resource")
 		}
@@ -204,7 +204,7 @@ func (s *reportStore) Update(ctx context.Context, name string, objInfo rest.Upda
 	rep.Generation += 1
 	klog.Infof("updating reports name=%s namespace=%s", rep.Name, rep.Namespace)
 	if !isDryRun {
-		r, err := s.updateRep(rep, oldObj)
+		r, err := s.updateRep(ctx, rep, oldObj)
 		if err != nil {
 			return nil, false, errors.NewBadRequest(fmt.Sprintf("cannot create report: %s", err.Error()))
 		}
@@ -220,10 +220,10 @@ func (s *reportStore) Delete(ctx context.Context, name string, deleteValidation 
 	isDryRun := slices.Contains(options.DryRun, "All")
 	namespace := genericapirequest.NamespaceValue(ctx)
 
-	rep, err := s.getRep(name, namespace)
+	rep, err := s.getRep(ctx, name, namespace)
 	if err != nil {
 		klog.ErrorS(err, "Failed to find reports", "name", name, "namespace", klog.KRef("", namespace))
-		return nil, false, errors.NewNotFound(utils.PolicyReportsGR, name)
+		return nil, false, errors.NewNotFound(utils.OpenreportsReportGR, name)
 	}
 
 	err = deleteValidation(ctx, rep)
@@ -234,10 +234,10 @@ func (s *reportStore) Delete(ctx context.Context, name string, deleteValidation 
 
 	klog.Infof("deleting reports name=%s namespace=%s", rep.Name, rep.Namespace)
 	if !isDryRun {
-		err = s.deleteRep(rep)
+		err = s.deleteRep(ctx, rep)
 		if err != nil {
 			klog.ErrorS(err, "failed to delete reports", "name", name, "namespace", klog.KRef("", namespace))
-			return nil, false, errors.NewBadRequest(fmt.Sprintf("failed to delete policyreport: %s", err.Error()))
+			return nil, false, errors.NewBadRequest(fmt.Sprintf("failed to delete report: %s", err.Error()))
 		}
 		if err := s.broadcaster.Action(watch.Deleted, rep); err != nil {
 			klog.ErrorS(err, "failed to broadcast event")
@@ -333,17 +333,16 @@ func (s *reportStore) ShortNames() []string {
 	return []string{"reps"}
 }
 
-func (s *reportStore) getRep(name, namespace string) (*openreportsv1alpha1.Report, error) {
-	val, err := s.store.Reports().Get(context.TODO(), name, namespace)
+func (s *reportStore) getRep(ctx context.Context, name, namespace string) (*openreportsv1alpha1.Report, error) {
+	val, err := s.store.Get(ctx, name, namespace)
 	if err != nil {
 		return nil, errorpkg.Wrapf(err, "could not find report in store")
 	}
-
 	return val, nil
 }
 
-func (s *reportStore) listRep(namespace string) (*openreportsv1alpha1.ReportList, error) {
-	valList, err := s.store.Reports().List(context.TODO(), namespace)
+func (s *reportStore) listRep(ctx context.Context, namespace string) (*openreportsv1alpha1.ReportList, error) {
+	valList, err := s.store.List(ctx, namespace)
 	if err != nil {
 		return nil, errorpkg.Wrapf(err, "could not find report in store")
 	}
@@ -351,7 +350,6 @@ func (s *reportStore) listRep(namespace string) (*openreportsv1alpha1.ReportList
 	reportList := &openreportsv1alpha1.ReportList{
 		Items: make([]openreportsv1alpha1.Report, 0, len(valList)),
 	}
-
 	for _, v := range valList {
 		reportList.Items = append(reportList.Items, *v.DeepCopy())
 	}
@@ -360,19 +358,18 @@ func (s *reportStore) listRep(namespace string) (*openreportsv1alpha1.ReportList
 	return reportList, nil
 }
 
-func (s *reportStore) createRep(report *openreportsv1alpha1.Report) (*openreportsv1alpha1.Report, error) {
+func (s *reportStore) createRep(ctx context.Context, report *openreportsv1alpha1.Report) (*openreportsv1alpha1.Report, error) {
 	report.ResourceVersion = s.store.UseResourceVersion()
 	report.UID = uuid.NewUUID()
 	report.CreationTimestamp = metav1.Now()
-
-	return report, s.store.Reports().Create(context.TODO(), report)
+	return report, s.store.Create(ctx, report)
 }
 
-func (s *reportStore) updateRep(report *openreportsv1alpha1.Report, _ *openreportsv1alpha1.Report) (*openreportsv1alpha1.Report, error) {
+func (s *reportStore) updateRep(ctx context.Context, report *openreportsv1alpha1.Report, _ *openreportsv1alpha1.Report) (*openreportsv1alpha1.Report, error) {
 	report.ResourceVersion = s.store.UseResourceVersion()
-	return report, s.store.Reports().Update(context.TODO(), report)
+	return report, s.store.Update(ctx, report)
 }
 
-func (s *reportStore) deleteRep(report *openreportsv1alpha1.Report) error {
-	return s.store.Reports().Delete(context.TODO(), report.Name, report.Namespace)
+func (s *reportStore) deleteRep(ctx context.Context, report *openreportsv1alpha1.Report) error {
+	return s.store.Delete(ctx, report.Name, report.Namespace)
 }

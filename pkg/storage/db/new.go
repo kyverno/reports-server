@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"time"
 
+	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/storage/api"
 	_ "github.com/lib/pq"
 	"k8s.io/klog/v2"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
+	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
 const (
@@ -63,47 +66,47 @@ func New(config *PostgresConfig, clusterUID string, clusterName string) (api.Sto
 	klog.Info("successfully setup storage")
 	return &postgresstore{
 		db:                   db,
-		polrstore:            &polrdb{db: db, clusterUID: clusterUID},
-		cpolrstore:           &cpolrdb{db: db, clusterUID: clusterUID},
-		ephrstore:            &ephrdb{db: db, clusterUID: clusterUID},
-		cephrstore:           &cephr{db: db, clusterUID: clusterUID},
-		orreportstore:        &orReportDB{db: db, clusterUID: clusterUID},
-		orclusterreportstore: &orClusterReportDB{db: db, clusterUID: clusterUID},
+		polrstore:            newGenericGetter[v1alpha2.PolicyReport, *v1alpha2.PolicyReport]("policyreport", "policyreports", clusterUID, db),
+		cpolrstore:           newGenericClusterGetter[v1alpha2.ClusterPolicyReport, *v1alpha2.ClusterPolicyReport]("clusterpolicyreport", "clusterpolicyreports", clusterUID, db),
+		ephrstore:            newGenericGetter[reportsv1.EphemeralReport, *reportsv1.EphemeralReport]("ephemeralreport", "ephemeralreports", clusterUID, db),
+		cephrstore:           newGenericClusterGetter[reportsv1.ClusterEphemeralReport, *reportsv1.ClusterEphemeralReport]("clusterephemeralreport", "clusterephemeralreports", clusterUID, db),
+		orreportstore:        newGenericGetter[openreportsv1alpha1.Report, *openreportsv1alpha1.Report]("report", "reports", clusterUID, db),
+		orclusterreportstore: newGenericClusterGetter[openreportsv1alpha1.ClusterReport, *openreportsv1alpha1.ClusterReport]("clusterreport", "clusterreports", clusterUID, db),
 	}, nil
 }
 
 type postgresstore struct {
 	db                   *sql.DB
-	polrstore            api.PolicyReportsInterface
-	cpolrstore           api.ClusterPolicyReportsInterface
-	ephrstore            api.EphemeralReportsInterface
-	cephrstore           api.ClusterEphemeralReportsInterface
-	orreportstore        api.ReportInterface
-	orclusterreportstore api.ClusterReportInterface
+	polrstore            api.GenericIface[*v1alpha2.PolicyReport]
+	cpolrstore           api.GenericClusterIface[*v1alpha2.ClusterPolicyReport]
+	ephrstore            api.GenericIface[*reportsv1.EphemeralReport]
+	cephrstore           api.GenericClusterIface[*reportsv1.ClusterEphemeralReport]
+	orreportstore        api.GenericIface[*openreportsv1alpha1.Report]
+	orclusterreportstore api.GenericClusterIface[*openreportsv1alpha1.ClusterReport]
 }
 
-func (p *postgresstore) ClusterPolicyReports() api.ClusterPolicyReportsInterface {
-	return p.cpolrstore
-}
-
-func (p *postgresstore) PolicyReports() api.PolicyReportsInterface {
+func (p *postgresstore) PolicyReports() api.GenericIface[*v1alpha2.PolicyReport] {
 	return p.polrstore
 }
 
-func (p *postgresstore) ClusterEphemeralReports() api.ClusterEphemeralReportsInterface {
-	return p.cephrstore
+func (p *postgresstore) ClusterPolicyReports() api.GenericClusterIface[*v1alpha2.ClusterPolicyReport] {
+	return p.cpolrstore
 }
 
-func (p *postgresstore) EphemeralReports() api.EphemeralReportsInterface {
+func (p *postgresstore) EphemeralReports() api.GenericIface[*reportsv1.EphemeralReport] {
 	return p.ephrstore
 }
 
-func (p *postgresstore) ClusterReports() api.ClusterReportInterface {
-	return p.orclusterreportstore
+func (p *postgresstore) ClusterEphemeralReports() api.GenericClusterIface[*reportsv1.ClusterEphemeralReport] {
+	return p.cephrstore
 }
 
-func (p *postgresstore) Reports() api.ReportInterface {
+func (p *postgresstore) Reports() api.GenericIface[*openreportsv1alpha1.Report] {
 	return p.orreportstore
+}
+
+func (p *postgresstore) ClusterReports() api.GenericClusterIface[*openreportsv1alpha1.ClusterReport] {
+	return p.orclusterreportstore
 }
 
 func (p *postgresstore) Ready() bool {

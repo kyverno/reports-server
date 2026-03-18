@@ -16,7 +16,7 @@ package api
 
 import (
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	"github.com/kyverno/reports-server/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/storage/api"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -88,10 +88,10 @@ func BuildOpenreports(rep, crep rest.Storage) genericapiserver.APIGroupInfo {
 }
 
 // Install builds the reports for the wgpolicyk8s.io, openreports.io and reports.kyverno.io API, and then installs it into the given API reports-server.
-func Install(store storage.Interface, server *genericapiserver.GenericAPIServer) error {
+func Install(store api.Storage, server *genericapiserver.GenericAPIServer) error {
 	// wgpolicy
-	polr := PolicyReportStore(store)
-	cpolr := ClusterPolicyReportStore(store)
+	polr := PolicyReportStore(store.PolicyReports())
+	cpolr := ClusterPolicyReportStore(store.ClusterPolicyReports())
 
 	polrInfo := BuildPolicyReports(polr, cpolr)
 	err := server.InstallAPIGroup(&polrInfo)
@@ -100,8 +100,8 @@ func Install(store storage.Interface, server *genericapiserver.GenericAPIServer)
 	}
 
 	// // openreports
-	orReport := ReportStore(store)
-	orClusterReport := ClusterReportStore(store)
+	orReport := ReportStore(store.Reports())
+	orClusterReport := ClusterReportStore(store.ClusterReports())
 
 	orInfo := BuildOpenreports(orReport, orClusterReport)
 	err = server.InstallAPIGroup(&orInfo)
@@ -110,8 +110,8 @@ func Install(store storage.Interface, server *genericapiserver.GenericAPIServer)
 	}
 
 	// ephemeral reports
-	ephr := EphemeralReportStore(store)
-	cephr := ClusterEphemeralReportStore(store)
+	ephr := EphemeralReportStore(store.EphemeralReports())
+	cephr := ClusterEphemeralReportStore(store.ClusterEphemeralReports())
 
 	ephrInfo := BuildEphemeralReports(ephr, cephr)
 	err = server.InstallAPIGroup(&ephrInfo)
