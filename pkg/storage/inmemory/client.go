@@ -1,6 +1,8 @@
 package inmemory
 
 import (
+	"context"
+
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/utils"
@@ -52,6 +54,6 @@ func (i *inMemoryDb) ClusterReports() storageapi.GenericClusterIface[*openreport
 	return i.creportdb
 }
 
-func (i *inMemoryDb) Ready() bool {
+func (i *inMemoryDb) Ready(_ context.Context) bool {
 	return true
 }

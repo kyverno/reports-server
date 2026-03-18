@@ -139,7 +139,8 @@ func (c *Config) Complete() (*server, error) {
 		genericServer,
 		c.Store,
 	)
-	err = s.RegisterProbes()
+	// TODO: turn this into a configurable parameter
+	err = s.RegisterProbes(time.Second * 30)
 	if err != nil {
 		klog.Error(err)
 		return nil, err

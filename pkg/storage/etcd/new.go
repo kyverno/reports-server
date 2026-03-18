@@ -1,6 +1,7 @@
 package etcd
 
 import (
+	"context"
 	"crypto/tls"
 	"strings"
 	"time"
@@ -57,7 +58,7 @@ func New(cfg *EtcdConfig) (api.Storage, error) {
 	}, nil
 }
 
-func (e *etcdClient) Ready() bool {
+func (e *etcdClient) Ready(_ context.Context) bool {
 	return true
 }
 

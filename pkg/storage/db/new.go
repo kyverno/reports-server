@@ -109,8 +109,8 @@ func (p *postgresstore) ClusterReports() api.GenericClusterIface[*openreportsv1a
 	return p.orclusterreportstore
 }
 
-func (p *postgresstore) Ready() bool {
-	if err := p.db.Ping(); err != nil {
+func (p *postgresstore) Ready(ctx context.Context) bool {
+	if err := p.db.PingContext(ctx); err != nil {
 		klog.Error("failed to ping db", err.Error())
 		return false
 	}

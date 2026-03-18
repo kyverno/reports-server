@@ -1,7 +1,7 @@
 package server
 
 import (
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiregistrationv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 )
 
@@ -17,7 +17,7 @@ type APIServices struct {
 func BuildApiServices(serviceName string, serviceNamespace string) APIServices {
 	return APIServices{
 		wgpolicyApiService: apiregistrationv1.APIService{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: "v1alpha2.wgpolicyk8s.io",
 				Labels: map[string]string{
 					"app.kubernetes.io/managed-by": serviceName,
@@ -36,7 +36,7 @@ func BuildApiServices(serviceName string, serviceNamespace string) APIServices {
 			},
 		},
 		openreportsApiService: apiregistrationv1.APIService{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: "v1alpha1.openreports.io",
 				Labels: map[string]string{
 					"app.kubernetes.io/managed-by": serviceName,
@@ -55,7 +55,7 @@ func BuildApiServices(serviceName string, serviceNamespace string) APIServices {
 			},
 		},
 		v1ReportsApiService: apiregistrationv1.APIService{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: "v1.reports.kyverno.io",
 				Labels: map[string]string{
 					"app.kubernetes.io/managed-by": serviceName,
