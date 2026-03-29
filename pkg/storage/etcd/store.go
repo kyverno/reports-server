@@ -167,6 +167,7 @@ func (o *objectStoreNamespaced[T]) Delete(ctx context.Context, name, namespace s
 func (o *objectStoreNamespaced[T]) Count(ctx context.Context) (int, error) {
 	return 0, fmt.Errorf("count not implemented for etcd objectStoreNamespaced")
 }
+
 type ObjectStorageCluster[T metav1.Object] interface {
 	Get(ctx context.Context, name string) (T, error)
 	List(ctx context.Context) ([]T, error)
