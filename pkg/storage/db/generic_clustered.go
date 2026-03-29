@@ -40,7 +40,7 @@ func (c *genericClusterGetter[T, PT]) List(ctx context.Context) ([]PT, error) {
 	res := make([]PT, 0)
 	var jsonb string
 
-	rows, err := c.db.Query(fmt.Sprintf("SELECT report FROM %s WHERE cluster_id = $1", c.tableName), c.clusterUID)
+	rows, err := c.db.QueryContext(ctx, fmt.Sprintf("SELECT report FROM %s WHERE cluster_id = $1", c.tableName), c.clusterUID)
 	if err != nil {
 		klog.ErrorS(err, fmt.Sprintf("failed to list %s", c.typeName))
 		return nil, fmt.Errorf("%s list: %v", c.typeName, err)
@@ -66,7 +66,7 @@ func (c *genericClusterGetter[T, PT]) List(ctx context.Context) ([]PT, error) {
 func (c *genericClusterGetter[T, PT]) Get(ctx context.Context, name string) (PT, error) {
 	var jsonb string
 
-	row := c.db.QueryRow(fmt.Sprintf("SELECT report FROM %s WHERE cluster_id = $1 AND name = $2", c.tableName), c.clusterUID, name)
+	row := c.db.QueryRowContext(ctx, fmt.Sprintf("SELECT report FROM %s WHERE cluster_id = $1 AND name = $2", c.tableName), c.clusterUID, name)
 	if err := row.Scan(&jsonb); err != nil {
 		klog.ErrorS(err, fmt.Sprintf("%s not found name=%s", c.typeName, name))
 		if err == sql.ErrNoRows {
@@ -95,7 +95,7 @@ func (c *genericClusterGetter[T, PT]) Create(ctx context.Context, obj PT) error 
 		return err
 	}
 
-	_, err = c.db.Exec(fmt.Sprintf("INSERT INTO %s (name, report, cluster_id) VALUES ($1, $2, $3) ON CONFLICT (name, cluster_id) DO UPDATE SET report = $2", c.tableName), name, string(jsonb), c.clusterUID)
+	_, err = c.db.ExecContext(ctx, fmt.Sprintf("INSERT INTO %s (name, report, cluster_id) VALUES ($1, $2, $3) ON CONFLICT (name, cluster_id) DO UPDATE SET report = $2", c.tableName), name, string(jsonb), c.clusterUID)
 	if err != nil {
 		klog.ErrorS(err, fmt.Sprintf("failed to create %s", c.typeName))
 		return fmt.Errorf("create %s: %v", c.typeName, err)
@@ -113,7 +113,7 @@ func (c *genericClusterGetter[T, PT]) Update(ctx context.Context, obj PT) error 
 		return err
 	}
 
-	_, err = c.db.Exec(fmt.Sprintf("UPDATE %s SET report = $1 WHERE cluster_id = $2 AND name = $3", c.tableName), string(jsonb), c.clusterUID, obj.GetName())
+	_, err = c.db.ExecContext(ctx, fmt.Sprintf("UPDATE %s SET report = $1 WHERE cluster_id = $2 AND name = $3", c.tableName), string(jsonb), c.clusterUID, obj.GetName())
 	if err != nil {
 		klog.ErrorS(err, fmt.Sprintf("failed to update %s", c.typeName))
 		return fmt.Errorf("update %s: %v", c.typeName, err)
@@ -122,7 +122,7 @@ func (c *genericClusterGetter[T, PT]) Update(ctx context.Context, obj PT) error 
 }
 
 func (c *genericClusterGetter[T, PT]) Delete(ctx context.Context, name string) error {
-	_, err := c.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE cluster_id = $1 AND name = $2", c.tableName), c.clusterUID, name)
+	_, err := c.db.ExecContext(ctx, fmt.Sprintf("DELETE FROM %s WHERE cluster_id = $1 AND name = $2", c.tableName), c.clusterUID, name)
 	if err != nil {
 		klog.ErrorS(err, fmt.Sprintf("failed to delete %s", c.typeName))
 		return fmt.Errorf("delete %s: %v", c.typeName, err)

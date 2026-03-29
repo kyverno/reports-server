@@ -37,7 +37,7 @@ func New(config *PostgresConfig, clusterUID string, clusterName string) (api.Sto
 		time.Sleep(sleepDuration)
 	}
 
-	err = db.Ping()
+	err = db.PingContext(context.Background())
 	if err != nil {
 		klog.Error("failed to ping db", err.Error())
 		return nil, err

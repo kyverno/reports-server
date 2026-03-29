@@ -43,9 +43,9 @@ func (c *genericGetter[T, PT]) List(ctx context.Context, ns string) ([]PT, error
 	var err error
 
 	if ns == "" {
-		rows, err = c.db.Query(fmt.Sprintf("SELECT report FROM %s WHERE cluster_id = $1", c.tableName), c.clusterUID)
+		rows, err = c.db.QueryContext(ctx, fmt.Sprintf("SELECT report FROM %s WHERE cluster_id = $1", c.tableName), c.clusterUID)
 	} else {
-		rows, err = c.db.Query(fmt.Sprintf("SELECT report FROM %s WHERE cluster_id = $1 AND namespace = $2", c.tableName), c.clusterUID, ns)
+		rows, err = c.db.QueryContext(ctx, fmt.Sprintf("SELECT report FROM %s WHERE cluster_id = $1 AND namespace = $2", c.tableName), c.clusterUID, ns)
 	}
 	if err != nil {
 		klog.ErrorS(err, fmt.Sprintf("failed to list %s", c.typeName))
@@ -72,7 +72,7 @@ func (c *genericGetter[T, PT]) List(ctx context.Context, ns string) ([]PT, error
 func (c *genericGetter[T, PT]) Get(ctx context.Context, name, ns string) (PT, error) {
 	var jsonb string
 
-	row := c.db.QueryRow(fmt.Sprintf("SELECT report FROM %s WHERE cluster_id = $1 AND name = $2 AND namespace = $3", c.tableName), c.clusterUID, name, ns)
+	row := c.db.QueryRowContext(ctx, fmt.Sprintf("SELECT report FROM %s WHERE cluster_id = $1 AND name = $2 AND namespace = $3", c.tableName), c.clusterUID, name, ns)
 	if err := row.Scan(&jsonb); err != nil {
 		klog.ErrorS(err, fmt.Sprintf("%s not found name=%s namespace=%s", c.typeName, name, ns))
 		if err == sql.ErrNoRows {
