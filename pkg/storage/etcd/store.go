@@ -72,18 +72,17 @@ func (o *objectStoreNamespaced[T]) List(ctx context.Context, namespace string) (
 	o.Lock()
 	defer o.Unlock()
 
-	var objects []T
 	key := o.getPrefix(namespace)
 	resp, err := o.etcdclient.Get(ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		klog.ErrorS(err, "failed to list report kind=%s", o.gvk.String())
-		return objects, err
+		return nil, err
 	}
 	klog.InfoS("list resp resp=%+v", resp)
 	if len(resp.Kvs) == 0 {
-		return objects, nil
+		return nil, nil
 	}
-	objects = make([]T, 0, len(resp.Kvs))
+	objects := make([]T, 0, len(resp.Kvs))
 	for _, v := range resp.Kvs {
 		var obj T
 		err = json.Unmarshal(v.Value, &obj)

@@ -1,11 +1,10 @@
 module github.com/kyverno/reports-server
 
-go 1.24.1
-
-toolchain go1.24.3
+go 1.25.0
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/kyverno/kyverno v1.12.0-rc.4
 	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
@@ -157,7 +156,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.5 // indirect
 	github.com/hashicorp/hcl v1.0.1-vault-5 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect

@@ -1,8 +1,10 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/kyverno/reports-server/pkg/storage/api"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -45,17 +47,19 @@ func (s *server) RunUntil(stopCh <-chan struct{}) error {
 	return s.GenericAPIServer.PrepareRun().Run(stopCh)
 }
 
-func (s *server) RegisterProbes() error {
-	err := s.AddReadyzChecks(s.probeMetricStorageReady("policy-db-ready"))
+func (s *server) RegisterProbes(readinessTimeout time.Duration) error {
+	err := s.AddReadyzChecks(s.probeMetricStorageReady("policy-db-ready", readinessTimeout))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *server) probeMetricStorageReady(name string) healthz.HealthChecker {
+func (s *server) probeMetricStorageReady(name string, readinessTimeout time.Duration) healthz.HealthChecker {
 	return healthz.NamedCheck(name, func(r *http.Request) error {
-		if !s.storage.Ready() {
+		ctx, cancel := context.WithTimeout(context.Background(), readinessTimeout)
+		defer cancel()
+		if !s.storage.Ready(ctx) {
 			err := fmt.Errorf("db not working")
 			klog.InfoS("Failed probe", "probe", name, "err", err)
 			return err

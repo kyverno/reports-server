@@ -10,7 +10,7 @@ import (
 )
 
 type Storage interface {
-	Ready() bool
+	Ready(context.Context) bool
 	PolicyReports() GenericIface[*v1alpha2.PolicyReport]
 	ClusterPolicyReports() GenericClusterIface[*v1alpha2.ClusterPolicyReport]
 	EphemeralReports() GenericIface[*reportsv1.EphemeralReport]

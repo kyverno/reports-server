@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"context"
+
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/storage/db"
@@ -60,6 +62,6 @@ func (s *store) ClusterReports() api.GenericClusterIface[*openreportsv1alpha1.Cl
 	return s.db.ClusterReports()
 }
 
-func (s *store) Ready() bool {
-	return s.db.Ready()
+func (s *store) Ready(ctx context.Context) bool {
+	return s.db.Ready(ctx)
 }

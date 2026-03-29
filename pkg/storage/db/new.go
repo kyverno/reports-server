@@ -26,10 +26,11 @@ func New(config *PostgresConfig, clusterUID string, clusterName string) (api.Sto
 		klog.Error("failed to open db", err.Error())
 		return nil, err
 	}
+	ctx := context.Background()
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		klog.Infof("pinging postgres db, attempt: %d", attempt)
-		err := db.PingContext(context.TODO())
+		err := db.PingContext(ctx)
 		if err == nil {
 			break
 		}
@@ -37,7 +38,7 @@ func New(config *PostgresConfig, clusterUID string, clusterName string) (api.Sto
 		time.Sleep(sleepDuration)
 	}
 
-	err = db.Ping()
+	err = db.PingContext(ctx)
 	if err != nil {
 		klog.Error("failed to ping db", err.Error())
 		return nil, err
@@ -51,13 +52,13 @@ func New(config *PostgresConfig, clusterUID string, clusterName string) (api.Sto
 		return nil, err
 	}
 
-	err = createOrUpdateClusterRecord(db, clusterUID, clusterName)
+	err = createOrUpdateClusterRecord(ctx, db, clusterUID, clusterName)
 	if err != nil {
 		klog.Error("failed to update cluster record", err.Error())
 		return nil, err
 	}
 
-	err = populateClusterUIDLegacyRecords(db, clusterUID)
+	err = populateClusterUIDLegacyRecords(ctx, db, clusterUID)
 	if err != nil {
 		klog.Error("failed to update legacy records", err.Error())
 		return nil, err
@@ -109,8 +110,8 @@ func (p *postgresstore) ClusterReports() api.GenericClusterIface[*openreportsv1a
 	return p.orclusterreportstore
 }
 
-func (p *postgresstore) Ready() bool {
-	if err := p.db.Ping(); err != nil {
+func (p *postgresstore) Ready(ctx context.Context) bool {
+	if err := p.db.PingContext(ctx); err != nil {
 		klog.Error("failed to ping db", err.Error())
 		return false
 	}
@@ -135,33 +136,33 @@ func (p PostgresConfig) String() string {
 		p.Host, p.Port, p.User, p.Password, p.DBname, p.SSLMode, p.SSLRootCert, p.SSLKey, p.SSLCert)
 }
 
-func createOrUpdateClusterRecord(db *sql.DB, clusterUID string, clusterName string) error {
-	_, err := db.Query("INSERT INTO clusters (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2", clusterUID, clusterName)
+func createOrUpdateClusterRecord(ctx context.Context, db *sql.DB, clusterUID string, clusterName string) error {
+	_, err := db.QueryContext(ctx, "INSERT INTO clusters (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2", clusterUID, clusterName)
 	return err
 }
 
-func populateClusterUIDLegacyRecords(db *sql.DB, clusterUID string) error {
-	_, err := db.Query("UPDATE clusterephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+func populateClusterUIDLegacyRecords(ctx context.Context, db *sql.DB, clusterUID string) error {
+	_, err := db.QueryContext(ctx, "UPDATE clusterephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.Query("UPDATE clusterpolicyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.QueryContext(ctx, "UPDATE clusterpolicyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.Query("UPDATE clusterreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.QueryContext(ctx, "UPDATE clusterreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.Query("UPDATE ephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.QueryContext(ctx, "UPDATE ephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.Query("UPDATE policyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.QueryContext(ctx, "UPDATE policyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.Query("UPDATE reports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.QueryContext(ctx, "UPDATE reports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}

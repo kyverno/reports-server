@@ -30,22 +30,24 @@ import (
 
 var (
 	// Scheme contains the types needed by the resource API.
-	Scheme = runtime.NewScheme()
+	Scheme = newScheme()
 	// Codecs is a codec factory for serving the resource API.
 	Codecs = serializer.NewCodecFactory(Scheme)
 )
 
-func init() {
-	utilruntime.Must(installWgPolicyTypesInternal(Scheme))
-	utilruntime.Must(v1alpha2.AddToScheme(Scheme))
-	utilruntime.Must(Scheme.SetVersionPriority(v1alpha2.SchemeGroupVersion))
-	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
+func newScheme() *runtime.Scheme {
+	s := runtime.NewScheme()
+	utilruntime.Must(installWgPolicyTypesInternal(s))
+	utilruntime.Must(v1alpha2.AddToScheme(s))
+	utilruntime.Must(s.SetVersionPriority(v1alpha2.SchemeGroupVersion))
+	metav1.AddToGroupVersion(s, schema.GroupVersion{Version: "v1"})
 
-	utilruntime.Must(reportsv1.Install(Scheme))
-	utilruntime.Must(Scheme.SetVersionPriority(reportsv1.SchemeGroupVersion))
+	utilruntime.Must(reportsv1.Install(s))
+	utilruntime.Must(s.SetVersionPriority(reportsv1.SchemeGroupVersion))
 	// openreports
-	utilruntime.Must(openreportsv1alpha1.AddToScheme(Scheme))
-	utilruntime.Must(Scheme.SetVersionPriority(openreportsv1alpha1.SchemeGroupVersion))
+	utilruntime.Must(openreportsv1alpha1.AddToScheme(s))
+	utilruntime.Must(s.SetVersionPriority(openreportsv1alpha1.SchemeGroupVersion))
+	return s
 }
 
 // BuildPolicyReports constructs APIGroupInfo the wgpolicyk8s.io API group using the given getters.
