@@ -118,6 +118,10 @@ func (c *genericClusterInMemStore[T, PT]) Delete(ctx context.Context, name strin
 	}
 }
 
+func (g *genericClusterInMemStore[T, PT]) Count(ctx context.Context) (int, error) {
+	return len(g.db), nil
+}
+
 type genericInMemStore[T any, PT interface {
 	*T
 	metav1.Object
@@ -225,4 +229,8 @@ func (g *genericInMemStore[T, PT]) Delete(ctx context.Context, name, namespace s
 	delete(g.db, key)
 	klog.Infof("entry deleted for key:%s", key)
 	return nil
+}
+
+func (g *genericInMemStore[T, PT]) Count(ctx context.Context) (int, error) {
+	return len(g.db), nil
 }

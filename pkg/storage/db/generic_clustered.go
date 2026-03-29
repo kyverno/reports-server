@@ -129,3 +129,16 @@ func (c *genericClusterGetter[T, PT]) Delete(ctx context.Context, name string) e
 	}
 	return nil
 }
+
+func (c *genericClusterGetter[T, PT]) Count(ctx context.Context) (int, error) {
+	var count int
+	err := c.db.QueryRowContext(
+		ctx,
+		fmt.Sprintf("SELECT COUNT(*) FROM %s", c.tableName),
+	).Scan(&count)
+
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}

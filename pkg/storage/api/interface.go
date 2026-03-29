@@ -4,8 +4,8 @@ import (
 	"context"
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
+	openreportsv1alpha1 "github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
@@ -25,6 +25,7 @@ type GenericIface[T metav1.Object] interface {
 	Create(ctx context.Context, obj T) error
 	Update(ctx context.Context, obj T) error
 	Delete(ctx context.Context, name, ns string) error
+	Count(ctx context.Context) (int, error)
 	UseResourceVersion() string
 	SetResourceVersion(string) error
 }
@@ -35,6 +36,7 @@ type GenericClusterIface[T metav1.Object] interface {
 	Create(ctx context.Context, obj T) error
 	Update(ctx context.Context, obj T) error
 	Delete(ctx context.Context, name string) error
+	Count(ctx context.Context) (int, error)
 	UseResourceVersion() string
 	SetResourceVersion(string) error
 }
