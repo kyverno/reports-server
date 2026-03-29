@@ -1,8 +1,8 @@
 package utils
 
 import (
+	v1alpha2 "github.com/kyverno/kyverno/api/policyreport/v1alpha2"
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	"k8s.io/api/resource/v1alpha2"
 	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 

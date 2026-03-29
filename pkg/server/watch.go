@@ -5,49 +5,17 @@ import (
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/api"
+	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
 	"k8s.io/klog/v2"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 
-func (c *Config) watchEphr(ctx context.Context, watchIface *watchtools.RetryWatcher) {
-	for {
-		select {
-		case <-ctx.Done():
-		case event := <-watchIface.ResultChan():
-			switch event.Type {
-			case watch.Added:
-				ephr := event.Object.(*reportsv1.EphemeralReport)
-				applyReportsServerAnnotation(ephr)
-				err := c.Store.EphemeralReports().Create(ctx, ephr)
-				if err != nil {
-					klog.Error(err)
-				}
-			case watch.Modified:
-				ephr := event.Object.(*reportsv1.EphemeralReport)
-				applyReportsServerAnnotation(ephr)
-				ephr.Annotations[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
-				err := c.Store.EphemeralReports().Update(ctx, ephr)
-				if err != nil {
-					klog.Error(err)
-				}
-			case watch.Deleted:
-				ephr := event.Object.(*reportsv1.EphemeralReport)
-				// Skip deletion if report was already migrated to the store
-				if ephr.Annotations != nil && ephr.Annotations[api.ServedByReportsServerAnnotation] == api.ServedByReportsServerValue {
-					continue
-				}
-				err := c.Store.EphemeralReports().Delete(ctx, ephr.Name, ephr.Namespace)
-				if err != nil {
-					klog.Error(err)
-				}
-			}
-		}
-	}
-}
-
-func (c *Config) watchCephr(ctx context.Context, watchIface *watchtools.RetryWatcher) {
+func (c *Config) watchReport(ctx context.Context, watchIface *watchtools.RetryWatcher) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -55,102 +23,146 @@ func (c *Config) watchCephr(ctx context.Context, watchIface *watchtools.RetryWat
 		case event := <-watchIface.ResultChan():
 			switch event.Type {
 			case watch.Added:
-				cephr := event.Object.(*reportsv1.ClusterEphemeralReport)
-				applyReportsServerAnnotation(cephr)
-				err := c.Store.ClusterEphemeralReports().Create(ctx, cephr)
-				if err != nil {
-					klog.Error(err)
-				}
+				handleCreate(ctx, c.Store, event.Object)
 			case watch.Modified:
-				cephr := event.Object.(*reportsv1.ClusterEphemeralReport)
-				applyReportsServerAnnotation(cephr)
-				err := c.Store.ClusterEphemeralReports().Update(ctx, cephr)
-				if err != nil {
-					klog.Error(err)
-				}
+				handleUpdate(ctx, c.Store, event.Object)
 			case watch.Deleted:
-				cephr := event.Object.(*reportsv1.ClusterEphemeralReport)
-				// Skip deletion if report was already migrated to the store
-				if cephr.Annotations != nil && cephr.Annotations[api.ServedByReportsServerAnnotation] == api.ServedByReportsServerValue {
-					continue
-				}
-				err := c.Store.ClusterEphemeralReports().Delete(ctx, cephr.Name)
-				if err != nil {
-					klog.Error(err)
-				}
+				handleDelete(ctx, c.Store, event.Object)
 			}
 		}
 	}
 }
 
-func (c *Config) watchPolr(ctx context.Context, watchIface *watchtools.RetryWatcher) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case event := <-watchIface.ResultChan():
-			switch event.Type {
-			case watch.Added:
-				polr := event.Object.(*v1alpha2.PolicyReport)
-				applyReportsServerAnnotation(polr)
-				err := c.Store.PolicyReports().Create(ctx, polr)
-				if err != nil {
-					klog.Error(err)
-				}
-			case watch.Modified:
-				polr := event.Object.(*v1alpha2.PolicyReport)
-				applyReportsServerAnnotation(polr)
-				err := c.Store.PolicyReports().Update(ctx, polr)
-				if err != nil {
-					klog.Error(err)
-				}
-			case watch.Deleted:
-				polr := event.Object.(*v1alpha2.PolicyReport)
-				// Skip deletion if report was already migrated to the store
-				if polr.Annotations != nil && polr.Annotations[api.ServedByReportsServerAnnotation] == api.ServedByReportsServerValue {
-					continue
-				}
-				err := c.Store.PolicyReports().Delete(ctx, polr.Name, polr.Namespace)
-				if err != nil {
-					klog.Error(err)
-				}
-			}
+func handleUpdate(ctx context.Context, storageIface storageapi.Storage, obj runtime.Object) {
+	switch report := obj.(type) {
+	case *v1alpha2.ClusterPolicyReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.ClusterPolicyReports().Update(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *v1alpha2.PolicyReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.PolicyReports().Update(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *reportsv1.ClusterEphemeralReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.ClusterEphemeralReports().Update(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *reportsv1.EphemeralReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.EphemeralReports().Update(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *openreportsv1alpha1.Report:
+		applyReportsServerAnnotation(report)
+		err := storageIface.Reports().Update(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *openreportsv1alpha1.ClusterReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.ClusterReports().Update(ctx, report)
+		if err != nil {
+			klog.Error(err)
 		}
 	}
 }
 
-func (c *Config) watchCpolr(ctx context.Context, watchIface *watchtools.RetryWatcher) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case event := <-watchIface.ResultChan():
-			switch event.Type {
-			case watch.Added:
-				cpolr := event.Object.(*v1alpha2.ClusterPolicyReport)
-				applyReportsServerAnnotation(cpolr)
-				err := c.Store.ClusterPolicyReports().Create(ctx, cpolr)
-				if err != nil {
-					klog.Error(err)
-				}
-			case watch.Modified:
-				cpolr := event.Object.(*v1alpha2.ClusterPolicyReport)
-				applyReportsServerAnnotation(cpolr)
-				err := c.Store.ClusterPolicyReports().Update(ctx, cpolr)
-				if err != nil {
-					klog.Error(err)
-				}
-			case watch.Deleted:
-				cpolr := event.Object.(*v1alpha2.ClusterPolicyReport)
-				// Skip deletion if report was already migrated to the store
-				if cpolr.Annotations != nil && cpolr.Annotations[api.ServedByReportsServerAnnotation] == api.ServedByReportsServerValue {
-					continue
-				}
-				err := c.Store.ClusterPolicyReports().Delete(ctx, cpolr.Name)
-				if err != nil {
-					klog.Error(err)
-				}
-			}
+func handleCreate(ctx context.Context, storageIface storageapi.Storage, obj runtime.Object) {
+	switch report := obj.(type) {
+	case *v1alpha2.ClusterPolicyReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.ClusterPolicyReports().Create(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *v1alpha2.PolicyReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.PolicyReports().Create(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *reportsv1.ClusterEphemeralReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.ClusterEphemeralReports().Create(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *reportsv1.EphemeralReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.EphemeralReports().Create(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *openreportsv1alpha1.Report:
+		applyReportsServerAnnotation(report)
+		err := storageIface.Reports().Create(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *openreportsv1alpha1.ClusterReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.ClusterReports().Create(ctx, report)
+		if err != nil {
+			klog.Error(err)
+		}
+	}
+}
+
+func handleDelete(ctx context.Context, storageIface storageapi.Storage, obj runtime.Object) {
+	accessor, err := meta.Accessor(obj)
+	if err != nil {
+		klog.Error(err)
+		return
+	}
+
+	annotations := accessor.GetAnnotations()
+	if annotations != nil && annotations[api.ServedByReportsServerAnnotation] == api.ServedByReportsServerValue {
+		return
+	}
+
+	switch report := obj.(type) {
+	case *v1alpha2.ClusterPolicyReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.ClusterPolicyReports().Delete(ctx, report.Name)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *v1alpha2.PolicyReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.PolicyReports().Delete(ctx, report.Name, report.Namespace)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *reportsv1.ClusterEphemeralReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.ClusterEphemeralReports().Delete(ctx, report.Name)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *reportsv1.EphemeralReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.EphemeralReports().Delete(ctx, report.Name, report.Namespace)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *openreportsv1alpha1.Report:
+		applyReportsServerAnnotation(report)
+		err := storageIface.Reports().Delete(ctx, report.Name, report.Namespace)
+		if err != nil {
+			klog.Error(err)
+		}
+	case *openreportsv1alpha1.ClusterReport:
+		applyReportsServerAnnotation(report)
+		err := storageIface.ClusterReports().Delete(ctx, report.Name)
+		if err != nil {
+			klog.Error(err)
 		}
 	}
 }

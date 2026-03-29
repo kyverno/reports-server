@@ -11,16 +11,18 @@ import (
 	"github.com/kyverno/reports-server/pkg/api"
 	generatedopenapi "github.com/kyverno/reports-server/pkg/api/generated/openapi"
 	"github.com/kyverno/reports-server/pkg/storage/etcd"
+	utilversion "k8s.io/apimachinery/pkg/util/version"
 	openapinamer "k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
-	"k8s.io/client-go/pkg/version"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/cli/flag"
+	basecompatibility "k8s.io/component-base/compatibility"
 	"k8s.io/component-base/logs"
 	logsapi "k8s.io/component-base/logs/api/v1"
 	_ "k8s.io/component-base/logs/json/register"
+	baseversion "k8s.io/component-base/version"
 )
 
 type Options struct {
@@ -144,15 +146,18 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 		return nil, err
 	}
 
-	versionGet := version.Get()
-	serverConfig.Version = &versionGet
+	// will be the version of kubernetes client-go library
+	binaryVersion := utilversion.MustParse(baseversion.DefaultKubeBinaryVersion)
+
+	serverConfig.EffectiveVersion = basecompatibility.NewEffectiveVersion(binaryVersion, false, binaryVersion, binaryVersion.SubtractMinor(1))
 	// enable OpenAPI schemas
 	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(generatedopenapi.GetOpenAPIDefinitions, openapinamer.NewDefinitionNamer(api.Scheme))
 	serverConfig.OpenAPIV3Config = genericapiserver.DefaultOpenAPIV3Config(generatedopenapi.GetOpenAPIDefinitions, openapinamer.NewDefinitionNamer(api.Scheme))
 	serverConfig.OpenAPIConfig.Info.Title = "reports-server"
 	serverConfig.OpenAPIV3Config.Info.Title = "reports-server"
-	serverConfig.OpenAPIConfig.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0] // TODO(directxman12): remove this once autosetting this doesn't require security definitions
-	serverConfig.OpenAPIV3Config.Info.Version = strings.Split(serverConfig.Version.String(), "-")[0]
+
+	serverConfig.OpenAPIConfig.Info.Version = strings.Split(serverConfig.EffectiveVersion.String(), "-")[0] // TODO(directxman12): remove this once autosetting this doesn't require security definitions
+	serverConfig.OpenAPIV3Config.Info.Version = strings.Split(serverConfig.EffectiveVersion.String(), "-")[0]
 
 	return serverConfig, nil
 }

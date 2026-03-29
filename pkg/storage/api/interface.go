@@ -25,6 +25,7 @@ type GenericIface[T metav1.Object] interface {
 	Create(ctx context.Context, obj T) error
 	Update(ctx context.Context, obj T) error
 	Delete(ctx context.Context, name, ns string) error
+	Count(ctx context.Context) (int, error)
 	UseResourceVersion() string
 	SetResourceVersion(string) error
 }
@@ -35,6 +36,7 @@ type GenericClusterIface[T metav1.Object] interface {
 	Create(ctx context.Context, obj T) error
 	Update(ctx context.Context, obj T) error
 	Delete(ctx context.Context, name string) error
+	Count(ctx context.Context) (int, error)
 	UseResourceVersion() string
 	SetResourceVersion(string) error
 }
