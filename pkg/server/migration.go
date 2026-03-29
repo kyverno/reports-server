@@ -94,7 +94,8 @@ func (c *Config) handleMigrateWgPolicyApis(ctx context.Context, policyClient *ve
 
 	polrs, err := policyClient.Wgpolicyk8sV1alpha2().PolicyReports("").List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return nil
+		klog.Errorf("error listing %s from the Kubernetes API", utils.PolicyReportsGR)
+		return err
 	}
 	count, err = c.Store.PolicyReports().Count(ctx)
 	if err != nil {
@@ -103,7 +104,7 @@ func (c *Config) handleMigrateWgPolicyApis(ctx context.Context, policyClient *ve
 	}
 
 	if count != len(polrs.Items) {
-		if !c.SkipMigration || count != len(polrs.Items) {
+		if !c.SkipMigration {
 			wg := &sync.WaitGroup{}
 			wg.Add(len(polrs.Items))
 			for _, r := range polrs.Items {
@@ -135,7 +136,7 @@ func (c *Config) handleMigrateWgPolicyApis(ctx context.Context, policyClient *ve
 func (c *Config) handleMigrateEphrApis(ctx context.Context, kyvernoClient kyverno.Interface, workerChan chan struct{}) error {
 	cephrs, err := kyvernoClient.ReportsV1().ClusterEphemeralReports().List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return nil
+		return err
 	}
 	count, err := c.Store.ClusterEphemeralReports().Count(ctx)
 	if err != nil {
@@ -172,7 +173,8 @@ func (c *Config) handleMigrateEphrApis(ctx context.Context, kyvernoClient kyvern
 
 	ephrs, err := kyvernoClient.ReportsV1().EphemeralReports("").List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return nil
+		klog.Errorf("error listing %s: %v", utils.EphemeralReportsGR, err)
+		return err
 	}
 	count, err = c.Store.EphemeralReports().Count(ctx)
 	if err != nil {
@@ -250,7 +252,7 @@ func (c *Config) handleMigrateOpenreportsApis(ctx context.Context, orClient open
 
 	reports, err := orClient.Reports("").List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return nil
+		return err
 	}
 	count, err = c.Store.Reports().Count(ctx)
 	if err != nil {
@@ -302,7 +304,7 @@ func (c *Config) migrateReport(ctx context.Context,
 	case v1alpha2.ClusterPolicyReport:
 		err := c.Store.ClusterPolicyReports().Create(ctx, &r)
 		if err != nil {
-			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
+			klog.Errorf("failed to migrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
 		// Update annotation in Kubernetes before deleting so watchers can identify it
 		_, err = policyClient.Wgpolicyk8sV1alpha2().ClusterPolicyReports().Update(ctx, &r, metav1.UpdateOptions{})
@@ -315,7 +317,7 @@ func (c *Config) migrateReport(ctx context.Context,
 	case v1alpha2.PolicyReport:
 		err := c.Store.PolicyReports().Create(ctx, &r)
 		if err != nil {
-			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
+			klog.Errorf("failed to migrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
 		// Update annotation in Kubernetes before deleting so watchers can identify it
 		_, err = policyClient.Wgpolicyk8sV1alpha2().PolicyReports(r.Namespace).Update(ctx, &r, metav1.UpdateOptions{})
@@ -328,7 +330,7 @@ func (c *Config) migrateReport(ctx context.Context,
 	case v1.ClusterEphemeralReport:
 		err := c.Store.ClusterEphemeralReports().Create(ctx, &r)
 		if err != nil {
-			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
+			klog.Errorf("failed to migrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
 		// Update annotation in Kubernetes before deleting so watchers can identify it
 		_, err = kyvernoClient.ReportsV1().ClusterEphemeralReports().Update(ctx, &r, metav1.UpdateOptions{})
@@ -341,7 +343,7 @@ func (c *Config) migrateReport(ctx context.Context,
 	case v1.EphemeralReport:
 		err := c.Store.EphemeralReports().Create(ctx, &r)
 		if err != nil {
-			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
+			klog.Errorf("failed to migrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
 		// Update annotation in Kubernetes before deleting so watchers can identify it
 		_, err = kyvernoClient.ReportsV1().EphemeralReports(r.Namespace).Update(ctx, &r, metav1.UpdateOptions{})
@@ -354,7 +356,7 @@ func (c *Config) migrateReport(ctx context.Context,
 	case openreportsv1alpha1.ClusterReport:
 		err := c.Store.ClusterReports().Create(ctx, &r)
 		if err != nil {
-			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
+			klog.Errorf("failed to migrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
 		// Update annotation in Kubernetes before deleting so watchers can identify it
 		_, err = orClient.ClusterReports().Update(ctx, &r, metav1.UpdateOptions{})
@@ -367,7 +369,7 @@ func (c *Config) migrateReport(ctx context.Context,
 	case openreportsv1alpha1.Report:
 		err := c.Store.Reports().Create(ctx, &r)
 		if err != nil {
-			klog.Errorf("failed to mirgrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
+			klog.Errorf("failed to migrate report of kind %s %s: %s", r.GroupVersionKind().String(), r.Name, err)
 		}
 		// Update annotation in Kubernetes before deleting so watchers can identify it
 		_, err = orClient.Reports(r.Namespace).Update(ctx, &r, metav1.UpdateOptions{})

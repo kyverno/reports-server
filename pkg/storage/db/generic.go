@@ -140,7 +140,8 @@ func (c *genericGetter[T, PT]) Count(ctx context.Context) (int, error) {
 	var count int
 	err := c.db.QueryRowContext(
 		ctx,
-		fmt.Sprintf("SELECT COUNT(*) FROM %s", c.tableName),
+		fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE cluster_id = $1", c.tableName),
+		c.clusterUID,
 	).Scan(&count)
 
 	if err != nil {

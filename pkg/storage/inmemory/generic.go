@@ -232,5 +232,7 @@ func (g *genericInMemStore[T, PT]) Delete(ctx context.Context, name, namespace s
 }
 
 func (g *genericInMemStore[T, PT]) Count(ctx context.Context) (int, error) {
+	g.Lock()
+	defer g.Unlock()
 	return len(g.db), nil
 }
