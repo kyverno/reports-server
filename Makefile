@@ -20,7 +20,9 @@ REPO_REPORTS_SERVER	?= 	$(REGISTRY)/$(ORG)/$(REPO)
 TOOLS_DIR                          := $(PWD)/.tools
 REGISTER_GEN                       := $(TOOLS_DIR)/register-gen
 OPENAPI_GEN                        := $(TOOLS_DIR)/openapi-gen
-CODE_GEN_VERSION                   := v0.28.0
+CODE_GEN_VERSION                   := v0.35.0
+# we sadly need to use a specific commit because https://github.com/kubernetes/kube-openapi has no sane tags
+KUBE_OPENAPI_VERSION               := v0.0.0-20250910181357-589584f1c912
 KIND                               := $(TOOLS_DIR)/kind
 KIND_VERSION                       := v0.30.0
 KO                                 := $(TOOLS_DIR)/ko
@@ -40,7 +42,7 @@ $(REGISTER_GEN):
 
 $(OPENAPI_GEN):
 	@echo Install openapi-gen... >&2
-	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/openapi-gen@$(CODE_GEN_VERSION)
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/kube-openapi/cmd/openapi-gen@$(KUBE_OPENAPI_VERSION)
 
 $(KIND):
 	@echo Install kind... >&2
