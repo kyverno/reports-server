@@ -308,7 +308,7 @@ require (
 	k8s.io/cli-runtime v0.29.2 // indirect
 	k8s.io/kms v0.35.0 // indirect
 	k8s.io/kubectl v0.29.2 // indirect
-	k8s.io/pod-security-admission v0.29.2 // indirect
+	k8s.io/pod-security-admission v0.35.0 // indirect
 	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.31.2 // indirect
 	sigs.k8s.io/controller-runtime v0.17.1 // indirect
