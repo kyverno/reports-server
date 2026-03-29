@@ -4,10 +4,11 @@ import (
 	"context"
 	"sync"
 
-	"github.com/kyverno/reports-server/pkg/utils"
-
 	v1 "github.com/kyverno/kyverno/api/reports/v1"
 	kyverno "github.com/kyverno/kyverno/pkg/clients/kyverno"
+	"github.com/kyverno/reports-server/pkg/utils"
+	openreportsv1alpha1 "github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
+	openreportsclient "github.com/openreports/reports-api/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
@@ -15,9 +16,6 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/generated/v1alpha2/clientset/versioned"
-
-	openreportsv1alpha1 "github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
-	openreportsclient "github.com/openreports/reports-api/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 )
 
 func (c *Config) migration(ctx context.Context) error {
