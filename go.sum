@@ -1125,8 +1125,8 @@ k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912 h1:Y3gxNAuB0OBLImH611+UDZ
 k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912/go.mod h1:kdmbQkyfwUagLfXIad1y2TdrjPFWp2Q89B3qkRwf/pQ=
 k8s.io/kubectl v0.29.2 h1:uaDYaBhumvkwz0S2XHt36fK0v5IdNgL7HyUniwb2IUo=
 k8s.io/kubectl v0.29.2/go.mod h1:BhizuYBGcKaHWyq+G7txGw2fXg576QbPrrnQdQDZgqI=
-k8s.io/pod-security-admission v0.29.2 h1:0/hhZzk1rPmUG2D02OHPWoZgo/3D5Wi/TXfwByD3xLs=
-k8s.io/pod-security-admission v0.29.2/go.mod h1:HBi3TJjRgPJmzdkbqtTxZshMf74ppA7Hth4dxGmUZj0=
+k8s.io/pod-security-admission v0.35.0 h1:tT3UHC+Q1mpFRe4IoVTu20ZAx+kqgKBZnewRnsDcyfc=
+k8s.io/pod-security-admission v0.35.0/go.mod h1:S+57PAqNo6DaUYjmtINiiXlYnEdShrOVMwSc7C4oYPg=
 k8s.io/utils v0.0.0-20251002143259-bc988d571ff4 h1:SjGebBtkBqHFOli+05xYbK8YF1Dzkbzn+gDM4X9T4Ck=
 k8s.io/utils v0.0.0-20251002143259-bc988d571ff4/go.mod h1:OLgZIPagt7ERELqWJFomSt595RzquPNLL48iOWgYOg0=
 sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.31.2 h1:jpcvIRr3GLoUoEKRkHKSmGjxb6lWwrBlJsXc+eUYQHM=
