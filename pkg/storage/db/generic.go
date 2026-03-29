@@ -101,7 +101,7 @@ func (c *genericGetter[T, PT]) Create(ctx context.Context, obj PT) error {
 		return err
 	}
 
-	_, err = c.db.Exec(fmt.Sprintf("INSERT INTO %s (name, namespace, report, cluster_id) VALUES ($1, $2, $3, $4) ON CONFLICT (name, namespace, cluster_id) DO UPDATE SET report = $3", c.tableName), name, obj.GetNamespace(), string(jsonb), c.clusterUID)
+	_, err = c.db.ExecContext(ctx, fmt.Sprintf("INSERT INTO %s (name, namespace, report, cluster_id) VALUES ($1, $2, $3, $4) ON CONFLICT (name, namespace, cluster_id) DO UPDATE SET report = $3", c.tableName), name, obj.GetNamespace(), string(jsonb), c.clusterUID)
 	if err != nil {
 		klog.ErrorS(err, fmt.Sprintf("failed to create %s", c.typeName))
 		return fmt.Errorf("create %s: %v", c.typeName, err)
@@ -119,7 +119,7 @@ func (c *genericGetter[T, PT]) Update(ctx context.Context, obj PT) error {
 		return err
 	}
 
-	_, err = c.db.Exec(fmt.Sprintf("UPDATE %s SET report = $1 WHERE cluster_id = $2 AND namespace = $3 AND name = $4", c.tableName), string(jsonb), c.clusterUID, obj.GetNamespace(), obj.GetName())
+	_, err = c.db.ExecContext(ctx, fmt.Sprintf("UPDATE %s SET report = $1 WHERE cluster_id = $2 AND namespace = $3 AND name = $4", c.tableName), string(jsonb), c.clusterUID, obj.GetNamespace(), obj.GetName())
 	if err != nil {
 		klog.ErrorS(err, fmt.Sprintf("failed to update %s", c.typeName))
 		return fmt.Errorf("update %s: %v", c.typeName, err)
@@ -128,7 +128,7 @@ func (c *genericGetter[T, PT]) Update(ctx context.Context, obj PT) error {
 }
 
 func (c *genericGetter[T, PT]) Delete(ctx context.Context, name, ns string) error {
-	_, err := c.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE cluster_id = $1 AND namespace = $2 AND name = $3", c.tableName), c.clusterUID, ns, name)
+	_, err := c.db.ExecContext(ctx, fmt.Sprintf("DELETE FROM %s WHERE cluster_id = $1 AND namespace = $2 AND name = $3", c.tableName), c.clusterUID, ns, name)
 	if err != nil {
 		klog.ErrorS(err, fmt.Sprintf("failed to delete %s", c.typeName))
 		return fmt.Errorf("delete %s: %v", c.typeName, err)
