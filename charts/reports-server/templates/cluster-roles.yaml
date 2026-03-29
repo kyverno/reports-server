@@ -64,7 +64,7 @@ rules:
     - watch
     - deletecollection
 - apiGroups:
-    - v1alpha1.openreports.io
+    - openreports.io
   resources:
     - reports
     - reports/status
