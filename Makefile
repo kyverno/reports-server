@@ -136,19 +136,20 @@ $(PACKAGE_SHIM): $(GOPATH_SHIM)
 codegen-openapi: $(PACKAGE_SHIM) $(OPENAPI_GEN) ## Generate openapi
 	@echo Generate openapi... >&2
 	@$(OPENAPI_GEN) \
-		-i k8s.io/apimachinery/pkg/api/resource \
-		-i k8s.io/apimachinery/pkg/apis/meta/v1 \
-		-i k8s.io/apimachinery/pkg/version \
-		-i k8s.io/apimachinery/pkg/runtime \
-		-i k8s.io/apimachinery/pkg/types \
-		-i k8s.io/api/core/v1 \
-		-i openreports.io/apis/openreports.io/v1alpha1 \
-		-i sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2 \
-		-i github.com/kyverno/kyverno/api/reports/v1 \
-		-i github.com/kyverno/kyverno/api/policyreport/v1alpha2 \
-		-p ./pkg/api/generated/openapi \
-		-O zz_generated.openapi \
-		-h ./.hack/boilerplate.go.txt
+		k8s.io/apimachinery/pkg/api/resource \
+		k8s.io/apimachinery/pkg/apis/meta/v1 \
+		k8s.io/apimachinery/pkg/version \
+		k8s.io/apimachinery/pkg/runtime \
+		k8s.io/apimachinery/pkg/types \
+		k8s.io/api/core/v1 \
+		openreports.io/apis/openreports.io/v1alpha1 \
+		sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2 \
+		github.com/kyverno/kyverno/api/reports/v1 \
+		github.com/kyverno/kyverno/api/policyreport/v1alpha2 \
+		--output-dir ./pkg/api/generated/openapi \
+		--output-pkg openapi \
+		--output-file zz_generated.openapi.go \
+		--go-header-file ./.hack/boilerplate.go.txt
 
 .PHONY: codegen-helm-docs
 codegen-helm-docs: ## Generate helm docs
