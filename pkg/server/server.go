@@ -57,7 +57,8 @@ func (s *server) RegisterProbes(readinessTimeout time.Duration) error {
 
 func (s *server) probeMetricStorageReady(name string, readinessTimeout time.Duration) healthz.HealthChecker {
 	return healthz.NamedCheck(name, func(r *http.Request) error {
-		ctx, _ := context.WithTimeout(context.Background(), readinessTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), readinessTimeout)
+		defer cancel()
 		if !s.storage.Ready(ctx) {
 			err := fmt.Errorf("db not working")
 			klog.InfoS("Failed probe", "probe", name, "err", err)
