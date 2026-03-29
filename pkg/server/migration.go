@@ -4,9 +4,10 @@ import (
 	"context"
 	"sync"
 
+	"github.com/kyverno/reports-server/pkg/utils"
+
 	v1 "github.com/kyverno/kyverno/api/reports/v1"
 	kyverno "github.com/kyverno/kyverno/pkg/clients/kyverno"
-	"github.com/kyverno/reports-server/pkg/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"

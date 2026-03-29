@@ -3,9 +3,9 @@ package server
 import (
 	"context"
 
-	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/api"
 
+	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
