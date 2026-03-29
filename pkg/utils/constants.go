@@ -3,7 +3,7 @@ package utils
 import (
 	v1alpha2 "github.com/kyverno/kyverno/api/policyreport/v1alpha2"
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	openreportsv1alpha1 "github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 
 var (

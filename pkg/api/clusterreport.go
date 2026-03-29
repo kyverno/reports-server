@@ -8,7 +8,6 @@ import (
 
 	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/utils"
-	openreportsv1alpha1 "github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	errorpkg "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
@@ -20,6 +19,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/klog/v2"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type clusterReportStore struct {
