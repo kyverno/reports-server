@@ -7,6 +7,7 @@ import (
 	"github.com/kyverno/reports-server/pkg/app"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/component-base/logs"
+	"k8s.io/klog/v2"
 )
 
 func main() {
@@ -17,6 +18,7 @@ func main() {
 	}
 	cmd := app.NewPolicyServer(genericapiserver.SetupSignalHandler())
 	if err := cmd.Execute(); err != nil {
-		panic(err)
+		klog.Errorf("failed to execute: %s", err.Error())
+		os.Exit(1)
 	}
 }
