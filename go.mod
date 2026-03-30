@@ -7,18 +7,17 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/kyverno/kyverno v1.17.1
 	github.com/lib/pq v1.10.9
+	github.com/openreports/reports-api v0.2.1
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
 	go.etcd.io/etcd/client/v3 v3.6.5
 	google.golang.org/grpc v1.78.0
-	k8s.io/api v0.35.1
 	k8s.io/apimachinery v0.35.1
 	k8s.io/apiserver v0.35.1
 	k8s.io/client-go v0.35.1
 	k8s.io/component-base v0.35.1
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/kube-aggregator v0.35.1
-	k8s.io/kube-openapi v0.0.0-20251125145642-4e65d59e963e
 	openreports.io v0.0.0-00010101000000-000000000000
 	sigs.k8s.io/wg-policy-prototypes v0.0.0-20231226153523-db3ef51d230f
 )
@@ -212,7 +211,6 @@ require (
 	github.com/open-policy-agent/opa v1.12.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/openreports/reports-api v0.2.1 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
@@ -314,9 +312,11 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	k8s.io/api v0.35.1 // indirect
 	k8s.io/apiextensions-apiserver v0.35.1 // indirect
 	k8s.io/cli-runtime v0.35.1 // indirect
 	k8s.io/kms v0.35.1 // indirect
+	k8s.io/kube-openapi v0.0.0-20251125145642-4e65d59e963e // indirect
 	k8s.io/kubectl v0.35.0 // indirect
 	k8s.io/pod-security-admission v0.35.0 // indirect
 	k8s.io/utils v0.0.0-20251222233032-718f0e51e6d2 // indirect
