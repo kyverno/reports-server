@@ -1,11 +1,9 @@
 ---
-# Source: reports-server/templates/namespace.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
   name: reports-server
 ---
-# Source: reports-server/templates/pod-disruption-budget.yaml
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -23,7 +21,6 @@ spec:
       app.kubernetes.io/name: reports-server
   maxUnavailable: 50%
 ---
-# Source: reports-server/templates/service-account.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -36,7 +33,6 @@ metadata:
     app.kubernetes.io/version: "v0.1.6"
     app.kubernetes.io/managed-by: Helm
 ---
-# Source: reports-server/templates/cluster-roles.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -137,7 +133,6 @@ rules:
   verbs:
     - create
 ---
-# Source: reports-server/templates/cluster-roles.yaml
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -157,7 +152,6 @@ subjects:
   name: reports-server
   namespace: reports-server
 ---
-# Source: reports-server/templates/roles.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -178,7 +172,6 @@ rules:
     - get
     - list
 ---
-# Source: reports-server/templates/roles.yaml
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -199,7 +192,6 @@ subjects:
   name: reports-server
   namespace: reports-server
 ---
-# Source: reports-server/templates/roles.yaml
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -220,7 +212,6 @@ subjects:
   name: reports-server
   namespace: reports-server
 ---
-# Source: reports-server/templates/etcd.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -247,7 +238,6 @@ spec:
   - name: etcd-metrics
     port: 8080
 ---
-# Source: reports-server/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -270,7 +260,6 @@ spec:
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
 ---
-# Source: reports-server/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -378,7 +367,6 @@ spec:
       - emptyDir: {}
         name: tmp-dir
 ---
-# Source: reports-server/templates/etcd.yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
