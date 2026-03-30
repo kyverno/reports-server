@@ -6,12 +6,12 @@ import (
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/api"
 	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
-	openreportsv1alpha1 "github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
 	"k8s.io/klog/v2"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 )
 

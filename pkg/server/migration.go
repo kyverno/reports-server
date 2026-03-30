@@ -7,13 +7,13 @@ import (
 	v1 "github.com/kyverno/kyverno/api/reports/v1"
 	kyverno "github.com/kyverno/kyverno/pkg/clients/kyverno"
 	"github.com/kyverno/reports-server/pkg/utils"
-	openreportsv1alpha1 "github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
-	openreportsclient "github.com/openreports/reports-api/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 	watchtools "k8s.io/client-go/tools/watch"
 	"k8s.io/klog/v2"
+	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
+	openreportsclient "openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2"
 	"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/generated/v1alpha2/clientset/versioned"
 )
@@ -87,7 +87,7 @@ func (c *Config) handleMigrateWgPolicyApis(ctx context.Context, policyClient *ve
 			return policyClient.Wgpolicyk8sV1alpha2().ClusterPolicyReports().Watch(ctx, options)
 		},
 	}
-	cpolrWatchInterface, err := watchtools.NewRetryWatcherWithContext(ctx, cpolrs.GetResourceVersion(), cpolrWatcher)
+	cpolrWatchInterface, err := watchtools.NewRetryWatcher(cpolrs.GetResourceVersion(), cpolrWatcher)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func (c *Config) handleMigrateWgPolicyApis(ctx context.Context, policyClient *ve
 			return policyClient.Wgpolicyk8sV1alpha2().PolicyReports("").Watch(ctx, options)
 		},
 	}
-	polrWatchInterface, err := watchtools.NewRetryWatcherWithContext(ctx, polrs.GetResourceVersion(), polrWatcher)
+	polrWatchInterface, err := watchtools.NewRetryWatcher(polrs.GetResourceVersion(), polrWatcher)
 	if err != nil {
 		return err
 	}
@@ -166,7 +166,7 @@ func (c *Config) handleMigrateEphrApis(ctx context.Context, kyvernoClient kyvern
 			return kyvernoClient.ReportsV1().ClusterEphemeralReports().Watch(ctx, options)
 		},
 	}
-	cephrWatchInterface, err := watchtools.NewRetryWatcherWithContext(ctx, cephrs.GetResourceVersion(), cephrWatcher)
+	cephrWatchInterface, err := watchtools.NewRetryWatcher(cephrs.GetResourceVersion(), cephrWatcher)
 	if err != nil {
 		return err
 	}
@@ -205,7 +205,7 @@ func (c *Config) handleMigrateEphrApis(ctx context.Context, kyvernoClient kyvern
 			return kyvernoClient.ReportsV1().EphemeralReports("").Watch(ctx, options)
 		},
 	}
-	ephrWatchInterface, err := watchtools.NewRetryWatcherWithContext(ctx, ephrs.GetResourceVersion(), ephrWatcher)
+	ephrWatchInterface, err := watchtools.NewRetryWatcher(ephrs.GetResourceVersion(), ephrWatcher)
 	if err != nil {
 		return err
 	}
@@ -245,7 +245,7 @@ func (c *Config) handleMigrateOpenreportsApis(ctx context.Context, orClient open
 			return orClient.ClusterReports().Watch(ctx, options)
 		},
 	}
-	crepsWatchInterface, err := watchtools.NewRetryWatcherWithContext(ctx, creps.GetResourceVersion(), crepsWatcher)
+	crepsWatchInterface, err := watchtools.NewRetryWatcher(creps.GetResourceVersion(), crepsWatcher)
 	if err != nil {
 		return err
 	}
@@ -283,7 +283,7 @@ func (c *Config) handleMigrateOpenreportsApis(ctx context.Context, orClient open
 			return orClient.Reports("").Watch(ctx, options)
 		},
 	}
-	reportsWatchInterface, err := watchtools.NewRetryWatcherWithContext(ctx, reports.GetResourceVersion(), reportsWatcher)
+	reportsWatchInterface, err := watchtools.NewRetryWatcher(reports.GetResourceVersion(), reportsWatcher)
 	if err != nil {
 		return err
 	}
