@@ -35,21 +35,24 @@ func (c *Config) migration(ctx context.Context) error {
 
 	if c.APIServices.StoreReports {
 		if err := c.handleMigrateWgPolicyApis(ctx, policyClient, workerChan); err != nil {
+			klog.Errorf("unable to migrate wgpolicyk8s reports: %s", err.Error())
 			return err
 		}
 	}
 
 	if c.APIServices.StoreEphemeralReports {
 		if err := c.handleMigrateEphrApis(ctx, kyvernoClient, workerChan); err != nil {
+			klog.Errorf("unable to migrate ephemeral reports: %s", err.Error())
 			return err
 		}
 	}
 
-	if c.APIServices.StoreOpenreports {
-		if err := c.handleMigrateOpenreportsApis(ctx, orClient, workerChan); err != nil {
-			return err
-		}
-	}
+	// if c.APIServices.StoreOpenreports {
+	// 	if err := c.handleMigrateOpenreportsApis(ctx, orClient, workerChan); err != nil {
+	// 		klog.Errorf("unable to migrate ephemeral reports: %s", err.Error())
+	// 		return err
+	// 	}
+	// }
 	return nil
 }
 
