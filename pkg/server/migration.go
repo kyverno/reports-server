@@ -81,6 +81,7 @@ func (c *Config) handleMigrateWgPolicyApis(ctx context.Context, policyClient *ve
 	if err != nil {
 		return err
 	}
+
 	cpolrWatcher := &cache.ListWatch{
 		WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 			return policyClient.Wgpolicyk8sV1alpha2().ClusterPolicyReports().Watch(ctx, options)

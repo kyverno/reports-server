@@ -119,6 +119,8 @@ func (c *genericClusterInMemStore[T, PT]) Delete(ctx context.Context, name strin
 }
 
 func (g *genericClusterInMemStore[T, PT]) Count(ctx context.Context) (int, error) {
+	g.Lock()
+	defer g.Unlock()
 	return len(g.db), nil
 }
 
