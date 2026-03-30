@@ -953,7 +953,7 @@ func schema_kyverno_api_reports_v1_EphemeralReportSpec(ref common.ReferenceCallb
 						SchemaProps: spec.SchemaProps{
 							Description: "PolicyReportSummary provides a summary of results",
 							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReportSummary"),
+							Ref:         ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportSummary"),
 						},
 					},
 					"results": {
@@ -964,7 +964,7 @@ func schema_kyverno_api_reports_v1_EphemeralReportSpec(ref common.ReferenceCallb
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReportResult"),
+										Ref:     ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportResult"),
 									},
 								},
 							},
@@ -975,7 +975,7 @@ func schema_kyverno_api_reports_v1_EphemeralReportSpec(ref common.ReferenceCallb
 			},
 		},
 		Dependencies: []string{
-			"github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReportResult", "github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReportSummary", metav1.OwnerReference{}.OpenAPIModelName()},
+			"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportResult", "github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportSummary", metav1.OwnerReference{}.OpenAPIModelName()},
 	}
 }
 
