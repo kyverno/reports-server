@@ -21,8 +21,9 @@ import (
 func NewPolicyServer(stopCh <-chan struct{}) *cobra.Command {
 	opts := opts.NewOptions()
 	cmd := &cobra.Command{
-		Short: "Launch reports-server",
-		Long:  "Launch reports-server",
+		Short:        "Launch reports-server",
+		Long:         "Launch reports-server",
+		SilenceUsage: true,
 		RunE: func(c *cobra.Command, args []string) error {
 			if err := runCommand(opts, stopCh); err != nil {
 				return err
