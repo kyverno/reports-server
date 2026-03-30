@@ -136,7 +136,6 @@ func (c *genericClusterGetter[T, PT]) Count(ctx context.Context) (int, error) {
 		ctx,
 		fmt.Sprintf("SELECT COUNT(*) FROM %s", c.tableName),
 	).Scan(&count)
-
 	if err != nil {
 		return 0, err
 	}

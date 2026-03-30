@@ -294,7 +294,8 @@ func (c *Config) migrateReport(ctx context.Context,
 	policyClient versioned.Interface,
 	orClient openreportsclient.OpenreportsV1alpha1Interface,
 	workerChan chan struct{},
-	wg *sync.WaitGroup, report any) {
+	wg *sync.WaitGroup, report any,
+) {
 	defer wg.Done()
 
 	// book a slot in the worker chan

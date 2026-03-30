@@ -143,7 +143,6 @@ func (c *genericGetter[T, PT]) Count(ctx context.Context) (int, error) {
 		fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE cluster_id = $1", c.tableName),
 		c.clusterUID,
 	).Scan(&count)
-
 	if err != nil {
 		return 0, err
 	}
