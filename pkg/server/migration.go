@@ -27,10 +27,10 @@ func (c *Config) migration(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	orClient, err := openreportsclient.NewForConfig(c.Rest)
-	if err != nil {
-		return err
-	}
+	// orClient, err := openreportsclient.NewForConfig(c.Rest)
+	// if err != nil {
+	// 	return err
+	// }
 	workerChan := make(chan struct{}, numWorkers)
 
 	if c.APIServices.StoreReports {
