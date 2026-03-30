@@ -35,25 +35,19 @@ func (c *Config) migration(ctx context.Context) error {
 
 	if c.APIServices.StoreReports {
 		if err := c.handleMigrateWgPolicyApis(ctx, policyClient, workerChan); err != nil {
-			klog.Errorf("unable to migrate wgpolicyk8s reports: %s. this api will not be served", err.Error())
-			// set the config flag value to false to not serve this api because it errored
-			c.APIServices.StoreReports = false
+			klog.Errorf("unable to migrate wgpolicyk8s reports: %s", err.Error())
 		}
 	}
 
 	if c.APIServices.StoreEphemeralReports {
 		if err := c.handleMigrateEphrApis(ctx, kyvernoClient, workerChan); err != nil {
-			klog.Errorf("unable to migrate ephemeral reports: %s. this api will not be served", err.Error())
-			// set the config flag value to false to not serve this api because it errored
-			c.APIServices.StoreEphemeralReports = false
+			klog.Errorf("unable to migrate ephemeral reports: %s", err.Error())
 		}
 	}
 
 	if c.APIServices.StoreOpenreports {
 		if err := c.handleMigrateOpenreportsApis(ctx, orClient, workerChan); err != nil {
-			klog.Errorf("unable to migrate ephemeral reports: %s. this api will not be served", err.Error())
-			// set the config flag value to false to not serve this api because it errored
-			c.APIServices.StoreOpenreports = false
+			klog.Errorf("unable to migrate ephemeral reports: %s", err.Error())
 		}
 	}
 
