@@ -31,317 +31,317 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.ClusterPolicyReport":                           schema_kyverno_api_policyreport_v1alpha2_ClusterPolicyReport(ref),
-		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.ClusterPolicyReportList":                       schema_kyverno_api_policyreport_v1alpha2_ClusterPolicyReportList(ref),
-		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReport":                                  schema_kyverno_api_policyreport_v1alpha2_PolicyReport(ref),
-		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReportList":                              schema_kyverno_api_policyreport_v1alpha2_PolicyReportList(ref),
-		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReportResult":                            schema_kyverno_api_policyreport_v1alpha2_PolicyReportResult(ref),
-		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReportSummary":                           schema_kyverno_api_policyreport_v1alpha2_PolicyReportSummary(ref),
-		"github.com/kyverno/kyverno/api/reports/v1.ClusterEphemeralReport":                                   schema_kyverno_api_reports_v1_ClusterEphemeralReport(ref),
-		"github.com/kyverno/kyverno/api/reports/v1.ClusterEphemeralReportList":                               schema_kyverno_api_reports_v1_ClusterEphemeralReportList(ref),
-		"github.com/kyverno/kyverno/api/reports/v1.EphemeralReport":                                          schema_kyverno_api_reports_v1_EphemeralReport(ref),
-		"github.com/kyverno/kyverno/api/reports/v1.EphemeralReportList":                                      schema_kyverno_api_reports_v1_EphemeralReportList(ref),
-		"github.com/kyverno/kyverno/api/reports/v1.EphemeralReportSpec":                                      schema_kyverno_api_reports_v1_EphemeralReportSpec(ref),
-		v1.AWSElasticBlockStoreVolumeSource{}.OpenAPIModelName():                                             schema_k8sio_api_core_v1_AWSElasticBlockStoreVolumeSource(ref),
-		v1.Affinity{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_Affinity(ref),
-		v1.AppArmorProfile{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_AppArmorProfile(ref),
-		v1.AttachedVolume{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_AttachedVolume(ref),
-		v1.AvoidPods{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_AvoidPods(ref),
-		v1.AzureDiskVolumeSource{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_AzureDiskVolumeSource(ref),
-		v1.AzureFilePersistentVolumeSource{}.OpenAPIModelName():                                              schema_k8sio_api_core_v1_AzureFilePersistentVolumeSource(ref),
-		v1.AzureFileVolumeSource{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_AzureFileVolumeSource(ref),
-		v1.Binding{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_Binding(ref),
-		v1.CSIPersistentVolumeSource{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_CSIPersistentVolumeSource(ref),
-		v1.CSIVolumeSource{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_CSIVolumeSource(ref),
-		v1.Capabilities{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_Capabilities(ref),
-		v1.CephFSPersistentVolumeSource{}.OpenAPIModelName():                                                 schema_k8sio_api_core_v1_CephFSPersistentVolumeSource(ref),
-		v1.CephFSVolumeSource{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_CephFSVolumeSource(ref),
-		v1.CinderPersistentVolumeSource{}.OpenAPIModelName():                                                 schema_k8sio_api_core_v1_CinderPersistentVolumeSource(ref),
-		v1.CinderVolumeSource{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_CinderVolumeSource(ref),
-		v1.ClientIPConfig{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_ClientIPConfig(ref),
-		v1.ClusterTrustBundleProjection{}.OpenAPIModelName():                                                 schema_k8sio_api_core_v1_ClusterTrustBundleProjection(ref),
-		v1.ComponentCondition{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_ComponentCondition(ref),
-		v1.ComponentStatus{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_ComponentStatus(ref),
-		v1.ComponentStatusList{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_ComponentStatusList(ref),
-		v1.ConfigMap{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_ConfigMap(ref),
-		v1.ConfigMapEnvSource{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_ConfigMapEnvSource(ref),
-		v1.ConfigMapKeySelector{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_ConfigMapKeySelector(ref),
-		v1.ConfigMapList{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ConfigMapList(ref),
-		v1.ConfigMapNodeConfigSource{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_ConfigMapNodeConfigSource(ref),
-		v1.ConfigMapProjection{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_ConfigMapProjection(ref),
-		v1.ConfigMapVolumeSource{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_ConfigMapVolumeSource(ref),
-		v1.Container{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_Container(ref),
-		v1.ContainerExtendedResourceRequest{}.OpenAPIModelName():                                             schema_k8sio_api_core_v1_ContainerExtendedResourceRequest(ref),
-		v1.ContainerImage{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_ContainerImage(ref),
-		v1.ContainerPort{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ContainerPort(ref),
-		v1.ContainerResizePolicy{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_ContainerResizePolicy(ref),
-		v1.ContainerRestartRule{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_ContainerRestartRule(ref),
-		v1.ContainerRestartRuleOnExitCodes{}.OpenAPIModelName():                                              schema_k8sio_api_core_v1_ContainerRestartRuleOnExitCodes(ref),
-		v1.ContainerState{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_ContainerState(ref),
-		v1.ContainerStateRunning{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_ContainerStateRunning(ref),
-		v1.ContainerStateTerminated{}.OpenAPIModelName():                                                     schema_k8sio_api_core_v1_ContainerStateTerminated(ref),
-		v1.ContainerStateWaiting{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_ContainerStateWaiting(ref),
-		v1.ContainerStatus{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_ContainerStatus(ref),
-		v1.ContainerUser{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ContainerUser(ref),
-		v1.DaemonEndpoint{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_DaemonEndpoint(ref),
-		v1.DownwardAPIProjection{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_DownwardAPIProjection(ref),
-		v1.DownwardAPIVolumeFile{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_DownwardAPIVolumeFile(ref),
-		v1.DownwardAPIVolumeSource{}.OpenAPIModelName():                                                      schema_k8sio_api_core_v1_DownwardAPIVolumeSource(ref),
-		v1.EmptyDirVolumeSource{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_EmptyDirVolumeSource(ref),
-		v1.EndpointAddress{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_EndpointAddress(ref),
-		v1.EndpointPort{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_EndpointPort(ref),
-		v1.EndpointSubset{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_EndpointSubset(ref),
-		v1.Endpoints{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_Endpoints(ref),
-		v1.EndpointsList{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_EndpointsList(ref),
-		v1.EnvFromSource{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_EnvFromSource(ref),
-		v1.EnvVar{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_EnvVar(ref),
-		v1.EnvVarSource{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_EnvVarSource(ref),
-		v1.EphemeralContainer{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_EphemeralContainer(ref),
-		v1.EphemeralContainerCommon{}.OpenAPIModelName():                                                     schema_k8sio_api_core_v1_EphemeralContainerCommon(ref),
-		v1.EphemeralVolumeSource{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_EphemeralVolumeSource(ref),
-		v1.Event{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_Event(ref),
-		v1.EventList{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_EventList(ref),
-		v1.EventSeries{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_EventSeries(ref),
-		v1.EventSource{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_EventSource(ref),
-		v1.ExecAction{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_ExecAction(ref),
-		v1.FCVolumeSource{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_FCVolumeSource(ref),
-		v1.FileKeySelector{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_FileKeySelector(ref),
-		v1.FlexPersistentVolumeSource{}.OpenAPIModelName():                                                   schema_k8sio_api_core_v1_FlexPersistentVolumeSource(ref),
-		v1.FlexVolumeSource{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_FlexVolumeSource(ref),
-		v1.FlockerVolumeSource{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_FlockerVolumeSource(ref),
-		v1.GCEPersistentDiskVolumeSource{}.OpenAPIModelName():                                                schema_k8sio_api_core_v1_GCEPersistentDiskVolumeSource(ref),
-		v1.GRPCAction{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_GRPCAction(ref),
-		v1.GitRepoVolumeSource{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_GitRepoVolumeSource(ref),
-		v1.GlusterfsPersistentVolumeSource{}.OpenAPIModelName():                                              schema_k8sio_api_core_v1_GlusterfsPersistentVolumeSource(ref),
-		v1.GlusterfsVolumeSource{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_GlusterfsVolumeSource(ref),
-		v1.HTTPGetAction{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_HTTPGetAction(ref),
-		v1.HTTPHeader{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_HTTPHeader(ref),
-		v1.HostAlias{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_HostAlias(ref),
-		v1.HostIP{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_HostIP(ref),
-		v1.HostPathVolumeSource{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_HostPathVolumeSource(ref),
-		v1.ISCSIPersistentVolumeSource{}.OpenAPIModelName():                                                  schema_k8sio_api_core_v1_ISCSIPersistentVolumeSource(ref),
-		v1.ISCSIVolumeSource{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ISCSIVolumeSource(ref),
-		v1.ImageVolumeSource{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ImageVolumeSource(ref),
-		v1.KeyToPath{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_KeyToPath(ref),
-		v1.Lifecycle{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_Lifecycle(ref),
-		v1.LifecycleHandler{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_LifecycleHandler(ref),
-		v1.LimitRange{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_LimitRange(ref),
-		v1.LimitRangeItem{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_LimitRangeItem(ref),
-		v1.LimitRangeList{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_LimitRangeList(ref),
-		v1.LimitRangeSpec{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_LimitRangeSpec(ref),
-		v1.LinuxContainerUser{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_LinuxContainerUser(ref),
-		v1.List{}.OpenAPIModelName():                                                                         schema_k8sio_api_core_v1_List(ref),
-		v1.LoadBalancerIngress{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_LoadBalancerIngress(ref),
-		v1.LoadBalancerStatus{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_LoadBalancerStatus(ref),
-		v1.LocalObjectReference{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_LocalObjectReference(ref),
-		v1.LocalVolumeSource{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_LocalVolumeSource(ref),
-		v1.ModifyVolumeStatus{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_ModifyVolumeStatus(ref),
-		v1.NFSVolumeSource{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_NFSVolumeSource(ref),
-		v1.Namespace{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_Namespace(ref),
-		v1.NamespaceCondition{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_NamespaceCondition(ref),
-		v1.NamespaceList{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_NamespaceList(ref),
-		v1.NamespaceSpec{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_NamespaceSpec(ref),
-		v1.NamespaceStatus{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_NamespaceStatus(ref),
-		v1.Node{}.OpenAPIModelName():                                                                         schema_k8sio_api_core_v1_Node(ref),
-		v1.NodeAddress{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_NodeAddress(ref),
-		v1.NodeAffinity{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_NodeAffinity(ref),
-		v1.NodeCondition{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_NodeCondition(ref),
-		v1.NodeConfigSource{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_NodeConfigSource(ref),
-		v1.NodeConfigStatus{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_NodeConfigStatus(ref),
-		v1.NodeDaemonEndpoints{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_NodeDaemonEndpoints(ref),
-		v1.NodeFeatures{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_NodeFeatures(ref),
-		v1.NodeList{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_NodeList(ref),
-		v1.NodeProxyOptions{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_NodeProxyOptions(ref),
-		v1.NodeRuntimeHandler{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_NodeRuntimeHandler(ref),
-		v1.NodeRuntimeHandlerFeatures{}.OpenAPIModelName():                                                   schema_k8sio_api_core_v1_NodeRuntimeHandlerFeatures(ref),
-		v1.NodeSelector{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_NodeSelector(ref),
-		v1.NodeSelectorRequirement{}.OpenAPIModelName():                                                      schema_k8sio_api_core_v1_NodeSelectorRequirement(ref),
-		v1.NodeSelectorTerm{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_NodeSelectorTerm(ref),
-		v1.NodeSpec{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_NodeSpec(ref),
-		v1.NodeStatus{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_NodeStatus(ref),
-		v1.NodeSwapStatus{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_NodeSwapStatus(ref),
-		v1.NodeSystemInfo{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_NodeSystemInfo(ref),
-		v1.ObjectFieldSelector{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_ObjectFieldSelector(ref),
-		v1.ObjectReference{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_ObjectReference(ref),
-		v1.PersistentVolume{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_PersistentVolume(ref),
-		v1.PersistentVolumeClaim{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_PersistentVolumeClaim(ref),
-		v1.PersistentVolumeClaimCondition{}.OpenAPIModelName():                                               schema_k8sio_api_core_v1_PersistentVolumeClaimCondition(ref),
-		v1.PersistentVolumeClaimList{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_PersistentVolumeClaimList(ref),
-		v1.PersistentVolumeClaimSpec{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_PersistentVolumeClaimSpec(ref),
-		v1.PersistentVolumeClaimStatus{}.OpenAPIModelName():                                                  schema_k8sio_api_core_v1_PersistentVolumeClaimStatus(ref),
-		v1.PersistentVolumeClaimTemplate{}.OpenAPIModelName():                                                schema_k8sio_api_core_v1_PersistentVolumeClaimTemplate(ref),
-		v1.PersistentVolumeClaimVolumeSource{}.OpenAPIModelName():                                            schema_k8sio_api_core_v1_PersistentVolumeClaimVolumeSource(ref),
-		v1.PersistentVolumeList{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_PersistentVolumeList(ref),
-		v1.PersistentVolumeSource{}.OpenAPIModelName():                                                       schema_k8sio_api_core_v1_PersistentVolumeSource(ref),
-		v1.PersistentVolumeSpec{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_PersistentVolumeSpec(ref),
-		v1.PersistentVolumeStatus{}.OpenAPIModelName():                                                       schema_k8sio_api_core_v1_PersistentVolumeStatus(ref),
-		v1.PhotonPersistentDiskVolumeSource{}.OpenAPIModelName():                                             schema_k8sio_api_core_v1_PhotonPersistentDiskVolumeSource(ref),
-		v1.Pod{}.OpenAPIModelName():                                                                          schema_k8sio_api_core_v1_Pod(ref),
-		v1.PodAffinity{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_PodAffinity(ref),
-		v1.PodAffinityTerm{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_PodAffinityTerm(ref),
-		v1.PodAntiAffinity{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_PodAntiAffinity(ref),
-		v1.PodAttachOptions{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_PodAttachOptions(ref),
-		v1.PodCertificateProjection{}.OpenAPIModelName():                                                     schema_k8sio_api_core_v1_PodCertificateProjection(ref),
-		v1.PodCondition{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_PodCondition(ref),
-		v1.PodDNSConfig{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_PodDNSConfig(ref),
-		v1.PodDNSConfigOption{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_PodDNSConfigOption(ref),
-		v1.PodExecOptions{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_PodExecOptions(ref),
-		v1.PodExtendedResourceClaimStatus{}.OpenAPIModelName():                                               schema_k8sio_api_core_v1_PodExtendedResourceClaimStatus(ref),
-		v1.PodIP{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_PodIP(ref),
-		v1.PodList{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_PodList(ref),
-		v1.PodLogOptions{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_PodLogOptions(ref),
-		v1.PodOS{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_PodOS(ref),
-		v1.PodPortForwardOptions{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_PodPortForwardOptions(ref),
-		v1.PodProxyOptions{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_PodProxyOptions(ref),
-		v1.PodReadinessGate{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_PodReadinessGate(ref),
-		v1.PodResourceClaim{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_PodResourceClaim(ref),
-		v1.PodResourceClaimStatus{}.OpenAPIModelName():                                                       schema_k8sio_api_core_v1_PodResourceClaimStatus(ref),
-		v1.PodSchedulingGate{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_PodSchedulingGate(ref),
-		v1.PodSecurityContext{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_PodSecurityContext(ref),
-		v1.PodSignature{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_PodSignature(ref),
-		v1.PodSpec{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_PodSpec(ref),
-		v1.PodStatus{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_PodStatus(ref),
-		v1.PodStatusResult{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_PodStatusResult(ref),
-		v1.PodTemplate{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_PodTemplate(ref),
-		v1.PodTemplateList{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_PodTemplateList(ref),
-		v1.PodTemplateSpec{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_PodTemplateSpec(ref),
-		v1.PortStatus{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_PortStatus(ref),
-		v1.PortworxVolumeSource{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_PortworxVolumeSource(ref),
-		v1.PreferAvoidPodsEntry{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_PreferAvoidPodsEntry(ref),
-		v1.PreferredSchedulingTerm{}.OpenAPIModelName():                                                      schema_k8sio_api_core_v1_PreferredSchedulingTerm(ref),
-		v1.Probe{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_Probe(ref),
-		v1.ProbeHandler{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_ProbeHandler(ref),
-		v1.ProjectedVolumeSource{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_ProjectedVolumeSource(ref),
-		v1.QuobyteVolumeSource{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_QuobyteVolumeSource(ref),
-		v1.RBDPersistentVolumeSource{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_RBDPersistentVolumeSource(ref),
-		v1.RBDVolumeSource{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_RBDVolumeSource(ref),
-		v1.RangeAllocation{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_RangeAllocation(ref),
-		v1.ReplicationController{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_ReplicationController(ref),
-		v1.ReplicationControllerCondition{}.OpenAPIModelName():                                               schema_k8sio_api_core_v1_ReplicationControllerCondition(ref),
-		v1.ReplicationControllerList{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_ReplicationControllerList(ref),
-		v1.ReplicationControllerSpec{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_ReplicationControllerSpec(ref),
-		v1.ReplicationControllerStatus{}.OpenAPIModelName():                                                  schema_k8sio_api_core_v1_ReplicationControllerStatus(ref),
-		v1.ResourceClaim{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ResourceClaim(ref),
-		v1.ResourceFieldSelector{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_ResourceFieldSelector(ref),
-		v1.ResourceHealth{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_ResourceHealth(ref),
-		v1.ResourceQuota{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ResourceQuota(ref),
-		v1.ResourceQuotaList{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ResourceQuotaList(ref),
-		v1.ResourceQuotaSpec{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ResourceQuotaSpec(ref),
-		v1.ResourceQuotaStatus{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_ResourceQuotaStatus(ref),
-		v1.ResourceRequirements{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_ResourceRequirements(ref),
-		v1.ResourceStatus{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_ResourceStatus(ref),
-		v1.SELinuxOptions{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_SELinuxOptions(ref),
-		v1.ScaleIOPersistentVolumeSource{}.OpenAPIModelName():                                                schema_k8sio_api_core_v1_ScaleIOPersistentVolumeSource(ref),
-		v1.ScaleIOVolumeSource{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_ScaleIOVolumeSource(ref),
-		v1.ScopeSelector{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ScopeSelector(ref),
-		v1.ScopedResourceSelectorRequirement{}.OpenAPIModelName():                                            schema_k8sio_api_core_v1_ScopedResourceSelectorRequirement(ref),
-		v1.SeccompProfile{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_SeccompProfile(ref),
-		v1.Secret{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_Secret(ref),
-		v1.SecretEnvSource{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_SecretEnvSource(ref),
-		v1.SecretKeySelector{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_SecretKeySelector(ref),
-		v1.SecretList{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_SecretList(ref),
-		v1.SecretProjection{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_SecretProjection(ref),
-		v1.SecretReference{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_SecretReference(ref),
-		v1.SecretVolumeSource{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_SecretVolumeSource(ref),
-		v1.SecurityContext{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_SecurityContext(ref),
-		v1.SerializedReference{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_SerializedReference(ref),
-		v1.Service{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_Service(ref),
-		v1.ServiceAccount{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_ServiceAccount(ref),
-		v1.ServiceAccountList{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_ServiceAccountList(ref),
-		v1.ServiceAccountTokenProjection{}.OpenAPIModelName():                                                schema_k8sio_api_core_v1_ServiceAccountTokenProjection(ref),
-		v1.ServiceList{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_ServiceList(ref),
-		v1.ServicePort{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_ServicePort(ref),
-		v1.ServiceProxyOptions{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_ServiceProxyOptions(ref),
-		v1.ServiceSpec{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_ServiceSpec(ref),
-		v1.ServiceStatus{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ServiceStatus(ref),
-		v1.SessionAffinityConfig{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_SessionAffinityConfig(ref),
-		v1.SleepAction{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_SleepAction(ref),
-		v1.StorageOSPersistentVolumeSource{}.OpenAPIModelName():                                              schema_k8sio_api_core_v1_StorageOSPersistentVolumeSource(ref),
-		v1.StorageOSVolumeSource{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_StorageOSVolumeSource(ref),
-		v1.Sysctl{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_Sysctl(ref),
-		v1.TCPSocketAction{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_TCPSocketAction(ref),
-		v1.Taint{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_Taint(ref),
-		v1.Toleration{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_Toleration(ref),
-		v1.TopologySelectorLabelRequirement{}.OpenAPIModelName():                                             schema_k8sio_api_core_v1_TopologySelectorLabelRequirement(ref),
-		v1.TopologySelectorTerm{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_TopologySelectorTerm(ref),
-		v1.TopologySpreadConstraint{}.OpenAPIModelName():                                                     schema_k8sio_api_core_v1_TopologySpreadConstraint(ref),
-		v1.TypedLocalObjectReference{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_TypedLocalObjectReference(ref),
-		v1.TypedObjectReference{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_TypedObjectReference(ref),
-		v1.Volume{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_Volume(ref),
-		v1.VolumeDevice{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_VolumeDevice(ref),
-		v1.VolumeMount{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_VolumeMount(ref),
-		v1.VolumeMountStatus{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_VolumeMountStatus(ref),
-		v1.VolumeNodeAffinity{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_VolumeNodeAffinity(ref),
-		v1.VolumeProjection{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_VolumeProjection(ref),
-		v1.VolumeResourceRequirements{}.OpenAPIModelName():                                                   schema_k8sio_api_core_v1_VolumeResourceRequirements(ref),
-		v1.VolumeSource{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_VolumeSource(ref),
-		v1.VsphereVirtualDiskVolumeSource{}.OpenAPIModelName():                                               schema_k8sio_api_core_v1_VsphereVirtualDiskVolumeSource(ref),
-		v1.WeightedPodAffinityTerm{}.OpenAPIModelName():                                                      schema_k8sio_api_core_v1_WeightedPodAffinityTerm(ref),
-		v1.WindowsSecurityContextOptions{}.OpenAPIModelName():                                                schema_k8sio_api_core_v1_WindowsSecurityContextOptions(ref),
-		v1.WorkloadReference{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_WorkloadReference(ref),
-		resource.Quantity{}.OpenAPIModelName():                                                               schema_apimachinery_pkg_api_resource_Quantity(ref),
-		metav1.APIGroup{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_APIGroup(ref),
-		metav1.APIGroupList{}.OpenAPIModelName():                                                             schema_pkg_apis_meta_v1_APIGroupList(ref),
-		metav1.APIResource{}.OpenAPIModelName():                                                              schema_pkg_apis_meta_v1_APIResource(ref),
-		metav1.APIResourceList{}.OpenAPIModelName():                                                          schema_pkg_apis_meta_v1_APIResourceList(ref),
-		metav1.APIVersions{}.OpenAPIModelName():                                                              schema_pkg_apis_meta_v1_APIVersions(ref),
-		metav1.ApplyOptions{}.OpenAPIModelName():                                                             schema_pkg_apis_meta_v1_ApplyOptions(ref),
-		metav1.Condition{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_Condition(ref),
-		metav1.CreateOptions{}.OpenAPIModelName():                                                            schema_pkg_apis_meta_v1_CreateOptions(ref),
-		metav1.DeleteOptions{}.OpenAPIModelName():                                                            schema_pkg_apis_meta_v1_DeleteOptions(ref),
-		metav1.Duration{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_Duration(ref),
-		metav1.FieldSelectorRequirement{}.OpenAPIModelName():                                                 schema_pkg_apis_meta_v1_FieldSelectorRequirement(ref),
-		metav1.FieldsV1{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_FieldsV1(ref),
-		metav1.GetOptions{}.OpenAPIModelName():                                                               schema_pkg_apis_meta_v1_GetOptions(ref),
-		metav1.GroupKind{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_GroupKind(ref),
-		metav1.GroupResource{}.OpenAPIModelName():                                                            schema_pkg_apis_meta_v1_GroupResource(ref),
-		metav1.GroupVersion{}.OpenAPIModelName():                                                             schema_pkg_apis_meta_v1_GroupVersion(ref),
-		metav1.GroupVersionForDiscovery{}.OpenAPIModelName():                                                 schema_pkg_apis_meta_v1_GroupVersionForDiscovery(ref),
-		metav1.GroupVersionKind{}.OpenAPIModelName():                                                         schema_pkg_apis_meta_v1_GroupVersionKind(ref),
-		metav1.GroupVersionResource{}.OpenAPIModelName():                                                     schema_pkg_apis_meta_v1_GroupVersionResource(ref),
-		metav1.InternalEvent{}.OpenAPIModelName():                                                            schema_pkg_apis_meta_v1_InternalEvent(ref),
-		metav1.LabelSelector{}.OpenAPIModelName():                                                            schema_pkg_apis_meta_v1_LabelSelector(ref),
-		metav1.LabelSelectorRequirement{}.OpenAPIModelName():                                                 schema_pkg_apis_meta_v1_LabelSelectorRequirement(ref),
-		metav1.List{}.OpenAPIModelName():                                                                     schema_pkg_apis_meta_v1_List(ref),
-		metav1.ListMeta{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_ListMeta(ref),
-		metav1.ListOptions{}.OpenAPIModelName():                                                              schema_pkg_apis_meta_v1_ListOptions(ref),
-		metav1.ManagedFieldsEntry{}.OpenAPIModelName():                                                       schema_pkg_apis_meta_v1_ManagedFieldsEntry(ref),
-		metav1.MicroTime{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_MicroTime(ref),
-		metav1.ObjectMeta{}.OpenAPIModelName():                                                               schema_pkg_apis_meta_v1_ObjectMeta(ref),
-		metav1.OwnerReference{}.OpenAPIModelName():                                                           schema_pkg_apis_meta_v1_OwnerReference(ref),
-		metav1.PartialObjectMetadata{}.OpenAPIModelName():                                                    schema_pkg_apis_meta_v1_PartialObjectMetadata(ref),
-		metav1.PartialObjectMetadataList{}.OpenAPIModelName():                                                schema_pkg_apis_meta_v1_PartialObjectMetadataList(ref),
-		metav1.Patch{}.OpenAPIModelName():                                                                    schema_pkg_apis_meta_v1_Patch(ref),
-		metav1.PatchOptions{}.OpenAPIModelName():                                                             schema_pkg_apis_meta_v1_PatchOptions(ref),
-		metav1.Preconditions{}.OpenAPIModelName():                                                            schema_pkg_apis_meta_v1_Preconditions(ref),
-		metav1.RootPaths{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_RootPaths(ref),
-		metav1.ServerAddressByClientCIDR{}.OpenAPIModelName():                                                schema_pkg_apis_meta_v1_ServerAddressByClientCIDR(ref),
-		metav1.Status{}.OpenAPIModelName():                                                                   schema_pkg_apis_meta_v1_Status(ref),
-		metav1.StatusCause{}.OpenAPIModelName():                                                              schema_pkg_apis_meta_v1_StatusCause(ref),
-		metav1.StatusDetails{}.OpenAPIModelName():                                                            schema_pkg_apis_meta_v1_StatusDetails(ref),
-		metav1.Table{}.OpenAPIModelName():                                                                    schema_pkg_apis_meta_v1_Table(ref),
-		metav1.TableColumnDefinition{}.OpenAPIModelName():                                                    schema_pkg_apis_meta_v1_TableColumnDefinition(ref),
-		metav1.TableOptions{}.OpenAPIModelName():                                                             schema_pkg_apis_meta_v1_TableOptions(ref),
-		metav1.TableRow{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_TableRow(ref),
-		metav1.TableRowCondition{}.OpenAPIModelName():                                                        schema_pkg_apis_meta_v1_TableRowCondition(ref),
-		metav1.Time{}.OpenAPIModelName():                                                                     schema_pkg_apis_meta_v1_Time(ref),
-		metav1.Timestamp{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_Timestamp(ref),
-		metav1.TypeMeta{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_TypeMeta(ref),
-		metav1.UpdateOptions{}.OpenAPIModelName():                                                            schema_pkg_apis_meta_v1_UpdateOptions(ref),
-		metav1.WatchEvent{}.OpenAPIModelName():                                                               schema_pkg_apis_meta_v1_WatchEvent(ref),
-		runtime.RawExtension{}.OpenAPIModelName():                                                            schema_k8sio_apimachinery_pkg_runtime_RawExtension(ref),
-		runtime.TypeMeta{}.OpenAPIModelName():                                                                schema_k8sio_apimachinery_pkg_runtime_TypeMeta(ref),
-		runtime.Unknown{}.OpenAPIModelName():                                                                 schema_k8sio_apimachinery_pkg_runtime_Unknown(ref),
-		version.Info{}.OpenAPIModelName():                                                                    schema_k8sio_apimachinery_pkg_version_Info(ref),
-		"openreports.io/apis/openreports.io/v1alpha1.ClusterReport":                                          schema_openreportsio_apis_openreportsio_v1alpha1_ClusterReport(ref),
-		"openreports.io/apis/openreports.io/v1alpha1.ClusterReportList":                                      schema_openreportsio_apis_openreportsio_v1alpha1_ClusterReportList(ref),
-		"openreports.io/apis/openreports.io/v1alpha1.Limits":                                                 schema_openreportsio_apis_openreportsio_v1alpha1_Limits(ref),
-		"openreports.io/apis/openreports.io/v1alpha1.Report":                                                 schema_openreportsio_apis_openreportsio_v1alpha1_Report(ref),
-		"openreports.io/apis/openreports.io/v1alpha1.ReportConfiguration":                                    schema_openreportsio_apis_openreportsio_v1alpha1_ReportConfiguration(ref),
-		"openreports.io/apis/openreports.io/v1alpha1.ReportList":                                             schema_openreportsio_apis_openreportsio_v1alpha1_ReportList(ref),
-		"openreports.io/apis/openreports.io/v1alpha1.ReportResult":                                           schema_openreportsio_apis_openreportsio_v1alpha1_ReportResult(ref),
-		"openreports.io/apis/openreports.io/v1alpha1.ReportSummary":                                          schema_openreportsio_apis_openreportsio_v1alpha1_ReportSummary(ref),
-		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.ClusterPolicyReport": schema_pkg_api_wgpolicyk8sio_v1alpha2_ClusterPolicyReport(ref),
+		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.ClusterPolicyReport":                               schema_kyverno_api_policyreport_v1alpha2_ClusterPolicyReport(ref),
+		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.ClusterPolicyReportList":                           schema_kyverno_api_policyreport_v1alpha2_ClusterPolicyReportList(ref),
+		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReport":                                      schema_kyverno_api_policyreport_v1alpha2_PolicyReport(ref),
+		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReportList":                                  schema_kyverno_api_policyreport_v1alpha2_PolicyReportList(ref),
+		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReportResult":                                schema_kyverno_api_policyreport_v1alpha2_PolicyReportResult(ref),
+		"github.com/kyverno/kyverno/api/policyreport/v1alpha2.PolicyReportSummary":                               schema_kyverno_api_policyreport_v1alpha2_PolicyReportSummary(ref),
+		"github.com/kyverno/kyverno/api/reports/v1.ClusterEphemeralReport":                                       schema_kyverno_api_reports_v1_ClusterEphemeralReport(ref),
+		"github.com/kyverno/kyverno/api/reports/v1.ClusterEphemeralReportList":                                   schema_kyverno_api_reports_v1_ClusterEphemeralReportList(ref),
+		"github.com/kyverno/kyverno/api/reports/v1.EphemeralReport":                                              schema_kyverno_api_reports_v1_EphemeralReport(ref),
+		"github.com/kyverno/kyverno/api/reports/v1.EphemeralReportList":                                          schema_kyverno_api_reports_v1_EphemeralReportList(ref),
+		"github.com/kyverno/kyverno/api/reports/v1.EphemeralReportSpec":                                          schema_kyverno_api_reports_v1_EphemeralReportSpec(ref),
+		"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ClusterReport":                          schema_reports_api_apis_openreportsio_v1alpha1_ClusterReport(ref),
+		"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ClusterReportList":                      schema_reports_api_apis_openreportsio_v1alpha1_ClusterReportList(ref),
+		"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.Limits":                                 schema_reports_api_apis_openreportsio_v1alpha1_Limits(ref),
+		"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.Report":                                 schema_reports_api_apis_openreportsio_v1alpha1_Report(ref),
+		"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportConfiguration":                    schema_reports_api_apis_openreportsio_v1alpha1_ReportConfiguration(ref),
+		"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportList":                             schema_reports_api_apis_openreportsio_v1alpha1_ReportList(ref),
+		"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportResult":                           schema_reports_api_apis_openreportsio_v1alpha1_ReportResult(ref),
+		"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportSummary":                          schema_reports_api_apis_openreportsio_v1alpha1_ReportSummary(ref),
+		v1.AWSElasticBlockStoreVolumeSource{}.OpenAPIModelName():                                                 schema_k8sio_api_core_v1_AWSElasticBlockStoreVolumeSource(ref),
+		v1.Affinity{}.OpenAPIModelName():                                                                         schema_k8sio_api_core_v1_Affinity(ref),
+		v1.AppArmorProfile{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_AppArmorProfile(ref),
+		v1.AttachedVolume{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_AttachedVolume(ref),
+		v1.AvoidPods{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_AvoidPods(ref),
+		v1.AzureDiskVolumeSource{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_AzureDiskVolumeSource(ref),
+		v1.AzureFilePersistentVolumeSource{}.OpenAPIModelName():                                                  schema_k8sio_api_core_v1_AzureFilePersistentVolumeSource(ref),
+		v1.AzureFileVolumeSource{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_AzureFileVolumeSource(ref),
+		v1.Binding{}.OpenAPIModelName():                                                                          schema_k8sio_api_core_v1_Binding(ref),
+		v1.CSIPersistentVolumeSource{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_CSIPersistentVolumeSource(ref),
+		v1.CSIVolumeSource{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_CSIVolumeSource(ref),
+		v1.Capabilities{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_Capabilities(ref),
+		v1.CephFSPersistentVolumeSource{}.OpenAPIModelName():                                                     schema_k8sio_api_core_v1_CephFSPersistentVolumeSource(ref),
+		v1.CephFSVolumeSource{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_CephFSVolumeSource(ref),
+		v1.CinderPersistentVolumeSource{}.OpenAPIModelName():                                                     schema_k8sio_api_core_v1_CinderPersistentVolumeSource(ref),
+		v1.CinderVolumeSource{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_CinderVolumeSource(ref),
+		v1.ClientIPConfig{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_ClientIPConfig(ref),
+		v1.ClusterTrustBundleProjection{}.OpenAPIModelName():                                                     schema_k8sio_api_core_v1_ClusterTrustBundleProjection(ref),
+		v1.ComponentCondition{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_ComponentCondition(ref),
+		v1.ComponentStatus{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_ComponentStatus(ref),
+		v1.ComponentStatusList{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_ComponentStatusList(ref),
+		v1.ConfigMap{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_ConfigMap(ref),
+		v1.ConfigMapEnvSource{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_ConfigMapEnvSource(ref),
+		v1.ConfigMapKeySelector{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_ConfigMapKeySelector(ref),
+		v1.ConfigMapList{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_ConfigMapList(ref),
+		v1.ConfigMapNodeConfigSource{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_ConfigMapNodeConfigSource(ref),
+		v1.ConfigMapProjection{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_ConfigMapProjection(ref),
+		v1.ConfigMapVolumeSource{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ConfigMapVolumeSource(ref),
+		v1.Container{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_Container(ref),
+		v1.ContainerExtendedResourceRequest{}.OpenAPIModelName():                                                 schema_k8sio_api_core_v1_ContainerExtendedResourceRequest(ref),
+		v1.ContainerImage{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_ContainerImage(ref),
+		v1.ContainerPort{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_ContainerPort(ref),
+		v1.ContainerResizePolicy{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ContainerResizePolicy(ref),
+		v1.ContainerRestartRule{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_ContainerRestartRule(ref),
+		v1.ContainerRestartRuleOnExitCodes{}.OpenAPIModelName():                                                  schema_k8sio_api_core_v1_ContainerRestartRuleOnExitCodes(ref),
+		v1.ContainerState{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_ContainerState(ref),
+		v1.ContainerStateRunning{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ContainerStateRunning(ref),
+		v1.ContainerStateTerminated{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_ContainerStateTerminated(ref),
+		v1.ContainerStateWaiting{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ContainerStateWaiting(ref),
+		v1.ContainerStatus{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_ContainerStatus(ref),
+		v1.ContainerUser{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_ContainerUser(ref),
+		v1.DaemonEndpoint{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_DaemonEndpoint(ref),
+		v1.DownwardAPIProjection{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_DownwardAPIProjection(ref),
+		v1.DownwardAPIVolumeFile{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_DownwardAPIVolumeFile(ref),
+		v1.DownwardAPIVolumeSource{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_DownwardAPIVolumeSource(ref),
+		v1.EmptyDirVolumeSource{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_EmptyDirVolumeSource(ref),
+		v1.EndpointAddress{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_EndpointAddress(ref),
+		v1.EndpointPort{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_EndpointPort(ref),
+		v1.EndpointSubset{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_EndpointSubset(ref),
+		v1.Endpoints{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_Endpoints(ref),
+		v1.EndpointsList{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_EndpointsList(ref),
+		v1.EnvFromSource{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_EnvFromSource(ref),
+		v1.EnvVar{}.OpenAPIModelName():                                                                           schema_k8sio_api_core_v1_EnvVar(ref),
+		v1.EnvVarSource{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_EnvVarSource(ref),
+		v1.EphemeralContainer{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_EphemeralContainer(ref),
+		v1.EphemeralContainerCommon{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_EphemeralContainerCommon(ref),
+		v1.EphemeralVolumeSource{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_EphemeralVolumeSource(ref),
+		v1.Event{}.OpenAPIModelName():                                                                            schema_k8sio_api_core_v1_Event(ref),
+		v1.EventList{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_EventList(ref),
+		v1.EventSeries{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_EventSeries(ref),
+		v1.EventSource{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_EventSource(ref),
+		v1.ExecAction{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_ExecAction(ref),
+		v1.FCVolumeSource{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_FCVolumeSource(ref),
+		v1.FileKeySelector{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_FileKeySelector(ref),
+		v1.FlexPersistentVolumeSource{}.OpenAPIModelName():                                                       schema_k8sio_api_core_v1_FlexPersistentVolumeSource(ref),
+		v1.FlexVolumeSource{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_FlexVolumeSource(ref),
+		v1.FlockerVolumeSource{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_FlockerVolumeSource(ref),
+		v1.GCEPersistentDiskVolumeSource{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_GCEPersistentDiskVolumeSource(ref),
+		v1.GRPCAction{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_GRPCAction(ref),
+		v1.GitRepoVolumeSource{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_GitRepoVolumeSource(ref),
+		v1.GlusterfsPersistentVolumeSource{}.OpenAPIModelName():                                                  schema_k8sio_api_core_v1_GlusterfsPersistentVolumeSource(ref),
+		v1.GlusterfsVolumeSource{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_GlusterfsVolumeSource(ref),
+		v1.HTTPGetAction{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_HTTPGetAction(ref),
+		v1.HTTPHeader{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_HTTPHeader(ref),
+		v1.HostAlias{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_HostAlias(ref),
+		v1.HostIP{}.OpenAPIModelName():                                                                           schema_k8sio_api_core_v1_HostIP(ref),
+		v1.HostPathVolumeSource{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_HostPathVolumeSource(ref),
+		v1.ISCSIPersistentVolumeSource{}.OpenAPIModelName():                                                      schema_k8sio_api_core_v1_ISCSIPersistentVolumeSource(ref),
+		v1.ISCSIVolumeSource{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ISCSIVolumeSource(ref),
+		v1.ImageVolumeSource{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ImageVolumeSource(ref),
+		v1.KeyToPath{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_KeyToPath(ref),
+		v1.Lifecycle{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_Lifecycle(ref),
+		v1.LifecycleHandler{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_LifecycleHandler(ref),
+		v1.LimitRange{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_LimitRange(ref),
+		v1.LimitRangeItem{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_LimitRangeItem(ref),
+		v1.LimitRangeList{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_LimitRangeList(ref),
+		v1.LimitRangeSpec{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_LimitRangeSpec(ref),
+		v1.LinuxContainerUser{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_LinuxContainerUser(ref),
+		v1.List{}.OpenAPIModelName():                                                                             schema_k8sio_api_core_v1_List(ref),
+		v1.LoadBalancerIngress{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_LoadBalancerIngress(ref),
+		v1.LoadBalancerStatus{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_LoadBalancerStatus(ref),
+		v1.LocalObjectReference{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_LocalObjectReference(ref),
+		v1.LocalVolumeSource{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_LocalVolumeSource(ref),
+		v1.ModifyVolumeStatus{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_ModifyVolumeStatus(ref),
+		v1.NFSVolumeSource{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_NFSVolumeSource(ref),
+		v1.Namespace{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_Namespace(ref),
+		v1.NamespaceCondition{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_NamespaceCondition(ref),
+		v1.NamespaceList{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_NamespaceList(ref),
+		v1.NamespaceSpec{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_NamespaceSpec(ref),
+		v1.NamespaceStatus{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_NamespaceStatus(ref),
+		v1.Node{}.OpenAPIModelName():                                                                             schema_k8sio_api_core_v1_Node(ref),
+		v1.NodeAddress{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_NodeAddress(ref),
+		v1.NodeAffinity{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_NodeAffinity(ref),
+		v1.NodeCondition{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_NodeCondition(ref),
+		v1.NodeConfigSource{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_NodeConfigSource(ref),
+		v1.NodeConfigStatus{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_NodeConfigStatus(ref),
+		v1.NodeDaemonEndpoints{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_NodeDaemonEndpoints(ref),
+		v1.NodeFeatures{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_NodeFeatures(ref),
+		v1.NodeList{}.OpenAPIModelName():                                                                         schema_k8sio_api_core_v1_NodeList(ref),
+		v1.NodeProxyOptions{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_NodeProxyOptions(ref),
+		v1.NodeRuntimeHandler{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_NodeRuntimeHandler(ref),
+		v1.NodeRuntimeHandlerFeatures{}.OpenAPIModelName():                                                       schema_k8sio_api_core_v1_NodeRuntimeHandlerFeatures(ref),
+		v1.NodeSelector{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_NodeSelector(ref),
+		v1.NodeSelectorRequirement{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_NodeSelectorRequirement(ref),
+		v1.NodeSelectorTerm{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_NodeSelectorTerm(ref),
+		v1.NodeSpec{}.OpenAPIModelName():                                                                         schema_k8sio_api_core_v1_NodeSpec(ref),
+		v1.NodeStatus{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_NodeStatus(ref),
+		v1.NodeSwapStatus{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_NodeSwapStatus(ref),
+		v1.NodeSystemInfo{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_NodeSystemInfo(ref),
+		v1.ObjectFieldSelector{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_ObjectFieldSelector(ref),
+		v1.ObjectReference{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_ObjectReference(ref),
+		v1.PersistentVolume{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_PersistentVolume(ref),
+		v1.PersistentVolumeClaim{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_PersistentVolumeClaim(ref),
+		v1.PersistentVolumeClaimCondition{}.OpenAPIModelName():                                                   schema_k8sio_api_core_v1_PersistentVolumeClaimCondition(ref),
+		v1.PersistentVolumeClaimList{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_PersistentVolumeClaimList(ref),
+		v1.PersistentVolumeClaimSpec{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_PersistentVolumeClaimSpec(ref),
+		v1.PersistentVolumeClaimStatus{}.OpenAPIModelName():                                                      schema_k8sio_api_core_v1_PersistentVolumeClaimStatus(ref),
+		v1.PersistentVolumeClaimTemplate{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_PersistentVolumeClaimTemplate(ref),
+		v1.PersistentVolumeClaimVolumeSource{}.OpenAPIModelName():                                                schema_k8sio_api_core_v1_PersistentVolumeClaimVolumeSource(ref),
+		v1.PersistentVolumeList{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_PersistentVolumeList(ref),
+		v1.PersistentVolumeSource{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_PersistentVolumeSource(ref),
+		v1.PersistentVolumeSpec{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_PersistentVolumeSpec(ref),
+		v1.PersistentVolumeStatus{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_PersistentVolumeStatus(ref),
+		v1.PhotonPersistentDiskVolumeSource{}.OpenAPIModelName():                                                 schema_k8sio_api_core_v1_PhotonPersistentDiskVolumeSource(ref),
+		v1.Pod{}.OpenAPIModelName():                                                                              schema_k8sio_api_core_v1_Pod(ref),
+		v1.PodAffinity{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_PodAffinity(ref),
+		v1.PodAffinityTerm{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_PodAffinityTerm(ref),
+		v1.PodAntiAffinity{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_PodAntiAffinity(ref),
+		v1.PodAttachOptions{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_PodAttachOptions(ref),
+		v1.PodCertificateProjection{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_PodCertificateProjection(ref),
+		v1.PodCondition{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_PodCondition(ref),
+		v1.PodDNSConfig{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_PodDNSConfig(ref),
+		v1.PodDNSConfigOption{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_PodDNSConfigOption(ref),
+		v1.PodExecOptions{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_PodExecOptions(ref),
+		v1.PodExtendedResourceClaimStatus{}.OpenAPIModelName():                                                   schema_k8sio_api_core_v1_PodExtendedResourceClaimStatus(ref),
+		v1.PodIP{}.OpenAPIModelName():                                                                            schema_k8sio_api_core_v1_PodIP(ref),
+		v1.PodList{}.OpenAPIModelName():                                                                          schema_k8sio_api_core_v1_PodList(ref),
+		v1.PodLogOptions{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_PodLogOptions(ref),
+		v1.PodOS{}.OpenAPIModelName():                                                                            schema_k8sio_api_core_v1_PodOS(ref),
+		v1.PodPortForwardOptions{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_PodPortForwardOptions(ref),
+		v1.PodProxyOptions{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_PodProxyOptions(ref),
+		v1.PodReadinessGate{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_PodReadinessGate(ref),
+		v1.PodResourceClaim{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_PodResourceClaim(ref),
+		v1.PodResourceClaimStatus{}.OpenAPIModelName():                                                           schema_k8sio_api_core_v1_PodResourceClaimStatus(ref),
+		v1.PodSchedulingGate{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_PodSchedulingGate(ref),
+		v1.PodSecurityContext{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_PodSecurityContext(ref),
+		v1.PodSignature{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_PodSignature(ref),
+		v1.PodSpec{}.OpenAPIModelName():                                                                          schema_k8sio_api_core_v1_PodSpec(ref),
+		v1.PodStatus{}.OpenAPIModelName():                                                                        schema_k8sio_api_core_v1_PodStatus(ref),
+		v1.PodStatusResult{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_PodStatusResult(ref),
+		v1.PodTemplate{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_PodTemplate(ref),
+		v1.PodTemplateList{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_PodTemplateList(ref),
+		v1.PodTemplateSpec{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_PodTemplateSpec(ref),
+		v1.PortStatus{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_PortStatus(ref),
+		v1.PortworxVolumeSource{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_PortworxVolumeSource(ref),
+		v1.PreferAvoidPodsEntry{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_PreferAvoidPodsEntry(ref),
+		v1.PreferredSchedulingTerm{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_PreferredSchedulingTerm(ref),
+		v1.Probe{}.OpenAPIModelName():                                                                            schema_k8sio_api_core_v1_Probe(ref),
+		v1.ProbeHandler{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_ProbeHandler(ref),
+		v1.ProjectedVolumeSource{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ProjectedVolumeSource(ref),
+		v1.QuobyteVolumeSource{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_QuobyteVolumeSource(ref),
+		v1.RBDPersistentVolumeSource{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_RBDPersistentVolumeSource(ref),
+		v1.RBDVolumeSource{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_RBDVolumeSource(ref),
+		v1.RangeAllocation{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_RangeAllocation(ref),
+		v1.ReplicationController{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ReplicationController(ref),
+		v1.ReplicationControllerCondition{}.OpenAPIModelName():                                                   schema_k8sio_api_core_v1_ReplicationControllerCondition(ref),
+		v1.ReplicationControllerList{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_ReplicationControllerList(ref),
+		v1.ReplicationControllerSpec{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_ReplicationControllerSpec(ref),
+		v1.ReplicationControllerStatus{}.OpenAPIModelName():                                                      schema_k8sio_api_core_v1_ReplicationControllerStatus(ref),
+		v1.ResourceClaim{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_ResourceClaim(ref),
+		v1.ResourceFieldSelector{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_ResourceFieldSelector(ref),
+		v1.ResourceHealth{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_ResourceHealth(ref),
+		v1.ResourceQuota{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_ResourceQuota(ref),
+		v1.ResourceQuotaList{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ResourceQuotaList(ref),
+		v1.ResourceQuotaSpec{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_ResourceQuotaSpec(ref),
+		v1.ResourceQuotaStatus{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_ResourceQuotaStatus(ref),
+		v1.ResourceRequirements{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_ResourceRequirements(ref),
+		v1.ResourceStatus{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_ResourceStatus(ref),
+		v1.SELinuxOptions{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_SELinuxOptions(ref),
+		v1.ScaleIOPersistentVolumeSource{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_ScaleIOPersistentVolumeSource(ref),
+		v1.ScaleIOVolumeSource{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_ScaleIOVolumeSource(ref),
+		v1.ScopeSelector{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_ScopeSelector(ref),
+		v1.ScopedResourceSelectorRequirement{}.OpenAPIModelName():                                                schema_k8sio_api_core_v1_ScopedResourceSelectorRequirement(ref),
+		v1.SeccompProfile{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_SeccompProfile(ref),
+		v1.Secret{}.OpenAPIModelName():                                                                           schema_k8sio_api_core_v1_Secret(ref),
+		v1.SecretEnvSource{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_SecretEnvSource(ref),
+		v1.SecretKeySelector{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_SecretKeySelector(ref),
+		v1.SecretList{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_SecretList(ref),
+		v1.SecretProjection{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_SecretProjection(ref),
+		v1.SecretReference{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_SecretReference(ref),
+		v1.SecretVolumeSource{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_SecretVolumeSource(ref),
+		v1.SecurityContext{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_SecurityContext(ref),
+		v1.SerializedReference{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_SerializedReference(ref),
+		v1.Service{}.OpenAPIModelName():                                                                          schema_k8sio_api_core_v1_Service(ref),
+		v1.ServiceAccount{}.OpenAPIModelName():                                                                   schema_k8sio_api_core_v1_ServiceAccount(ref),
+		v1.ServiceAccountList{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_ServiceAccountList(ref),
+		v1.ServiceAccountTokenProjection{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_ServiceAccountTokenProjection(ref),
+		v1.ServiceList{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_ServiceList(ref),
+		v1.ServicePort{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_ServicePort(ref),
+		v1.ServiceProxyOptions{}.OpenAPIModelName():                                                              schema_k8sio_api_core_v1_ServiceProxyOptions(ref),
+		v1.ServiceSpec{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_ServiceSpec(ref),
+		v1.ServiceStatus{}.OpenAPIModelName():                                                                    schema_k8sio_api_core_v1_ServiceStatus(ref),
+		v1.SessionAffinityConfig{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_SessionAffinityConfig(ref),
+		v1.SleepAction{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_SleepAction(ref),
+		v1.StorageOSPersistentVolumeSource{}.OpenAPIModelName():                                                  schema_k8sio_api_core_v1_StorageOSPersistentVolumeSource(ref),
+		v1.StorageOSVolumeSource{}.OpenAPIModelName():                                                            schema_k8sio_api_core_v1_StorageOSVolumeSource(ref),
+		v1.Sysctl{}.OpenAPIModelName():                                                                           schema_k8sio_api_core_v1_Sysctl(ref),
+		v1.TCPSocketAction{}.OpenAPIModelName():                                                                  schema_k8sio_api_core_v1_TCPSocketAction(ref),
+		v1.Taint{}.OpenAPIModelName():                                                                            schema_k8sio_api_core_v1_Taint(ref),
+		v1.Toleration{}.OpenAPIModelName():                                                                       schema_k8sio_api_core_v1_Toleration(ref),
+		v1.TopologySelectorLabelRequirement{}.OpenAPIModelName():                                                 schema_k8sio_api_core_v1_TopologySelectorLabelRequirement(ref),
+		v1.TopologySelectorTerm{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_TopologySelectorTerm(ref),
+		v1.TopologySpreadConstraint{}.OpenAPIModelName():                                                         schema_k8sio_api_core_v1_TopologySpreadConstraint(ref),
+		v1.TypedLocalObjectReference{}.OpenAPIModelName():                                                        schema_k8sio_api_core_v1_TypedLocalObjectReference(ref),
+		v1.TypedObjectReference{}.OpenAPIModelName():                                                             schema_k8sio_api_core_v1_TypedObjectReference(ref),
+		v1.Volume{}.OpenAPIModelName():                                                                           schema_k8sio_api_core_v1_Volume(ref),
+		v1.VolumeDevice{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_VolumeDevice(ref),
+		v1.VolumeMount{}.OpenAPIModelName():                                                                      schema_k8sio_api_core_v1_VolumeMount(ref),
+		v1.VolumeMountStatus{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_VolumeMountStatus(ref),
+		v1.VolumeNodeAffinity{}.OpenAPIModelName():                                                               schema_k8sio_api_core_v1_VolumeNodeAffinity(ref),
+		v1.VolumeProjection{}.OpenAPIModelName():                                                                 schema_k8sio_api_core_v1_VolumeProjection(ref),
+		v1.VolumeResourceRequirements{}.OpenAPIModelName():                                                       schema_k8sio_api_core_v1_VolumeResourceRequirements(ref),
+		v1.VolumeSource{}.OpenAPIModelName():                                                                     schema_k8sio_api_core_v1_VolumeSource(ref),
+		v1.VsphereVirtualDiskVolumeSource{}.OpenAPIModelName():                                                   schema_k8sio_api_core_v1_VsphereVirtualDiskVolumeSource(ref),
+		v1.WeightedPodAffinityTerm{}.OpenAPIModelName():                                                          schema_k8sio_api_core_v1_WeightedPodAffinityTerm(ref),
+		v1.WindowsSecurityContextOptions{}.OpenAPIModelName():                                                    schema_k8sio_api_core_v1_WindowsSecurityContextOptions(ref),
+		v1.WorkloadReference{}.OpenAPIModelName():                                                                schema_k8sio_api_core_v1_WorkloadReference(ref),
+		resource.Quantity{}.OpenAPIModelName():                                                                   schema_apimachinery_pkg_api_resource_Quantity(ref),
+		metav1.APIGroup{}.OpenAPIModelName():                                                                     schema_pkg_apis_meta_v1_APIGroup(ref),
+		metav1.APIGroupList{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_APIGroupList(ref),
+		metav1.APIResource{}.OpenAPIModelName():                                                                  schema_pkg_apis_meta_v1_APIResource(ref),
+		metav1.APIResourceList{}.OpenAPIModelName():                                                              schema_pkg_apis_meta_v1_APIResourceList(ref),
+		metav1.APIVersions{}.OpenAPIModelName():                                                                  schema_pkg_apis_meta_v1_APIVersions(ref),
+		metav1.ApplyOptions{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_ApplyOptions(ref),
+		metav1.Condition{}.OpenAPIModelName():                                                                    schema_pkg_apis_meta_v1_Condition(ref),
+		metav1.CreateOptions{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_CreateOptions(ref),
+		metav1.DeleteOptions{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_DeleteOptions(ref),
+		metav1.Duration{}.OpenAPIModelName():                                                                     schema_pkg_apis_meta_v1_Duration(ref),
+		metav1.FieldSelectorRequirement{}.OpenAPIModelName():                                                     schema_pkg_apis_meta_v1_FieldSelectorRequirement(ref),
+		metav1.FieldsV1{}.OpenAPIModelName():                                                                     schema_pkg_apis_meta_v1_FieldsV1(ref),
+		metav1.GetOptions{}.OpenAPIModelName():                                                                   schema_pkg_apis_meta_v1_GetOptions(ref),
+		metav1.GroupKind{}.OpenAPIModelName():                                                                    schema_pkg_apis_meta_v1_GroupKind(ref),
+		metav1.GroupResource{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_GroupResource(ref),
+		metav1.GroupVersion{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_GroupVersion(ref),
+		metav1.GroupVersionForDiscovery{}.OpenAPIModelName():                                                     schema_pkg_apis_meta_v1_GroupVersionForDiscovery(ref),
+		metav1.GroupVersionKind{}.OpenAPIModelName():                                                             schema_pkg_apis_meta_v1_GroupVersionKind(ref),
+		metav1.GroupVersionResource{}.OpenAPIModelName():                                                         schema_pkg_apis_meta_v1_GroupVersionResource(ref),
+		metav1.InternalEvent{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_InternalEvent(ref),
+		metav1.LabelSelector{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_LabelSelector(ref),
+		metav1.LabelSelectorRequirement{}.OpenAPIModelName():                                                     schema_pkg_apis_meta_v1_LabelSelectorRequirement(ref),
+		metav1.List{}.OpenAPIModelName():                                                                         schema_pkg_apis_meta_v1_List(ref),
+		metav1.ListMeta{}.OpenAPIModelName():                                                                     schema_pkg_apis_meta_v1_ListMeta(ref),
+		metav1.ListOptions{}.OpenAPIModelName():                                                                  schema_pkg_apis_meta_v1_ListOptions(ref),
+		metav1.ManagedFieldsEntry{}.OpenAPIModelName():                                                           schema_pkg_apis_meta_v1_ManagedFieldsEntry(ref),
+		metav1.MicroTime{}.OpenAPIModelName():                                                                    schema_pkg_apis_meta_v1_MicroTime(ref),
+		metav1.ObjectMeta{}.OpenAPIModelName():                                                                   schema_pkg_apis_meta_v1_ObjectMeta(ref),
+		metav1.OwnerReference{}.OpenAPIModelName():                                                               schema_pkg_apis_meta_v1_OwnerReference(ref),
+		metav1.PartialObjectMetadata{}.OpenAPIModelName():                                                        schema_pkg_apis_meta_v1_PartialObjectMetadata(ref),
+		metav1.PartialObjectMetadataList{}.OpenAPIModelName():                                                    schema_pkg_apis_meta_v1_PartialObjectMetadataList(ref),
+		metav1.Patch{}.OpenAPIModelName():                                                                        schema_pkg_apis_meta_v1_Patch(ref),
+		metav1.PatchOptions{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_PatchOptions(ref),
+		metav1.Preconditions{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_Preconditions(ref),
+		metav1.RootPaths{}.OpenAPIModelName():                                                                    schema_pkg_apis_meta_v1_RootPaths(ref),
+		metav1.ServerAddressByClientCIDR{}.OpenAPIModelName():                                                    schema_pkg_apis_meta_v1_ServerAddressByClientCIDR(ref),
+		metav1.Status{}.OpenAPIModelName():                                                                       schema_pkg_apis_meta_v1_Status(ref),
+		metav1.StatusCause{}.OpenAPIModelName():                                                                  schema_pkg_apis_meta_v1_StatusCause(ref),
+		metav1.StatusDetails{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_StatusDetails(ref),
+		metav1.Table{}.OpenAPIModelName():                                                                        schema_pkg_apis_meta_v1_Table(ref),
+		metav1.TableColumnDefinition{}.OpenAPIModelName():                                                        schema_pkg_apis_meta_v1_TableColumnDefinition(ref),
+		metav1.TableOptions{}.OpenAPIModelName():                                                                 schema_pkg_apis_meta_v1_TableOptions(ref),
+		metav1.TableRow{}.OpenAPIModelName():                                                                     schema_pkg_apis_meta_v1_TableRow(ref),
+		metav1.TableRowCondition{}.OpenAPIModelName():                                                            schema_pkg_apis_meta_v1_TableRowCondition(ref),
+		metav1.Time{}.OpenAPIModelName():                                                                         schema_pkg_apis_meta_v1_Time(ref),
+		metav1.Timestamp{}.OpenAPIModelName():                                                                    schema_pkg_apis_meta_v1_Timestamp(ref),
+		metav1.TypeMeta{}.OpenAPIModelName():                                                                     schema_pkg_apis_meta_v1_TypeMeta(ref),
+		metav1.UpdateOptions{}.OpenAPIModelName():                                                                schema_pkg_apis_meta_v1_UpdateOptions(ref),
+		metav1.WatchEvent{}.OpenAPIModelName():                                                                   schema_pkg_apis_meta_v1_WatchEvent(ref),
+		runtime.RawExtension{}.OpenAPIModelName():                                                                schema_k8sio_apimachinery_pkg_runtime_RawExtension(ref),
+		runtime.TypeMeta{}.OpenAPIModelName():                                                                    schema_k8sio_apimachinery_pkg_runtime_TypeMeta(ref),
+		runtime.Unknown{}.OpenAPIModelName():                                                                     schema_k8sio_apimachinery_pkg_runtime_Unknown(ref),
+		version.Info{}.OpenAPIModelName():                                                                        schema_k8sio_apimachinery_pkg_version_Info(ref),
+		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.ClusterPolicyReport":     schema_pkg_api_wgpolicyk8sio_v1alpha2_ClusterPolicyReport(ref),
 		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.ClusterPolicyReportList": schema_pkg_api_wgpolicyk8sio_v1alpha2_ClusterPolicyReportList(ref),
 		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReport":            schema_pkg_api_wgpolicyk8sio_v1alpha2_PolicyReport(ref),
 		"sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2.PolicyReportList":        schema_pkg_api_wgpolicyk8sio_v1alpha2_PolicyReportList(ref),
@@ -976,6 +976,494 @@ func schema_kyverno_api_reports_v1_EphemeralReportSpec(ref common.ReferenceCallb
 		},
 		Dependencies: []string{
 			"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportResult", "github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportSummary", metav1.OwnerReference{}.OpenAPIModelName()},
+	}
+}
+
+func schema_reports_api_apis_openreportsio_v1alpha1_ClusterReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ClusterReport is the Schema for the ClusterReport API",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref(metav1.ObjectMeta{}.OpenAPIModelName()),
+						},
+					},
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Source is an identifier for the source e.g. a policy engine that manages this report. Use this field if all the results are produced by a single policy engine. If the results are produced by multiple sources e.g. different engines or scanners, then use the Source field at the ReportResult level.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"scope": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Scope is an optional reference to the report scope (e.g. a Deployment, Namespace, or Node)",
+							Ref:         ref(v1.ObjectReference{}.OpenAPIModelName()),
+						},
+					},
+					"scopeSelector": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ScopeSelector is an optional selector for multiple scopes (e.g. Pods). Either one of, or none of, but not both of, Scope or ScopeSelector should be specified.",
+							Ref:         ref(metav1.LabelSelector{}.OpenAPIModelName()),
+						},
+					},
+					"configuration": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Configuration is an optional field which can be used to specify a contract between Report generators and consumers",
+							Ref:         ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportConfiguration"),
+						},
+					},
+					"summary": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ReportSummary provides a summary of results",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportSummary"),
+						},
+					},
+					"results": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ReportResult provides result details",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportResult"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportConfiguration", "github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportResult", "github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportSummary", v1.ObjectReference{}.OpenAPIModelName(), metav1.LabelSelector{}.OpenAPIModelName(), metav1.ObjectMeta{}.OpenAPIModelName()},
+	}
+}
+
+func schema_reports_api_apis_openreportsio_v1alpha1_ClusterReportList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ClusterReportList contains a list of ClusterReport",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref(metav1.ListMeta{}.OpenAPIModelName()),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ClusterReport"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ClusterReport", metav1.ListMeta{}.OpenAPIModelName()},
+	}
+}
+
+func schema_reports_api_apis_openreportsio_v1alpha1_Limits(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"maxResults": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MaxResults is the maximum number of results contained in the report",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"statusFilter": {
+						SchemaProps: spec.SchemaProps{
+							Description: "StatusFilter indicates that the Report contains only those reports with statuses specified in this list",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_reports_api_apis_openreportsio_v1alpha1_Report(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Report is the Schema for the reports API",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref(metav1.ObjectMeta{}.OpenAPIModelName()),
+						},
+					},
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Source is an identifier for the source e.g. a policy engine that manages this report. Use this field if all the results are produced by a single policy engine. If the results are produced by multiple sources e.g. different engines or scanners, then use the Source field at the ReportResult level.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"scope": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Scope is an optional reference to the report scope (e.g. a Deployment, Namespace, or Node)",
+							Ref:         ref(v1.ObjectReference{}.OpenAPIModelName()),
+						},
+					},
+					"scopeSelector": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ScopeSelector is an optional selector for multiple scopes (e.g. Pods). Either one of, or none of, but not both of, Scope or ScopeSelector should be specified.",
+							Ref:         ref(metav1.LabelSelector{}.OpenAPIModelName()),
+						},
+					},
+					"configuration": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Configuration is an optional field which can be used to specify a contract between Report generators and consumers",
+							Ref:         ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportConfiguration"),
+						},
+					},
+					"summary": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ReportSummary provides a summary of results",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportSummary"),
+						},
+					},
+					"results": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ReportResult provides result details",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportResult"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportConfiguration", "github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportResult", "github.com/openreports/reports-api/apis/openreports.io/v1alpha1.ReportSummary", v1.ObjectReference{}.OpenAPIModelName(), metav1.LabelSelector{}.OpenAPIModelName(), metav1.ObjectMeta{}.OpenAPIModelName()},
+	}
+}
+
+func schema_reports_api_apis_openreportsio_v1alpha1_ReportConfiguration(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"limits": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.Limits"),
+						},
+					},
+				},
+				Required: []string{"limits"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.Limits"},
+	}
+}
+
+func schema_reports_api_apis_openreportsio_v1alpha1_ReportList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ReportList contains a list of Report",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref(metav1.ListMeta{}.OpenAPIModelName()),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openreports/reports-api/apis/openreports.io/v1alpha1.Report"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openreports/reports-api/apis/openreports.io/v1alpha1.Report", metav1.ListMeta{}.OpenAPIModelName()},
+	}
+}
+
+func schema_reports_api_apis_openreportsio_v1alpha1_ReportResult(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ReportResult provides the result for an individual policy",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Source is an identifier for the policy engine that manages this report If the Source is specified at this level, it will override the Source field set at the Report level",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"policy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Policy is the name or identifier of the policy",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"rule": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Rule is the name or identifier of the rule within the policy",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"category": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Category indicates policy category",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"severity": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Severity indicates policy check result criticality",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"timestamp": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Timestamp indicates the time the result was found",
+							Default:     map[string]interface{}{},
+							Ref:         ref(metav1.Timestamp{}.OpenAPIModelName()),
+						},
+					},
+					"result": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Result indicates the outcome of the policy rule execution",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"scored": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Scored indicates if this result is scored",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"resources": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Subjects is an optional reference to the checked Kubernetes resources",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref(v1.ObjectReference{}.OpenAPIModelName()),
+									},
+								},
+							},
+						},
+					},
+					"resourceSelector": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ResourceSelector is an optional label selector for checked Kubernetes resources. For example, a policy result may apply to all pods that match a label. Either a Subject or a ResourceSelector can be specified. If neither are provided, the result is assumed to be for the policy report scope.",
+							Ref:         ref(metav1.LabelSelector{}.OpenAPIModelName()),
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Description is a short user friendly message for the policy rule",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"properties": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Properties provides additional information for the policy rule",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"policy"},
+			},
+		},
+		Dependencies: []string{
+			v1.ObjectReference{}.OpenAPIModelName(), metav1.LabelSelector{}.OpenAPIModelName(), metav1.Timestamp{}.OpenAPIModelName()},
+	}
+}
+
+func schema_reports_api_apis_openreportsio_v1alpha1_ReportSummary(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ReportSummary provides a status count summary",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"pass": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Pass provides the count of policies whose requirements were met",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"fail": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Fail provides the count of policies whose requirements were not met",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"warn": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Warn provides the count of non-scored policies whose requirements were not met",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"error": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Error provides the count of policies that could not be evaluated",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"skip": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Skip indicates the count of policies that were not selected for evaluation",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -17565,494 +18053,6 @@ func schema_k8sio_apimachinery_pkg_version_Info(ref common.ReferenceCallback) co
 					},
 				},
 				Required: []string{"major", "minor", "gitVersion", "gitCommit", "gitTreeState", "buildDate", "goVersion", "compiler", "platform"},
-			},
-		},
-	}
-}
-
-func schema_openreportsio_apis_openreportsio_v1alpha1_ClusterReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ClusterReport is the Schema for the ClusterReport API",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref(metav1.ObjectMeta{}.OpenAPIModelName()),
-						},
-					},
-					"source": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Source is an identifier for the source e.g. a policy engine that manages this report. Use this field if all the results are produced by a single policy engine. If the results are produced by multiple sources e.g. different engines or scanners, then use the Source field at the ReportResult level.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"scope": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Scope is an optional reference to the report scope (e.g. a Deployment, Namespace, or Node)",
-							Ref:         ref(v1.ObjectReference{}.OpenAPIModelName()),
-						},
-					},
-					"scopeSelector": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ScopeSelector is an optional selector for multiple scopes (e.g. Pods). Either one of, or none of, but not both of, Scope or ScopeSelector should be specified.",
-							Ref:         ref(metav1.LabelSelector{}.OpenAPIModelName()),
-						},
-					},
-					"configuration": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Configuration is an optional field which can be used to specify a contract between Report generators and consumers",
-							Ref:         ref("openreports.io/apis/openreports.io/v1alpha1.ReportConfiguration"),
-						},
-					},
-					"summary": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ReportSummary provides a summary of results",
-							Default:     map[string]interface{}{},
-							Ref:         ref("openreports.io/apis/openreports.io/v1alpha1.ReportSummary"),
-						},
-					},
-					"results": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ReportResult provides result details",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("openreports.io/apis/openreports.io/v1alpha1.ReportResult"),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			v1.ObjectReference{}.OpenAPIModelName(), metav1.LabelSelector{}.OpenAPIModelName(), metav1.ObjectMeta{}.OpenAPIModelName(), "openreports.io/apis/openreports.io/v1alpha1.ReportConfiguration", "openreports.io/apis/openreports.io/v1alpha1.ReportResult", "openreports.io/apis/openreports.io/v1alpha1.ReportSummary"},
-	}
-}
-
-func schema_openreportsio_apis_openreportsio_v1alpha1_ClusterReportList(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ClusterReportList contains a list of ClusterReport",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref(metav1.ListMeta{}.OpenAPIModelName()),
-						},
-					},
-					"items": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("openreports.io/apis/openreports.io/v1alpha1.ClusterReport"),
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"items"},
-			},
-		},
-		Dependencies: []string{
-			metav1.ListMeta{}.OpenAPIModelName(), "openreports.io/apis/openreports.io/v1alpha1.ClusterReport"},
-	}
-}
-
-func schema_openreportsio_apis_openreportsio_v1alpha1_Limits(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"maxResults": {
-						SchemaProps: spec.SchemaProps{
-							Description: "MaxResults is the maximum number of results contained in the report",
-							Default:     0,
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-					"statusFilter": {
-						SchemaProps: spec.SchemaProps{
-							Description: "StatusFilter indicates that the Report contains only those reports with statuses specified in this list",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
-func schema_openreportsio_apis_openreportsio_v1alpha1_Report(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Report is the Schema for the reports API",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref(metav1.ObjectMeta{}.OpenAPIModelName()),
-						},
-					},
-					"source": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Source is an identifier for the source e.g. a policy engine that manages this report. Use this field if all the results are produced by a single policy engine. If the results are produced by multiple sources e.g. different engines or scanners, then use the Source field at the ReportResult level.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"scope": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Scope is an optional reference to the report scope (e.g. a Deployment, Namespace, or Node)",
-							Ref:         ref(v1.ObjectReference{}.OpenAPIModelName()),
-						},
-					},
-					"scopeSelector": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ScopeSelector is an optional selector for multiple scopes (e.g. Pods). Either one of, or none of, but not both of, Scope or ScopeSelector should be specified.",
-							Ref:         ref(metav1.LabelSelector{}.OpenAPIModelName()),
-						},
-					},
-					"configuration": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Configuration is an optional field which can be used to specify a contract between Report generators and consumers",
-							Ref:         ref("openreports.io/apis/openreports.io/v1alpha1.ReportConfiguration"),
-						},
-					},
-					"summary": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ReportSummary provides a summary of results",
-							Default:     map[string]interface{}{},
-							Ref:         ref("openreports.io/apis/openreports.io/v1alpha1.ReportSummary"),
-						},
-					},
-					"results": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ReportResult provides result details",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("openreports.io/apis/openreports.io/v1alpha1.ReportResult"),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			v1.ObjectReference{}.OpenAPIModelName(), metav1.LabelSelector{}.OpenAPIModelName(), metav1.ObjectMeta{}.OpenAPIModelName(), "openreports.io/apis/openreports.io/v1alpha1.ReportConfiguration", "openreports.io/apis/openreports.io/v1alpha1.ReportResult", "openreports.io/apis/openreports.io/v1alpha1.ReportSummary"},
-	}
-}
-
-func schema_openreportsio_apis_openreportsio_v1alpha1_ReportConfiguration(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"limits": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("openreports.io/apis/openreports.io/v1alpha1.Limits"),
-						},
-					},
-				},
-				Required: []string{"limits"},
-			},
-		},
-		Dependencies: []string{
-			"openreports.io/apis/openreports.io/v1alpha1.Limits"},
-	}
-}
-
-func schema_openreportsio_apis_openreportsio_v1alpha1_ReportList(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ReportList contains a list of Report",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref(metav1.ListMeta{}.OpenAPIModelName()),
-						},
-					},
-					"items": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("openreports.io/apis/openreports.io/v1alpha1.Report"),
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"items"},
-			},
-		},
-		Dependencies: []string{
-			metav1.ListMeta{}.OpenAPIModelName(), "openreports.io/apis/openreports.io/v1alpha1.Report"},
-	}
-}
-
-func schema_openreportsio_apis_openreportsio_v1alpha1_ReportResult(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ReportResult provides the result for an individual policy",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"source": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Source is an identifier for the policy engine that manages this report If the Source is specified at this level, it will override the Source field set at the Report level",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"policy": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Policy is the name or identifier of the policy",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"rule": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Rule is the name or identifier of the rule within the policy",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"category": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Category indicates policy category",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"severity": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Severity indicates policy check result criticality",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"timestamp": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Timestamp indicates the time the result was found",
-							Default:     map[string]interface{}{},
-							Ref:         ref(metav1.Timestamp{}.OpenAPIModelName()),
-						},
-					},
-					"result": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Result indicates the outcome of the policy rule execution",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"scored": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Scored indicates if this result is scored",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
-					"resources": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Subjects is an optional reference to the checked Kubernetes resources",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref(v1.ObjectReference{}.OpenAPIModelName()),
-									},
-								},
-							},
-						},
-					},
-					"resourceSelector": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ResourceSelector is an optional label selector for checked Kubernetes resources. For example, a policy result may apply to all pods that match a label. Either a Subject or a ResourceSelector can be specified. If neither are provided, the result is assumed to be for the policy report scope.",
-							Ref:         ref(metav1.LabelSelector{}.OpenAPIModelName()),
-						},
-					},
-					"message": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Description is a short user friendly message for the policy rule",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"properties": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Properties provides additional information for the policy rule",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"policy"},
-			},
-		},
-		Dependencies: []string{
-			v1.ObjectReference{}.OpenAPIModelName(), metav1.LabelSelector{}.OpenAPIModelName(), metav1.Timestamp{}.OpenAPIModelName()},
-	}
-}
-
-func schema_openreportsio_apis_openreportsio_v1alpha1_ReportSummary(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ReportSummary provides a status count summary",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"pass": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Pass provides the count of policies whose requirements were met",
-							Default:     0,
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-					"fail": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Fail provides the count of policies whose requirements were not met",
-							Default:     0,
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-					"warn": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Warn provides the count of non-scored policies whose requirements were not met",
-							Default:     0,
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-					"error": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Error provides the count of policies that could not be evaluated",
-							Default:     0,
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-					"skip": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Skip indicates the count of policies that were not selected for evaluation",
-							Default:     0,
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-				},
 			},
 		},
 	}

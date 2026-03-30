@@ -144,7 +144,7 @@ codegen-openapi: $(PACKAGE_SHIM) $(OPENAPI_GEN) ## Generate openapi
 		k8s.io/apimachinery/pkg/runtime \
 		k8s.io/apimachinery/pkg/types \
 		k8s.io/api/core/v1 \
-		openreports.io/apis/openreports.io/v1alpha1 \
+		github.com/openreports/reports-api/apis/openreports.io/v1alpha1 \
 		sigs.k8s.io/wg-policy-prototypes/policy-report/pkg/api/wgpolicyk8s.io/v1alpha2 \
 		github.com/kyverno/kyverno/api/reports/v1 \
 		github.com/kyverno/kyverno/api/policyreport/v1alpha2 \
