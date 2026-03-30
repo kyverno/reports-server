@@ -56,6 +56,7 @@ func (c *Config) migration(ctx context.Context) error {
 			c.APIServices.StoreOpenreports = false
 		}
 	}
+
 	return nil
 }
 
