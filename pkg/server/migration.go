@@ -91,6 +91,11 @@ func (c *Config) handleMigrateWgPolicyApis(ctx context.Context, policyClient *ve
 	if err != nil {
 		return err
 	}
+	// these watches are only needed until the end of the migration to catch report changes.
+	// afterwards we rely on the apiservice for intercepting report creation
+	// we create a context with cancel to cancel them at the end
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	go c.watchReport(ctx, cpolrWatchInterface)
 
 	polrs, err := policyClient.Wgpolicyk8sV1alpha2().PolicyReports("").List(ctx, metav1.ListOptions{})

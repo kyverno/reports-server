@@ -19,6 +19,7 @@ func (c *Config) watchReport(ctx context.Context, watchIface *watchtools.RetryWa
 	for {
 		select {
 		case <-ctx.Done():
+			watchIface.Stop()
 			return
 		case event := <-watchIface.ResultChan():
 			switch event.Type {
