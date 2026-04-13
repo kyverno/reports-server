@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/kyverno/reports-server/pkg/storage/api"
+	"github.com/kyverno/reports-server/pkg/storage/versioning"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,28 +15,22 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type ObjectStorageNamespaced[T metav1.Object] interface {
-	Get(ctx context.Context, name, namespace string) (T, error)
-	List(ctx context.Context, namespace string) ([]T, error)
-	Create(ctx context.Context, obj T) error
-	Update(ctx context.Context, obj T) error
-	Delete(ctx context.Context, name, namespace string) error
-}
-
 type objectStoreNamespaced[T metav1.Object] struct {
 	sync.Mutex
+	*versioning.ResourceVersion
 	namespaced bool
 	etcdclient clientv3.KV
 	gvk        schema.GroupVersionKind
 	gr         schema.GroupResource
 }
 
-func NewObjectStoreNamespaced[T metav1.Object](client clientv3.KV, gvk schema.GroupVersionKind, gr schema.GroupResource) ObjectStorageNamespaced[T] {
+func NewObjectStoreNamespaced[T metav1.Object](client clientv3.KV, gvk schema.GroupVersionKind, gr schema.GroupResource) api.GenericIface[T] {
 	return &objectStoreNamespaced[T]{
-		namespaced: true,
-		etcdclient: client,
-		gvk:        gvk,
-		gr:         gr,
+		ResourceVersion: versioning.NewVersioning(),
+		namespaced:      true,
+		etcdclient:      client,
+		gvk:             gvk,
+		gr:              gr,
 	}
 }
 
@@ -76,18 +72,17 @@ func (o *objectStoreNamespaced[T]) List(ctx context.Context, namespace string) (
 	o.Lock()
 	defer o.Unlock()
 
-	var objects []T
 	key := o.getPrefix(namespace)
 	resp, err := o.etcdclient.Get(ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		klog.ErrorS(err, "failed to list report kind=%s", o.gvk.String())
-		return objects, err
+		return nil, err
 	}
 	klog.InfoS("list resp resp=%+v", resp)
 	if len(resp.Kvs) == 0 {
-		return objects, nil
+		return nil, nil
 	}
-	objects = make([]T, 0, len(resp.Kvs))
+	objects := make([]T, 0, len(resp.Kvs))
 	for _, v := range resp.Kvs {
 		var obj T
 		err = json.Unmarshal(v.Value, &obj)
@@ -169,6 +164,10 @@ func (o *objectStoreNamespaced[T]) Delete(ctx context.Context, name, namespace s
 	return nil
 }
 
+func (o *objectStoreNamespaced[T]) Count(ctx context.Context) (int, error) {
+	return 0, fmt.Errorf("count not implemented for etcd objectStoreNamespaced")
+}
+
 type ObjectStorageCluster[T metav1.Object] interface {
 	Get(ctx context.Context, name string) (T, error)
 	List(ctx context.Context) ([]T, error)
@@ -178,10 +177,10 @@ type ObjectStorageCluster[T metav1.Object] interface {
 }
 
 type objectStoreCluster[T metav1.Object] struct {
-	store ObjectStorageNamespaced[T]
+	store api.GenericIface[T]
 }
 
-func NewObjectStoreCluster[T metav1.Object](client clientv3.KV, gvk schema.GroupVersionKind, gr schema.GroupResource) ObjectStorageCluster[T] {
+func NewObjectStoreCluster[T metav1.Object](client clientv3.KV, gvk schema.GroupVersionKind, gr schema.GroupResource) api.GenericClusterIface[T] {
 	return &objectStoreCluster[T]{
 		store: &objectStoreNamespaced[T]{
 			namespaced: false,
@@ -210,4 +209,16 @@ func (o *objectStoreCluster[T]) Update(ctx context.Context, obj T) error {
 
 func (o *objectStoreCluster[T]) Delete(ctx context.Context, name string) error {
 	return o.store.Delete(ctx, name, "")
+}
+
+func (o *objectStoreCluster[T]) Count(ctx context.Context) (int, error) {
+	return o.store.Count(ctx)
+}
+
+func (o *objectStoreCluster[T]) SetResourceVersion(val string) error {
+	return o.store.SetResourceVersion(val)
+}
+
+func (o *objectStoreCluster[T]) UseResourceVersion() string {
+	return o.store.UseResourceVersion()
 }

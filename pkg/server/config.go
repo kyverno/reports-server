@@ -3,11 +3,13 @@ package server
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/kyverno/reports-server/pkg/api"
 	"github.com/kyverno/reports-server/pkg/app/opts"
 	"github.com/kyverno/reports-server/pkg/storage"
+	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/storage/db"
 	"github.com/kyverno/reports-server/pkg/storage/etcd"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -28,14 +30,16 @@ import (
 const numWorkers = 50
 
 type Config struct {
-	Apiserver   *genericapiserver.Config
-	Rest        *rest.Config
-	Embedded    bool
-	EtcdConfig  *etcd.EtcdConfig
-	DBconfig    *db.PostgresConfig
-	ClusterName string
-	APIServices APIServices
-	Store       storage.Interface
+	Apiserver                   *genericapiserver.Config
+	Rest                        *rest.Config
+	Embedded                    bool
+	EtcdConfig                  *etcd.EtcdConfig
+	DBconfig                    *db.PostgresConfig
+	ClusterName                 string
+	APIServices                 APIServices
+	Store                       storageapi.Storage
+	SkipMigration               bool
+	APIServiceReconcileInterval time.Duration
 }
 
 func NewServerConfig(o opts.Options) (*Config, error) {
@@ -84,14 +88,16 @@ func NewServerConfig(o opts.Options) (*Config, error) {
 	}
 
 	config := &Config{
-		Apiserver:   apiserver,
-		Rest:        restConfig,
-		Embedded:    o.Etcd,
-		EtcdConfig:  &o.EtcdConfig,
-		DBconfig:    dbconfig,
-		ClusterName: o.ClusterName,
-		APIServices: apiservices,
-		Store:       store,
+		Apiserver:                   apiserver,
+		Rest:                        restConfig,
+		Embedded:                    o.Etcd,
+		EtcdConfig:                  &o.EtcdConfig,
+		DBconfig:                    dbconfig,
+		ClusterName:                 o.ClusterName,
+		APIServices:                 apiservices,
+		Store:                       store,
+		SkipMigration:               o.SkipMigration,
+		APIServiceReconcileInterval: o.APIServiceReconcileInterval,
 	}
 
 	return config, nil
@@ -133,7 +139,8 @@ func (c *Config) Complete() (*server, error) {
 		genericServer,
 		c.Store,
 	)
-	err = s.RegisterProbes()
+	// TODO: turn this into a configurable parameter
+	err = s.RegisterProbes(time.Second * 30)
 	if err != nil {
 		klog.Error(err)
 		return nil, err
@@ -189,6 +196,7 @@ func applyReportsServerAnnotation(o metav1.Object) {
 	if a == nil {
 		a = make(map[string]string)
 	}
+
 	a[api.ServedByReportsServerAnnotation] = api.ServedByReportsServerValue
 	o.SetAnnotations(a)
 }
@@ -209,6 +217,27 @@ func (c *Config) installApiServices() error {
 	}
 
 	return nil
+}
+
+func (c *Config) StartAPIServiceReconciler(ctx context.Context) {
+	if !c.APIServices.StoreReports && !c.APIServices.StoreEphemeralReports && !c.APIServices.StoreOpenreports {
+		klog.Info("No APIServices enabled, skipping reconciler")
+		return
+	}
+	ticker := time.NewTicker(c.APIServiceReconcileInterval)
+	defer ticker.Stop()
+	klog.Info("Starting APIService reconciler")
+	for {
+		select {
+		case <-ctx.Done():
+			klog.Info("Stopping APIService reconciler")
+			return
+		case <-ticker.C:
+			if err := c.installApiServices(); err != nil {
+				klog.Errorf("APIService reconciliation failed: %v", err)
+			}
+		}
+	}
 }
 
 func (c *Config) toLocalApiService(apiSvcName string, client apiregistrationv1client.ApiregistrationV1Client) error {

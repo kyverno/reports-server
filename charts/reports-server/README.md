@@ -74,6 +74,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | affinity | object | `{}` | Affinity |
 | service.type | string | `"ClusterIP"` | Service type |
 | service.port | int | `443` | Service port |
+| config.skipMigration | bool | `false` | Skip database migration on startup |
 | config.etcd.enabled | bool | `false` |  |
 | config.etcd.endpoints | string | `nil` |  |
 | config.etcd.insecure | bool | `true` |  |
@@ -97,9 +98,9 @@ helm install reports-server --namespace reports-server --create-namespace report
 | apiServicesManagement.installApiServices.enabled | bool | `true` | Store reports in reports-server |
 | apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
 | apiServicesManagement.installApiServices.installOpenreportsService | bool | `true` | Store open reports in reports-server |
-| apiServicesManagement.image.registry | string | `"docker.io"` | Image registry |
-| apiServicesManagement.image.repository | string | `"bitnamilegacy/kubectl"` | Image repository |
-| apiServicesManagement.image.tag | string | `"1.30.2"` | Image tag Defaults to `latest` if omitted |
+| apiServicesManagement.image.registry | string | `"registry.k8s.io"` | Image registry |
+| apiServicesManagement.image.repository | string | `"kubectl"` | Image repository |
+| apiServicesManagement.image.tag | string | `"v1.34.1"` | Image tag |
 | apiServicesManagement.image.pullPolicy | string | `nil` | Image pull policy Defaults to image.pullPolicy if omitted |
 | apiServicesManagement.imagePullSecrets | list | `[]` | Image pull secrets |
 | apiServicesManagement.podSecurityContext | object | `{}` | Security context for the pod |
@@ -112,6 +113,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | apiServicesManagement.nodeAffinity | object | `{}` | Node affinity constraints. |
 | apiServicesManagement.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsNonRoot":true,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Security context for the hook containers |
 | extraObjects | list | `[]` |  |
+| openreports.enabled | bool | `false` | Deploy openreports-api CRDs |
 
 ## Source Code
 
@@ -123,6 +125,7 @@ Kubernetes: `>=1.16.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
+| oci://ghcr.io/openreports/charts | openreports | 0.2.1 |
 | oci://registry-1.docker.io/bitnamicharts | postgresql | 13.4.1 |
 
 ## Maintainers

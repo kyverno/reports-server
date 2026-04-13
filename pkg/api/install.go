@@ -16,7 +16,7 @@ package api
 
 import (
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
-	"github.com/kyverno/reports-server/pkg/storage"
+	"github.com/kyverno/reports-server/pkg/storage/api"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -30,22 +30,24 @@ import (
 
 var (
 	// Scheme contains the types needed by the resource API.
-	Scheme = runtime.NewScheme()
+	Scheme = newScheme()
 	// Codecs is a codec factory for serving the resource API.
 	Codecs = serializer.NewCodecFactory(Scheme)
 )
 
-func init() {
-	utilruntime.Must(installWgPolicyTypesInternal(Scheme))
-	utilruntime.Must(v1alpha2.AddToScheme(Scheme))
-	utilruntime.Must(Scheme.SetVersionPriority(v1alpha2.SchemeGroupVersion))
-	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
+func newScheme() *runtime.Scheme {
+	s := runtime.NewScheme()
+	utilruntime.Must(installWgPolicyTypesInternal(s))
+	utilruntime.Must(v1alpha2.AddToScheme(s))
+	utilruntime.Must(s.SetVersionPriority(v1alpha2.SchemeGroupVersion))
+	metav1.AddToGroupVersion(s, schema.GroupVersion{Version: "v1"})
 
-	utilruntime.Must(reportsv1.Install(Scheme))
-	utilruntime.Must(Scheme.SetVersionPriority(reportsv1.SchemeGroupVersion))
+	utilruntime.Must(reportsv1.Install(s))
+	utilruntime.Must(s.SetVersionPriority(reportsv1.SchemeGroupVersion))
 	// openreports
-	utilruntime.Must(openreportsv1alpha1.AddToScheme(Scheme))
-	utilruntime.Must(Scheme.SetVersionPriority(openreportsv1alpha1.SchemeGroupVersion))
+	utilruntime.Must(openreportsv1alpha1.AddToScheme(s))
+	utilruntime.Must(s.SetVersionPriority(openreportsv1alpha1.SchemeGroupVersion))
+	return s
 }
 
 // BuildPolicyReports constructs APIGroupInfo the wgpolicyk8s.io API group using the given getters.
@@ -88,10 +90,10 @@ func BuildOpenreports(rep, crep rest.Storage) genericapiserver.APIGroupInfo {
 }
 
 // Install builds the reports for the wgpolicyk8s.io, openreports.io and reports.kyverno.io API, and then installs it into the given API reports-server.
-func Install(store storage.Interface, server *genericapiserver.GenericAPIServer) error {
+func Install(store api.Storage, server *genericapiserver.GenericAPIServer) error {
 	// wgpolicy
-	polr := PolicyReportStore(store)
-	cpolr := ClusterPolicyReportStore(store)
+	polr := PolicyReportStore(store.PolicyReports())
+	cpolr := ClusterPolicyReportStore(store.ClusterPolicyReports())
 
 	polrInfo := BuildPolicyReports(polr, cpolr)
 	err := server.InstallAPIGroup(&polrInfo)
@@ -100,8 +102,8 @@ func Install(store storage.Interface, server *genericapiserver.GenericAPIServer)
 	}
 
 	// // openreports
-	orReport := ReportStore(store)
-	orClusterReport := ClusterReportStore(store)
+	orReport := ReportStore(store.Reports())
+	orClusterReport := ClusterReportStore(store.ClusterReports())
 
 	orInfo := BuildOpenreports(orReport, orClusterReport)
 	err = server.InstallAPIGroup(&orInfo)
@@ -110,8 +112,8 @@ func Install(store storage.Interface, server *genericapiserver.GenericAPIServer)
 	}
 
 	// ephemeral reports
-	ephr := EphemeralReportStore(store)
-	cephr := ClusterEphemeralReportStore(store)
+	ephr := EphemeralReportStore(store.EphemeralReports())
+	cephr := ClusterEphemeralReportStore(store.ClusterEphemeralReports())
 
 	ephrInfo := BuildEphemeralReports(ephr, cephr)
 	err = server.InstallAPIGroup(&ephrInfo)

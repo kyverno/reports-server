@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -20,8 +21,9 @@ import (
 func NewPolicyServer(stopCh <-chan struct{}) *cobra.Command {
 	opts := opts.NewOptions()
 	cmd := &cobra.Command{
-		Short: "Launch reports-server",
-		Long:  "Launch reports-server",
+		Short:        "Launch reports-server",
+		Long:         "Launch reports-server",
+		SilenceUsage: true,
 		RunE: func(c *cobra.Command, args []string) error {
 			if err := runCommand(opts, stopCh); err != nil {
 				return err
@@ -78,6 +80,13 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 		}
 	}()
 
+	reconcilerCtx, reconcilerCancel := context.WithCancel(context.Background())
+	reconcilerDone := make(chan struct{})
+	go func() {
+		config.StartAPIServiceReconciler(reconcilerCtx)
+		close(reconcilerDone)
+	}()
+
 	sigChan := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
 
@@ -85,6 +94,8 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 
 	go func() {
 		<-sigChan
+		reconcilerCancel()
+		<-reconcilerDone
 		if err := config.CleanupApiServices(); err != nil {
 			klog.ErrorS(err, "failed to cleanup api-services during shutdown")
 		}

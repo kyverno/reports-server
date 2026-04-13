@@ -1,6 +1,7 @@
 package etcd
 
 import (
+	"context"
 	"crypto/tls"
 	"strings"
 	"time"
@@ -23,12 +24,12 @@ type EtcdConfig struct {
 }
 
 type etcdClient struct {
-	polrClient           ObjectStorageNamespaced[*v1alpha2.PolicyReport]
-	ephrClient           ObjectStorageNamespaced[*reportsv1.EphemeralReport]
-	reportsClient        ObjectStorageNamespaced[*openreportsv1alpha1.Report]
-	cpolrClient          ObjectStorageCluster[*v1alpha2.ClusterPolicyReport]
-	cephrClient          ObjectStorageCluster[*reportsv1.ClusterEphemeralReport]
-	clusterReportsClient ObjectStorageCluster[*openreportsv1alpha1.ClusterReport]
+	polrClient           api.GenericIface[*v1alpha2.PolicyReport]
+	ephrClient           api.GenericIface[*reportsv1.EphemeralReport]
+	reportsClient        api.GenericIface[*openreportsv1alpha1.Report]
+	cpolrClient          api.GenericClusterIface[*v1alpha2.ClusterPolicyReport]
+	cephrClient          api.GenericClusterIface[*reportsv1.ClusterEphemeralReport]
+	clusterReportsClient api.GenericClusterIface[*openreportsv1alpha1.ClusterReport]
 }
 
 func New(cfg *EtcdConfig) (api.Storage, error) {
@@ -57,30 +58,30 @@ func New(cfg *EtcdConfig) (api.Storage, error) {
 	}, nil
 }
 
-func (e *etcdClient) Ready() bool {
+func (e *etcdClient) Ready(_ context.Context) bool {
 	return true
 }
 
-func (e *etcdClient) PolicyReports() api.PolicyReportsInterface {
+func (e *etcdClient) PolicyReports() api.GenericIface[*v1alpha2.PolicyReport] {
 	return e.polrClient
 }
 
-func (e *etcdClient) ClusterPolicyReports() api.ClusterPolicyReportsInterface {
+func (e *etcdClient) ClusterPolicyReports() api.GenericClusterIface[*v1alpha2.ClusterPolicyReport] {
 	return e.cpolrClient
 }
 
-func (e *etcdClient) EphemeralReports() api.EphemeralReportsInterface {
+func (e *etcdClient) EphemeralReports() api.GenericIface[*reportsv1.EphemeralReport] {
 	return e.ephrClient
 }
 
-func (e *etcdClient) ClusterEphemeralReports() api.ClusterEphemeralReportsInterface {
+func (e *etcdClient) ClusterEphemeralReports() api.GenericClusterIface[*reportsv1.ClusterEphemeralReport] {
 	return e.cephrClient
 }
 
-func (e *etcdClient) Reports() api.ReportInterface {
+func (e *etcdClient) Reports() api.GenericIface[*openreportsv1alpha1.Report] {
 	return e.reportsClient
 }
 
-func (e *etcdClient) ClusterReports() api.ClusterReportInterface {
+func (e *etcdClient) ClusterReports() api.GenericClusterIface[*openreportsv1alpha1.ClusterReport] {
 	return e.clusterReportsClient
 }
