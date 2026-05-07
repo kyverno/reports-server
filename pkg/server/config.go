@@ -69,11 +69,6 @@ func NewServerConfig(o opts.Options) (*Config, error) {
 		SSLCert:     o.DBSSLCert,
 	}
 
-	apiservices := BuildApiServices(o.ServiceName, o.ServiceNamespace)
-	apiservices.StoreReports = o.StoreReports
-	apiservices.StoreEphemeralReports = o.StoreEphemeralReports
-	apiservices.StoreOpenreports = o.StoreOpenreports
-
 	client, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return nil, err
@@ -82,6 +77,12 @@ func NewServerConfig(o opts.Options) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	ownerRef := lookupClusterRoleOwnerRef(client, o.ClusterRoleName)
+	apiservices := BuildApiServices(o.ServiceName, o.ServiceNamespace, ownerRef)
+	apiservices.StoreReports = o.StoreReports
+	apiservices.StoreEphemeralReports = o.StoreEphemeralReports
+	apiservices.StoreOpenreports = o.StoreOpenreports
 
 	store, err := storage.New(o.Etcd, dbconfig, &o.EtcdConfig, string(kubeSystem.GetUID()), o.ClusterName)
 	if err != nil {
@@ -100,9 +101,29 @@ func NewServerConfig(o opts.Options) (*Config, error) {
 		Store:                       store,
 		SkipMigration:               o.SkipMigration,
 		APIServiceReconcileInterval: o.APIServiceReconcileInterval,
+		KubeClient:                  client,
+		ClusterRoleName:             o.ClusterRoleName,
 	}
 
 	return config, nil
+}
+
+func lookupClusterRoleOwnerRef(client kubernetes.Interface, name string) *metav1.OwnerReference {
+	if name == "" {
+		klog.Info("--clusterrolename not set; APIServices will be created without OwnerReferences")
+		return nil
+	}
+	cr, err := client.RbacV1().ClusterRoles().Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		klog.Warningf("failed to look up ClusterRole %q for OwnerReference: %v", name, err)
+		return nil
+	}
+	return &metav1.OwnerReference{
+		APIVersion: "rbac.authorization.k8s.io/v1",
+		Kind:       "ClusterRole",
+		Name:       cr.GetName(),
+		UID:        cr.GetUID(),
+	}
 }
 
 func (c *Config) Complete() (*server, error) {
@@ -208,17 +229,30 @@ func (c *Config) installApiServices() error {
 	if err != nil {
 		return err
 	}
-	if err := c.createOrDeleteApiservice(c.APIServices.wgpolicyApiService, *apiRegClient, c.APIServices.StoreReports); err != nil {
+	ownerRef := lookupClusterRoleOwnerRef(c.KubeClient, c.ClusterRoleName)
+	if err := c.createOrDeleteApiservice(withOwner(c.APIServices.wgpolicyApiService, ownerRef), *apiRegClient, c.APIServices.StoreReports); err != nil {
 		return err
 	}
-	if err := c.createOrDeleteApiservice(c.APIServices.v1ReportsApiService, *apiRegClient, c.APIServices.StoreEphemeralReports); err != nil {
+	if err := c.createOrDeleteApiservice(withOwner(c.APIServices.v1ReportsApiService, ownerRef), *apiRegClient, c.APIServices.StoreEphemeralReports); err != nil {
 		return err
 	}
-	if err := c.createOrDeleteApiservice(c.APIServices.openreportsApiService, *apiRegClient, c.APIServices.StoreOpenreports); err != nil {
+	if err := c.createOrDeleteApiservice(withOwner(c.APIServices.openreportsApiService, ownerRef), *apiRegClient, c.APIServices.StoreOpenreports); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// withOwner returns a copy of svc with its OwnerReferences set to ownerRef.
+// When ownerRef is nil, OwnerReferences is left nil so existing owner refs in
+// the cluster aren't accidentally cleared by a transient lookup failure.
+func withOwner(svc apiregistrationv1.APIService, ownerRef *metav1.OwnerReference) apiregistrationv1.APIService {
+	if ownerRef != nil {
+		svc.OwnerReferences = []metav1.OwnerReference{*ownerRef}
+	} else {
+		svc.OwnerReferences = nil
+	}
+	return svc
 }
 
 func (c *Config) StartAPIServiceReconciler(ctx context.Context) {
@@ -262,6 +296,18 @@ func (c *Config) toLocalApiService(apiSvcName string, client apiregistrationv1cl
 	return nil
 }
 
+func ownerRefsEqual(a, b []metav1.OwnerReference) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].APIVersion != b[i].APIVersion || a[i].Kind != b[i].Kind || a[i].Name != b[i].Name || a[i].UID != b[i].UID {
+			return false
+		}
+	}
+	return true
+}
+
 func (c *Config) createOrDeleteApiservice(apiservice apiregistrationv1.APIService, client apiregistrationv1client.ApiregistrationV1Client, enabled bool) error {
 	inClusterApiService, err := client.APIServices().Get(context.TODO(), apiservice.GetName(), metav1.GetOptions{})
 	if err != nil && !errors.IsNotFound(err) {
@@ -279,9 +325,17 @@ func (c *Config) createOrDeleteApiservice(apiservice apiregistrationv1.APIServic
 				klog.Infof("APIService %s created successfully", apiservice.GetName())
 			}
 		} else {
-			// APIService already exists, update it
-			if inClusterApiService.Spec.Service == nil || inClusterApiService.Spec.Service.Name != apiservice.Spec.Service.Name || inClusterApiService.Spec.Service.Namespace != apiservice.Spec.Service.Namespace {
+			// APIService already exists, update it if spec.service or owner refs drifted.
+			specDrift := inClusterApiService.Spec.Service == nil || inClusterApiService.Spec.Service.Name != apiservice.Spec.Service.Name || inClusterApiService.Spec.Service.Namespace != apiservice.Spec.Service.Namespace
+			// Only consider owner-ref drift when we have a desired owner ref this cycle —
+			// a nil desired ref means lookup failed transiently and we shouldn't clear existing refs.
+			ownerDrift := len(apiservice.OwnerReferences) > 0 && !ownerRefsEqual(inClusterApiService.OwnerReferences, apiservice.OwnerReferences)
+			if specDrift || ownerDrift {
 				apiservice.SetResourceVersion(inClusterApiService.GetResourceVersion())
+				if !ownerDrift {
+					// Preserve existing owner refs when only spec drifted but desired has none.
+					apiservice.OwnerReferences = inClusterApiService.OwnerReferences
+				}
 				_, err = client.APIServices().Update(context.TODO(), &apiservice, metav1.UpdateOptions{})
 				if err != nil {
 					return err

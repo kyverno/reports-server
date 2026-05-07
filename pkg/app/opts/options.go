@@ -54,6 +54,7 @@ type Options struct {
 	// apiservice install config
 	ServiceName           string
 	ServiceNamespace      string
+	ClusterRoleName       string
 	StoreReports          bool
 	StoreEphemeralReports bool
 	StoreOpenreports      bool
@@ -93,6 +94,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.StringVar(&o.DBSSLCert, "dbsslcert", "", "Path to database ssl cert.")
 	msfs.StringVar(&o.ServiceName, "servicename", "", "Name of the service targeted by the APIService.")
 	msfs.StringVar(&o.ServiceNamespace, "servicens", "", "Namespace of the service targeted by the APIService.")
+	msfs.StringVar(&o.ClusterRoleName, "clusterrolename", "", "Name of the chart's ClusterRole used as OwnerReference anchor for managed APIServices. When unset, APIServices are created without an owner (legacy behavior).")
 	msfs.BoolVar(&o.StoreReports, "storereports", true, "Whether or not to store and manage Policy Reports.")
 	msfs.BoolVar(&o.StoreOpenreports, "storeopenreports", true, "Whether or not to store and manage Open Reports.")
 	msfs.BoolVar(&o.StoreEphemeralReports, "storeephemeralreports", true, "Whether or not to store and manage Ephemeral Reports.")

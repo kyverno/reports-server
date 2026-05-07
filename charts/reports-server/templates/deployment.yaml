@@ -52,6 +52,7 @@ spec:
             {{- end }}
             - --servicename={{ include "reports-server.fullname" . }}
             - --servicens={{ $.Release.Namespace }}
+            - --clusterrolename={{ include "reports-server.fullname" . }}
             - --storereports={{ .Values.apiServicesManagement.installApiServices.enabled }}
             - --storeephemeralreports={{ .Values.apiServicesManagement.installApiServices.installEphemeralReportsService }}
             - --storeopenreports={{ .Values.apiServicesManagement.installApiServices.installOpenreportsService }}
