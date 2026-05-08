@@ -91,6 +91,14 @@ rules:
     - watch
     - deletecollection
 - apiGroups:
+    - "coordination.k8s.io"
+  resources:
+    - "leases"
+  verbs:
+    - "create"
+    - "get"
+    - "update"
+- apiGroups:
     - ""
   resources:
     - namespaces
@@ -303,6 +311,29 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: reports-server-headless
+  namespace: reports-server
+  labels:
+    helm.sh/chart: reports-server-0.1.6
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: https
+  selector:
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: reports-server
   namespace: reports-server
   labels:
@@ -387,6 +418,12 @@ spec:
               value: "postgres"
             - name: DB_PASSWORD
               value: "reports"
+            - name: HEADLESS_SERVICE
+              value: reports-server-headless.reports-server.svc.cluster.local
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

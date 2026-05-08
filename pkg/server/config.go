@@ -40,6 +40,7 @@ type Config struct {
 	Store                       storageapi.Storage
 	SkipMigration               bool
 	APIServiceReconcileInterval time.Duration
+	KubeClient                  *kubernetes.Clientset
 }
 
 func NewServerConfig(o opts.Options) (*Config, error) {
@@ -92,6 +93,7 @@ func NewServerConfig(o opts.Options) (*Config, error) {
 		Rest:                        restConfig,
 		Embedded:                    o.Etcd,
 		EtcdConfig:                  &o.EtcdConfig,
+		KubeClient:                  client,
 		DBconfig:                    dbconfig,
 		ClusterName:                 o.ClusterName,
 		APIServices:                 apiservices,
