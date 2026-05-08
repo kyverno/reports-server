@@ -81,7 +81,7 @@ spec:
             - name: DB_PASSWORD
               {{- include "reports-server.dbPassword" . | nindent 14 }}
             - name: HEADLESS_SERVICE
-              value: {{ include "reports-server.fullname" . }}-headless.svc.cluster.local
+              value: {{ include "reports-server.fullname" . }}-headless.{{ $.Release.Namespace }}.svc.cluster.local
             - name: POD_IP
               valueFrom:
                 fieldRef:
