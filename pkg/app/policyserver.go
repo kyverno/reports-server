@@ -130,7 +130,6 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 
 				<-stopCh
 				reconcilerCancel()
-				<-reconcilerDone
 
 				resolver := net.Resolver{}
 				addrs, err := resolver.LookupHost(ctx, headlessSvc)
