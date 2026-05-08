@@ -168,10 +168,12 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 
 	// wait on shutdown signal
 	<-stopCh
+	klog.Info("received shutdown signal")
 
 	// wait on the cleanup to finish only if this was the leader
 	if wasLeader.Load() {
 		<-reconcilerDone
+		klog.Info("cleanup completed")
 	}
 
 	return nil
