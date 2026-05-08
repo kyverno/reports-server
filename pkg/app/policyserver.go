@@ -15,7 +15,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/leaderelection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
-
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/logs"
 	"k8s.io/component-base/term"
@@ -133,7 +132,8 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 				reconcilerCancel()
 				<-reconcilerDone
 
-				addrs, err := net.LookupHost(headlessSvc)
+				resolver := net.Resolver{}
+				addrs, err := resolver.LookupHost(ctx, headlessSvc)
 				if err != nil {
 					klog.Errorf("error looking up headless service dns name: %s, %s", headlessSvc, err.Error())
 				}
@@ -155,7 +155,6 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 					}
 				}
 				close(reconcilerDone)
-
 			},
 			OnStoppedLeading: func() {
 				wasLeader.Store(false)
