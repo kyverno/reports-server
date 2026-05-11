@@ -57,6 +57,11 @@ jobs:
         uses: ko-build/setup-ko@3aebd0597dc1e9d1a26bcfdb7cbeb19c131d3037 # v0.7
         with:
           version: v0.18.1   # TODO: make it the same version in the makefile to avoid maintaining the version twice
+      # we need this because ko can't copy out files from the symlink dir that kodata/migrations points to
+      - name: move migration files
+        run: |
+          rm -rf kodata/migrations
+          cp -r pkg/storage/db/migrations kodata/migrations
       - name: Run GoReleaser
         id: goreleaser
         uses: goreleaser/goreleaser-action@286f3b13b1b49da4ac219696163fb8c1c93e1200 # v6.0.0
