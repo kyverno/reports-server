@@ -88,6 +88,12 @@ rules:
     - watch
     - deletecollection
 - apiGroups:
+    - apiextensions.k8s.io
+  resources:
+    - customresourcedefinitions
+  verbs:
+    - list
+- apiGroups:
     - ''
     - events.k8s.io
   resources:
