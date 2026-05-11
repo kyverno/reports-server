@@ -79,7 +79,7 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 		klog.Error("no headless service dns name found. api service cleanup during leader shutdown will not work properly")
 	}
 
-	config, err := server.NewServerConfig(*o)
+	config, err := server.NewServerConfig(context.TODO(), *o)
 	if err != nil {
 		return err
 	}
