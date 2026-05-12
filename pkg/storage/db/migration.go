@@ -2,28 +2,43 @@ package db
 
 import (
 	"database/sql"
-	"os"
+	"embed"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/lib/pq"
 	"k8s.io/klog/v2"
 )
 
+//go:embed migrations/*.sql
+var migrations embed.FS
+
 func RunDatabaseMigration(db *sql.DB, dbName string) error {
 	// Creates a new migration instance
-	migrationsPath := "file:///" + os.Getenv("KO_DATA_PATH") + "/migrations"
+	// migrationsPath := "file:///" + os.Getenv("KO_DATA_PATH") + "/migrations"
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		klog.Errorf("failed to setup db migration driver: %v", err)
 		return err
 	}
-	m, err := migrate.NewWithDatabaseInstance(migrationsPath, dbName, driver)
+	d, err := iofs.New(migrations, "migrations")
 	if err != nil {
-		klog.Errorf("failed to create migration connection to db: %v", err)
 		return err
 	}
+
+	m, err := migrate.NewWithInstance(
+		"iofs",
+		d,
+		dbName,
+		driver,
+	)
+	// m, err := migrate.NewWithDatabaseInstance(migrationsPath, dbName, driver)
+	// if err != nil {
+	// 	klog.Errorf("failed to create migration connection to db: %v", err)
+	// 	return err
+	// }
 
 	// Run migration
 	if err = m.Up(); err != nil {
