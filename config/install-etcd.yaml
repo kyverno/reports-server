@@ -39,8 +39,6 @@ metadata:
   name: reports-server
   labels:
     rbac.authorization.k8s.io/aggregate-to-admin: 'true'
-    rbac.authorization.k8s.io/aggregate-to-edit: 'true'
-    rbac.authorization.k8s.io/aggregate-to-view: 'true'
     helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
