@@ -17,7 +17,6 @@ var migrations embed.FS
 
 func RunDatabaseMigration(db *sql.DB, dbName string) error {
 	// Creates a new migration instance
-	// migrationsPath := "file:///" + os.Getenv("KO_DATA_PATH") + "/migrations"
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		klog.Errorf("failed to setup db migration driver: %v", err)
@@ -34,11 +33,6 @@ func RunDatabaseMigration(db *sql.DB, dbName string) error {
 		dbName,
 		driver,
 	)
-	// m, err := migrate.NewWithDatabaseInstance(migrationsPath, dbName, driver)
-	// if err != nil {
-	// 	klog.Errorf("failed to create migration connection to db: %v", err)
-	// 	return err
-	// }
 
 	// Run migration
 	if err = m.Up(); err != nil {
