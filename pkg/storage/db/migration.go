@@ -33,6 +33,9 @@ func RunDatabaseMigration(db *sql.DB, dbName string) error {
 		dbName,
 		driver,
 	)
+	if err != nil {
+		return err
+	}
 
 	// Run migration
 	if err = m.Up(); err != nil {
