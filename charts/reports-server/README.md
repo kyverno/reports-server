@@ -93,25 +93,11 @@ helm install reports-server --namespace reports-server --create-namespace report
 | config.db.sslrootcert | string | `""` | Database SSL root cert |
 | config.db.sslkey | string | `""` | Database SSL key |
 | config.db.sslcert | string | `""` | Database SSL cert |
-| apiServicesManagement.enabled | bool | `true` | Create a helm hooks to delete api services on uninstall |
+| apiServicesManagement.enabled | bool | `true` | Manage APIService objects for the reports-server. APIServices are anchored to the chart's ClusterRole via OwnerReferences and garbage-collected on uninstall. |
 | apiServicesManagement.installApiServices | object | `{"enabled":true,"installEphemeralReportsService":true,"installOpenreportsService":true}` | Install api services in manifest |
 | apiServicesManagement.installApiServices.enabled | bool | `true` | Store reports in reports-server |
 | apiServicesManagement.installApiServices.installEphemeralReportsService | bool | `true` | Store ephemeral reports in reports-server |
 | apiServicesManagement.installApiServices.installOpenreportsService | bool | `true` | Store open reports in reports-server |
-| apiServicesManagement.image.registry | string | `"registry.k8s.io"` | Image registry |
-| apiServicesManagement.image.repository | string | `"kubectl"` | Image repository |
-| apiServicesManagement.image.tag | string | `"v1.34.1"` | Image tag |
-| apiServicesManagement.image.pullPolicy | string | `nil` | Image pull policy Defaults to image.pullPolicy if omitted |
-| apiServicesManagement.imagePullSecrets | list | `[]` | Image pull secrets |
-| apiServicesManagement.podSecurityContext | object | `{}` | Security context for the pod |
-| apiServicesManagement.nodeSelector | object | `{}` | Node labels for pod assignment |
-| apiServicesManagement.tolerations | list | `[]` | List of node taints to tolerate |
-| apiServicesManagement.podAntiAffinity | object | `{}` | Pod anti affinity constraints. |
-| apiServicesManagement.podAffinity | object | `{}` | Pod affinity constraints. |
-| apiServicesManagement.podLabels | object | `{}` | Pod labels. |
-| apiServicesManagement.podAnnotations | object | `{}` | Pod annotations. |
-| apiServicesManagement.nodeAffinity | object | `{}` | Node affinity constraints. |
-| apiServicesManagement.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsNonRoot":true,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Security context for the hook containers |
 | extraObjects | list | `[]` |  |
 | openreports.enabled | bool | `false` | Deploy openreports-api CRDs |
 

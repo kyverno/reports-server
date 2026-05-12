@@ -12,6 +12,7 @@ import (
 	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/storage/db"
 	"github.com/kyverno/reports-server/pkg/storage/etcd"
+	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -43,7 +44,7 @@ type Config struct {
 	KubeClient                  *kubernetes.Clientset
 }
 
-func NewServerConfig(o opts.Options) (*Config, error) {
+func NewServerConfig(ctx context.Context, o opts.Options) (*Config, error) {
 	apiserver, err := o.ApiserverConfig()
 	if err != nil {
 		return nil, err
@@ -69,19 +70,25 @@ func NewServerConfig(o opts.Options) (*Config, error) {
 		SSLCert:     o.DBSSLCert,
 	}
 
-	apiservices := BuildApiServices(o.ServiceName, o.ServiceNamespace)
-	apiservices.StoreReports = o.StoreReports
-	apiservices.StoreEphemeralReports = o.StoreEphemeralReports
-	apiservices.StoreOpenreports = o.StoreOpenreports
-
 	client, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return nil, err
 	}
-	kubeSystem, err := client.CoreV1().Namespaces().Get(context.TODO(), "kube-system", metav1.GetOptions{})
+	kubeSystem, err := client.CoreV1().Namespaces().Get(ctx, "kube-system", metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
+
+	ownerRef, err := lookupClusterRoleOwnerRef(ctx, client, o.ClusterRoleName)
+	if err != nil {
+		// Don't fail startup if the ClusterRole lookup fails — fall back to
+		// creating APIServices without an OwnerReference (legacy behavior).
+		klog.Warningf("failed to look up ClusterRole %q for OwnerReference: %v", o.ClusterRoleName, err)
+	}
+	apiservices := BuildApiServices(o.ServiceName, o.ServiceNamespace, ownerRef)
+	apiservices.StoreReports = o.StoreReports
+	apiservices.StoreEphemeralReports = o.StoreEphemeralReports
+	apiservices.StoreOpenreports = o.StoreOpenreports
 
 	store, err := storage.New(o.Etcd, dbconfig, &o.EtcdConfig, string(kubeSystem.GetUID()), o.ClusterName)
 	if err != nil {
@@ -103,6 +110,33 @@ func NewServerConfig(o opts.Options) (*Config, error) {
 	}
 
 	return config, nil
+}
+
+// lookupClusterRoleOwnerRef returns an OwnerReference pointing at the chart's
+// ClusterRole so it can be attached to the managed APIServices. APIServices
+// are cluster-scoped and can't be owned by a namespaced object, so the
+// ClusterRole is used as the GC anchor: when the chart is uninstalled the
+// ClusterRole is deleted and the Kubernetes garbage collector then prunes the
+// APIServices automatically. This replaces the previous kubectl-based
+// pre-delete Helm hook.
+//
+// Returns (nil, nil) when name is empty so callers can opt out of the
+// ownership behavior and keep the legacy unowned APIServices.
+func lookupClusterRoleOwnerRef(ctx context.Context, client kubernetes.Interface, name string) (*metav1.OwnerReference, error) {
+	if name == "" {
+		klog.Info("--clusterrolename not set; APIServices will be created without OwnerReferences")
+		return nil, nil
+	}
+	cr, err := client.RbacV1().ClusterRoles().Get(ctx, name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return &metav1.OwnerReference{
+		APIVersion: "rbac.authorization.k8s.io/v1",
+		Kind:       "ClusterRole",
+		Name:       cr.GetName(),
+		UID:        cr.GetUID(),
+	}, nil
 }
 
 func (c *Config) Complete() (*server, error) {
@@ -279,8 +313,14 @@ func (c *Config) createOrDeleteApiservice(apiservice apiregistrationv1.APIServic
 				klog.Infof("APIService %s created successfully", apiservice.GetName())
 			}
 		} else {
-			// APIService already exists, update it
-			if inClusterApiService.Spec.Service == nil || inClusterApiService.Spec.Service.Name != apiservice.Spec.Service.Name || inClusterApiService.Spec.Service.Namespace != apiservice.Spec.Service.Namespace {
+			// Preserve in-cluster owner refs when the desired object has none —
+			// a missing desired owner ref means startup lookup failed and we
+			// shouldn't strip refs added by a previous successful start.
+			if len(apiservice.OwnerReferences) == 0 {
+				apiservice.OwnerReferences = inClusterApiService.OwnerReferences
+			}
+			if !apiequality.Semantic.DeepEqual(apiservice.Spec, inClusterApiService.Spec) ||
+				!apiequality.Semantic.DeepEqual(apiservice.OwnerReferences, inClusterApiService.OwnerReferences) {
 				apiservice.SetResourceVersion(inClusterApiService.GetResourceVersion())
 				_, err = client.APIServices().Update(context.TODO(), &apiservice, metav1.UpdateOptions{})
 				if err != nil {

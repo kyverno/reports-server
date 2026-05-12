@@ -169,6 +169,14 @@ rules:
     - subjectaccessreviews
   verbs:
     - create
+- apiGroups:
+    - rbac.authorization.k8s.io
+  resources:
+    - clusterroles
+  verbs:
+    - get
+  resourceNames:
+    - reports-server
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -395,6 +403,7 @@ spec:
             - --dbsslcert=
             - --servicename=reports-server
             - --servicens=reports-server
+            - --clusterrolename=reports-server
             - --storereports=true
             - --storeephemeralreports=true
             - --storeopenreports=true

@@ -14,7 +14,11 @@ type APIServices struct {
 	StoreOpenreports      bool
 }
 
-func BuildApiServices(serviceName string, serviceNamespace string) APIServices {
+func BuildApiServices(serviceName string, serviceNamespace string, ownerRef *metav1.OwnerReference) APIServices {
+	var ownerRefs []metav1.OwnerReference
+	if ownerRef != nil {
+		ownerRefs = []metav1.OwnerReference{*ownerRef}
+	}
 	return APIServices{
 		wgpolicyApiService: apiregistrationv1.APIService{
 			ObjectMeta: metav1.ObjectMeta{
@@ -22,6 +26,7 @@ func BuildApiServices(serviceName string, serviceNamespace string) APIServices {
 				Labels: map[string]string{
 					"app.kubernetes.io/managed-by": serviceName,
 				},
+				OwnerReferences: ownerRefs,
 			},
 			Spec: apiregistrationv1.APIServiceSpec{
 				Group:                 "wgpolicyk8s.io",
@@ -41,6 +46,7 @@ func BuildApiServices(serviceName string, serviceNamespace string) APIServices {
 				Labels: map[string]string{
 					"app.kubernetes.io/managed-by": serviceName,
 				},
+				OwnerReferences: ownerRefs,
 			},
 			Spec: apiregistrationv1.APIServiceSpec{
 				Group:                 "openreports.io",
@@ -60,6 +66,7 @@ func BuildApiServices(serviceName string, serviceNamespace string) APIServices {
 				Labels: map[string]string{
 					"app.kubernetes.io/managed-by": serviceName,
 				},
+				OwnerReferences: ownerRefs,
 			},
 			Spec: apiregistrationv1.APIServiceSpec{
 				Group:                 "reports.kyverno.io",
