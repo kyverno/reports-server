@@ -10,10 +10,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -27,10 +27,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -39,10 +39,10 @@ metadata:
   name: reports-server
   labels:
     rbac.authorization.k8s.io/aggregate-to-admin: 'true'
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -59,6 +59,14 @@ rules:
     - update
     - watch
     - deletecollection
+- apiGroups:
+    - "coordination.k8s.io"
+  resources:
+    - "leases"
+  verbs:
+    - "create"
+    - "get"
+    - "update"
 - apiGroups:
     - ""
   resources:
@@ -130,16 +138,24 @@ rules:
     - subjectaccessreviews
   verbs:
     - create
+- apiGroups:
+    - rbac.authorization.k8s.io
+  resources:
+    - clusterroles
+  verbs:
+    - get
+  resourceNames:
+    - reports-server
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -156,10 +172,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -176,10 +192,10 @@ metadata:
   name: reports-server
   namespace: kube-system
   labels:
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -196,10 +212,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -217,10 +233,10 @@ metadata:
   namespace: reports-server
   labels:
     app: etcd-reports-server
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -239,13 +255,36 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: reports-server-headless
+  namespace: reports-server
+  labels:
+    helm.sh/chart: reports-server-0.1.7
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+    app.kubernetes.io/version: "v0.1.7"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: https
+  selector:
+    app.kubernetes.io/name: reports-server
+    app.kubernetes.io/instance: reports-server
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -264,10 +303,10 @@ metadata:
   name: reports-server
   namespace: reports-server
   labels:
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 spec:
   strategy:
@@ -281,10 +320,10 @@ spec:
   template:
     metadata:
       labels:
-        helm.sh/chart: reports-server-0.1.6
+        helm.sh/chart: reports-server-0.1.7
         app.kubernetes.io/name: reports-server
         app.kubernetes.io/instance: reports-server
-        app.kubernetes.io/version: "v0.1.6"
+        app.kubernetes.io/version: "v0.1.7"
         app.kubernetes.io/managed-by: Helm
     spec:
       priorityClassName: system-cluster-critical
@@ -299,6 +338,7 @@ spec:
             - --etcdEndpoints=https://etcd-0.etcd.reports-server:2379,https://etcd-1.etcd.reports-server:2379,https://etcd-2.etcd.reports-server:2379
             - --servicename=reports-server
             - --servicens=reports-server
+            - --clusterrolename=reports-server
             - --storereports=true
             - --storeephemeralreports=true
             - --storeopenreports=true
@@ -322,6 +362,12 @@ spec:
               value: "postgres"
             - name: DB_PASSWORD
               value: "reports"
+            - name: HEADLESS_SERVICE
+              value: reports-server-headless.reports-server.svc.cluster.local
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -372,10 +418,10 @@ metadata:
   name: etcd
   labels:
     app: etcd-reports-server
-    helm.sh/chart: reports-server-0.1.6
+    helm.sh/chart: reports-server-0.1.7
     app.kubernetes.io/name: reports-server
     app.kubernetes.io/instance: reports-server
-    app.kubernetes.io/version: "v0.1.6"
+    app.kubernetes.io/version: "v0.1.7"
     app.kubernetes.io/managed-by: Helm
 spec:
   serviceName: etcd
