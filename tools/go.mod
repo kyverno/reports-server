@@ -3,7 +3,7 @@ module github.com/kyverno/reports-server/tools
 go 1.22.2
 
 require (
-	github.com/google/addlicense v1.1.1
+	github.com/google/addlicense v1.2.0
 	golang.org/x/perf v0.0.0-20230822165715-3c60af34b3f4
 	k8s.io/kube-openapi v0.0.0-20230816210353-14e408962443
 	sigs.k8s.io/logtools v0.8.1
