@@ -183,10 +183,11 @@ type objectStoreCluster[T metav1.Object] struct {
 func NewObjectStoreCluster[T metav1.Object](client clientv3.KV, gvk schema.GroupVersionKind, gr schema.GroupResource) api.GenericClusterIface[T] {
 	return &objectStoreCluster[T]{
 		store: &objectStoreNamespaced[T]{
-			namespaced: false,
-			etcdclient: client,
-			gvk:        gvk,
-			gr:         gr,
+			ResourceVersion: versioning.NewVersioning(),
+			namespaced:      false,
+			etcdclient:      client,
+			gvk:             gvk,
+			gr:              gr,
 		},
 	}
 }
