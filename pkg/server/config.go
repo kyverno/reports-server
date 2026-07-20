@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/kyverno/reports-server/pkg/api"
 	"github.com/kyverno/reports-server/pkg/app/opts"
+	"github.com/kyverno/reports-server/pkg/crdcoexistence"
 	"github.com/kyverno/reports-server/pkg/storage"
 	storageapi "github.com/kyverno/reports-server/pkg/storage/api"
 	"github.com/kyverno/reports-server/pkg/storage/db"
@@ -42,6 +43,7 @@ type Config struct {
 	SkipMigration               bool
 	APIServiceReconcileInterval time.Duration
 	KubeClient                  *kubernetes.Clientset
+	OpenAPIIgnorePrefixes       []string
 }
 
 func NewServerConfig(ctx context.Context, o opts.Options) (*Config, error) {
@@ -95,6 +97,12 @@ func NewServerConfig(ctx context.Context, o opts.Options) (*Config, error) {
 		return nil, err
 	}
 
+	ignorePrefixes := crdcoexistence.DetectConflictingCRDs(restConfig)
+	if len(ignorePrefixes) > 0 {
+		apiserver.OpenAPIConfig.IgnorePrefixes = append(apiserver.OpenAPIConfig.IgnorePrefixes, ignorePrefixes...)
+		apiserver.OpenAPIV3Config.IgnorePrefixes = append(apiserver.OpenAPIV3Config.IgnorePrefixes, ignorePrefixes...)
+	}
+
 	config := &Config{
 		Apiserver:                   apiserver,
 		Rest:                        restConfig,
@@ -107,6 +115,7 @@ func NewServerConfig(ctx context.Context, o opts.Options) (*Config, error) {
 		Store:                       store,
 		SkipMigration:               o.SkipMigration,
 		APIServiceReconcileInterval: o.APIServiceReconcileInterval,
+		OpenAPIIgnorePrefixes:       ignorePrefixes,
 	}
 
 	return config, nil

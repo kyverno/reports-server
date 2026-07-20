@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/kyverno/reports-server/pkg/app/opts"
+	"github.com/kyverno/reports-server/pkg/crdcoexistence"
 	"github.com/kyverno/reports-server/pkg/server"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -87,8 +88,16 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		if err := s.RunUntil(stopCh); err != nil {
+		<-stopCh
+		cancel()
+	}()
+	go crdcoexistence.PeriodicallyCheckForNewConflicts(ctx, cancel, config.Rest, config.OpenAPIIgnorePrefixes)
+
+	go func() {
+		if err := s.RunUntil(ctx.Done()); err != nil {
 			klog.ErrorS(err, "failed to run server")
 			os.Exit(1)
 		}
