@@ -36,7 +36,7 @@ func newGenericGetter[T any, PT interface {
 }
 
 func (c *genericGetter[T, PT]) List(ctx context.Context, ns string) ([]PT, error) {
-	klog.Infof("listing all %s values for namespace:%s", c.typeName, ns)
+	klog.V(4).Infof("listing all %s values for namespace:%s", c.typeName, ns)
 	res := make([]PT, 0)
 	var jsonb string
 	var rows *sql.Rows
@@ -65,7 +65,7 @@ func (c *genericGetter[T, PT]) List(ctx context.Context, ns string) ([]PT, error
 		res = append(res, report)
 	}
 
-	klog.Infof("list found length: %d", len(res))
+	klog.V(4).Infof("list found length: %d", len(res))
 	return res, nil
 }
 
@@ -94,7 +94,7 @@ func (c *genericGetter[T, PT]) Create(ctx context.Context, obj PT) error {
 	}
 
 	name := obj.GetName()
-	klog.Infof("creating %s entry for key:%s/%s", c.typeName, obj.GetNamespace(), name)
+	klog.V(4).Infof("creating %s entry for key:%s/%s", c.typeName, obj.GetNamespace(), name)
 	jsonb, err := json.Marshal(obj)
 	if err != nil {
 		klog.ErrorS(err, fmt.Sprintf("failed to marshal %s", c.typeName))

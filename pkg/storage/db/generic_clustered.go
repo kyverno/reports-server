@@ -36,7 +36,7 @@ func newGenericClusterGetter[T any, PT interface {
 }
 
 func (c *genericClusterGetter[T, PT]) List(ctx context.Context) ([]PT, error) {
-	klog.Infof("listing all %s values", c.typeName)
+	klog.V(4).Infof("listing all %s values", c.typeName)
 	res := make([]PT, 0)
 	var jsonb string
 
@@ -59,7 +59,7 @@ func (c *genericClusterGetter[T, PT]) List(ctx context.Context) ([]PT, error) {
 		res = append(res, report)
 	}
 
-	klog.Infof("list found length: %d", len(res))
+	klog.V(4).Infof("list found length: %d", len(res))
 	return res, nil
 }
 
@@ -88,7 +88,7 @@ func (c *genericClusterGetter[T, PT]) Create(ctx context.Context, obj PT) error 
 	}
 
 	name := obj.GetName()
-	klog.Infof("creating %s entry for key:%s", c.typeName, name)
+	klog.V(4).Infof("creating %s entry for key:%s", c.typeName, name)
 	jsonb, err := json.Marshal(obj)
 	if err != nil {
 		klog.ErrorS(err, fmt.Sprintf("failed to marshal %s", c.typeName))

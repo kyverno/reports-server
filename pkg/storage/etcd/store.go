@@ -24,6 +24,15 @@ type objectStoreNamespaced[T metav1.Object] struct {
 	gr         schema.GroupResource
 }
 
+// etcdRevision returns the etcd store revision from a Get response, guarding
+// against a nil response or header so it is safe to log unconditionally.
+func etcdRevision(resp *clientv3.GetResponse) int64 {
+	if resp == nil || resp.Header == nil {
+		return 0
+	}
+	return resp.Header.Revision
+}
+
 func NewObjectStoreNamespaced[T metav1.Object](client clientv3.KV, gvk schema.GroupVersionKind, gr schema.GroupResource) api.GenericIface[T] {
 	return &objectStoreNamespaced[T]{
 		ResourceVersion: versioning.NewVersioning(),
@@ -56,7 +65,7 @@ func (o *objectStoreNamespaced[T]) Get(ctx context.Context, name, namespace stri
 		klog.ErrorS(err, "failed to get report kind=%s", o.gvk.String())
 		return obj, err
 	}
-	klog.InfoS("get resp resp=%+v", resp)
+	klog.V(4).InfoS("etcd get response", "kind", o.gvk.String(), "key", key, "kvs", len(resp.Kvs), "revision", etcdRevision(resp))
 	if len(resp.Kvs) != 1 {
 		return obj, errors.NewNotFound(o.gr, key)
 	}
@@ -78,7 +87,7 @@ func (o *objectStoreNamespaced[T]) List(ctx context.Context, namespace string) (
 		klog.ErrorS(err, "failed to list report kind=%s", o.gvk.String())
 		return nil, err
 	}
-	klog.InfoS("list resp resp=%+v", resp)
+	klog.V(4).InfoS("etcd list response", "kind", o.gvk.String(), "prefix", key, "kvs", len(resp.Kvs), "revision", etcdRevision(resp))
 	if len(resp.Kvs) == 0 {
 		return nil, nil
 	}
@@ -104,7 +113,7 @@ func (o *objectStoreNamespaced[T]) Create(ctx context.Context, obj T) error {
 		klog.ErrorS(err, "failed to create report kind=%s", o.gvk.String())
 		return err
 	}
-	klog.InfoS("create resp resp=%+v", resp)
+	klog.V(4).InfoS("etcd create precheck response", "kind", o.gvk.String(), "key", key, "kvs", len(resp.Kvs), "revision", etcdRevision(resp))
 	if len(resp.Kvs) > 0 {
 		return errors.NewAlreadyExists(o.gr, key)
 	}

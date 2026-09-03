@@ -346,6 +346,8 @@ spec:
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics
             - --clustername=
+            - --v=0
+            - --logging-format=text
           env:
             - name: GOMEMLIMIT
               valueFrom:

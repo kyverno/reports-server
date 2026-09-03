@@ -46,6 +46,9 @@ helm install reports-server --namespace reports-server --create-namespace report
 | commonLabels | object | `{}` | Labels to add to resources managed by the chart |
 | podSecurityContext | object | `{"fsGroup":2000}` | Pod security context |
 | podEnv | object | `{}` | Provide additional environment variables to the pods. Map with the same format as kubernetes deployment spec's env. |
+| logging.format | string | `"text"` | Logging format. Permitted formats: `text`, `json`. |
+| logging.verbosity | int | `0` | Logging verbosity, passed to the container as `--v`. `0` keeps startup, lifecycle and error messages only. Raise to `4` to restore the per-request storage trace logs (high volume - one or more lines per report read/write). |
+| extraArgs | object | `{}` | Extra arguments passed to the container on the command line, as a map of flag name to value. Rendered as `--<key>=<value>`; entries with an empty value are skipped. |
 | securityContext | object | See [values.yaml](values.yaml) | Container security context |
 | livenessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/livez","port":"https","scheme":"HTTPS"},"initialDelaySeconds":20,"periodSeconds":10}` | Liveness probe |
 | readinessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/readyz","port":"https","scheme":"HTTPS"},"initialDelaySeconds":30,"periodSeconds":10}` | Readiness probe |

@@ -65,6 +65,15 @@ spec:
             - --authorization-always-allow-paths=/metrics
             {{- end }}
             - --clustername={{ .Values.clusterName }}
+            - --v={{ .Values.logging.verbosity | default 0 }}
+            {{- with .Values.logging.format }}
+            - --logging-format={{ . }}
+            {{- end }}
+            {{- range $key, $value := .Values.extraArgs }}
+            {{- if $value }}
+            - --{{ $key }}={{ $value }}
+            {{- end }}
+            {{- end }}
           env:
             - name: GOMEMLIMIT
               valueFrom:

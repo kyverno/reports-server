@@ -69,6 +69,19 @@ podSecurityContext:
 # -- Provide additional environment variables to the pods. Map with the same format as kubernetes deployment spec's env.
 podEnv: {}
 
+logging:
+  # -- Logging format. Permitted formats: `text`, `json`.
+  format: text
+  # -- Logging verbosity, passed to the container as `--v`. `0` keeps startup,
+  # lifecycle and error messages only. Raise to `4` to restore the per-request
+  # storage trace logs (high volume - one or more lines per report read/write).
+  verbosity: 0
+
+# -- Extra arguments passed to the container on the command line, as a map of
+# flag name to value. Rendered as `--<key>=<value>`; entries with an empty value
+# are skipped.
+extraArgs: {}
+
 # -- Container security context
 # @default -- See [values.yaml](values.yaml)
 securityContext:
