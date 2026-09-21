@@ -51,7 +51,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | extraArgs | object | `{}` | Extra arguments passed to the container on the command line, as a map of flag name to value. Rendered as `--<key>=<value>`; entries with an empty value are skipped. |
 | securityContext | object | See [values.yaml](values.yaml) | Container security context |
 | livenessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/livez","port":"https","scheme":"HTTPS"},"initialDelaySeconds":20,"periodSeconds":10}` | Liveness probe |
-| readinessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/readyz","port":"https","scheme":"HTTPS"},"initialDelaySeconds":30,"periodSeconds":10}` | Readiness probe |
+| readinessProbe | object | `{"failureThreshold":10,"httpGet":{"path":"/readyz","port":"https","scheme":"HTTPS"},"initialDelaySeconds":1,"periodSeconds":5}` | Readiness probe |
 | metrics.enabled | bool | `true` | Enable prometheus metrics |
 | metrics.serviceMonitor.enabled | bool | `false` | Enable service monitor for scraping prometheus metrics |
 | metrics.serviceMonitor.additionalLabels | object | `{}` | Service monitor additional labels |
