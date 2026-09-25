@@ -3,6 +3,7 @@ package opts
 import (
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -37,6 +38,9 @@ type Options struct {
 	Etcd          bool
 	Kubeconfig    string
 	ClusterName   string
+
+	// no keepalive
+	NoHTTPKeepAlive bool
 
 	// dbopts
 	EtcdConfig    etcd.EtcdConfig
@@ -99,6 +103,7 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.BoolVar(&o.StoreOpenreports, "storeopenreports", true, "Whether or not to store and manage Open Reports.")
 	msfs.BoolVar(&o.StoreEphemeralReports, "storeephemeralreports", true, "Whether or not to store and manage Ephemeral Reports.")
 	msfs.BoolVar(&o.SkipMigration, "skipmigration", false, "Skip database migration on startup.")
+	msfs.BoolVar(&o.NoHTTPKeepAlive, "no-keepalive", false, "Prevents the api-server from reusing a HTTP connection to a single reports server instance")
 	msfs.DurationVar(&o.APIServiceReconcileInterval, "apiservicereconcileinterval", 10*time.Second, "Interval between APIService reconciliation runs.")
 
 	o.SecureServing.AddFlags(fs.FlagSet("apiserver secure serving"))
@@ -129,6 +134,19 @@ func (o Options) ApiserverConfig() (*genericapiserver.Config, error) {
 	}
 
 	serverConfig := genericapiserver.NewConfig(api.Codecs)
+
+	// disable keep alive
+	if o.NoHTTPKeepAlive {
+		defaultChain := genericapiserver.DefaultBuildHandlerChain
+		serverConfig.BuildHandlerChainFunc = func(apiHandler http.Handler, c *genericapiserver.Config) http.Handler {
+			h := defaultChain(apiHandler, c)
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Connection", "close")
+				h.ServeHTTP(w, r)
+			})
+		}
+	}
+
 	if err := o.SecureServing.ApplyTo(&serverConfig.SecureServing, &serverConfig.LoopbackClientConfig); err != nil {
 		return nil, err
 	}

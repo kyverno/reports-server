@@ -59,6 +59,9 @@ spec:
             {{- if .Values.config.skipMigration }}
             - --skipmigration=true
             {{- end }}
+            {{- if .Values.config.noKeepAlive }}
+            - --no-keepalive=true
+            {{- end }}
             - --cert-dir=/tmp
             - --secure-port=4443
             {{- if .Values.metrics.enabled }}

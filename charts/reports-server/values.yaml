@@ -218,6 +218,9 @@ config:
   # -- Skip database migration on startup
   skipMigration: false
 
+  # -- Disable HTTP keep-alive on the reports-server API server
+  noKeepAlive: false
+
   etcd:
     enabled: false
     endpoints: ~

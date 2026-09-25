@@ -78,6 +78,7 @@ helm install reports-server --namespace reports-server --create-namespace report
 | service.type | string | `"ClusterIP"` | Service type |
 | service.port | int | `443` | Service port |
 | config.skipMigration | bool | `false` | Skip database migration on startup |
+| config.noKeepAlive | bool | `false` | Disable HTTP keep-alive on the reports-server API server |
 | config.etcd.enabled | bool | `false` |  |
 | config.etcd.endpoints | string | `nil` |  |
 | config.etcd.insecure | bool | `true` |  |
