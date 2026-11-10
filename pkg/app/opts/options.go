@@ -51,6 +51,12 @@ type Options struct {
 	DBSSLKey      string
 	DBSSLCert     string
 
+	// db connection pool
+	DBMaxOpenConns    int
+	DBMaxIdleConns    int
+	DBConnMaxLifetime time.Duration
+	DBConnMaxIdleTime time.Duration
+
 	// apiservice install config
 	ServiceName           string
 	ServiceNamespace      string
@@ -92,6 +98,10 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.StringVar(&o.DBSSLRootCert, "dbsslrootcert", "", "Path to database root cert.")
 	msfs.StringVar(&o.DBSSLKey, "dbsslkey", "", "Path to database ssl key.")
 	msfs.StringVar(&o.DBSSLCert, "dbsslcert", "", "Path to database ssl cert.")
+	msfs.IntVar(&o.DBMaxOpenConns, "dbmaxopenconns", 0, "Maximum number of open connections to the postgres database. 0 means unlimited.")
+	msfs.IntVar(&o.DBMaxIdleConns, "dbmaxidleconns", 10, "Maximum number of idle connections kept in the postgres connection pool. 0 or less keeps none.")
+	msfs.DurationVar(&o.DBConnMaxLifetime, "dbconnmaxlifetime", 30*time.Minute, "Maximum time a postgres connection may be reused. 0 means forever.")
+	msfs.DurationVar(&o.DBConnMaxIdleTime, "dbconnmaxidletime", 5*time.Minute, "Maximum time a postgres connection may stay idle in the pool. 0 means forever.")
 	msfs.StringVar(&o.ServiceName, "servicename", "", "Name of the service targeted by the APIService.")
 	msfs.StringVar(&o.ServiceNamespace, "servicens", "", "Namespace of the service targeted by the APIService.")
 	msfs.StringVar(&o.ClusterRoleName, "clusterrolename", "reports-server", "Name of the chart's ClusterRole used as OwnerReference anchor for managed APIServices. Defaults to the chart's release fullname; set to empty string to create APIServices without an owner (legacy behavior).")

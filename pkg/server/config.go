@@ -68,6 +68,12 @@ func NewServerConfig(ctx context.Context, o opts.Options) (*Config, error) {
 		SSLRootCert: o.DBSSLRootCert,
 		SSLKey:      o.DBSSLKey,
 		SSLCert:     o.DBSSLCert,
+		Pool: db.PoolConfig{
+			MaxOpenConns:    o.DBMaxOpenConns,
+			MaxIdleConns:    o.DBMaxIdleConns,
+			ConnMaxLifetime: o.DBConnMaxLifetime,
+			ConnMaxIdleTime: o.DBConnMaxIdleTime,
+		},
 	}
 
 	client, err := kubernetes.NewForConfig(restConfig)
