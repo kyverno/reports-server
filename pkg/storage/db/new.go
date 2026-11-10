@@ -26,6 +26,7 @@ func New(config *PostgresConfig, clusterUID string, clusterName string) (api.Sto
 		klog.Error("failed to open db", err.Error())
 		return nil, err
 	}
+	config.Pool.apply(db)
 	ctx := context.Background()
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
@@ -128,6 +129,26 @@ type PostgresConfig struct {
 	SSLRootCert string
 	SSLKey      string
 	SSLCert     string
+	Pool        PoolConfig
+}
+
+// PoolConfig holds the database/sql connection pool settings. Without them
+// database/sql keeps only 2 idle connections, so any burst of more than 2
+// concurrent queries opens new connections and closes them right after use.
+type PoolConfig struct {
+	MaxOpenConns    int
+	MaxIdleConns    int
+	ConnMaxLifetime time.Duration
+	ConnMaxIdleTime time.Duration
+}
+
+func (p PoolConfig) apply(db *sql.DB) {
+	db.SetMaxOpenConns(p.MaxOpenConns)
+	db.SetMaxIdleConns(p.MaxIdleConns)
+	db.SetConnMaxLifetime(p.ConnMaxLifetime)
+	db.SetConnMaxIdleTime(p.ConnMaxIdleTime)
+	klog.Infof("postgres pool: maxOpenConns=%d maxIdleConns=%d connMaxLifetime=%s connMaxIdleTime=%s",
+		p.MaxOpenConns, p.MaxIdleConns, p.ConnMaxLifetime, p.ConnMaxIdleTime)
 }
 
 func (p PostgresConfig) String() string {
@@ -137,32 +158,32 @@ func (p PostgresConfig) String() string {
 }
 
 func createOrUpdateClusterRecord(ctx context.Context, db *sql.DB, clusterUID string, clusterName string) error {
-	_, err := db.QueryContext(ctx, "INSERT INTO clusters (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2", clusterUID, clusterName)
+	_, err := db.ExecContext(ctx, "INSERT INTO clusters (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2", clusterUID, clusterName)
 	return err
 }
 
 func populateClusterUIDLegacyRecords(ctx context.Context, db *sql.DB, clusterUID string) error {
-	_, err := db.QueryContext(ctx, "UPDATE clusterephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err := db.ExecContext(ctx, "UPDATE clusterephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.QueryContext(ctx, "UPDATE clusterpolicyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.ExecContext(ctx, "UPDATE clusterpolicyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.QueryContext(ctx, "UPDATE clusterreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.ExecContext(ctx, "UPDATE clusterreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.QueryContext(ctx, "UPDATE ephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.ExecContext(ctx, "UPDATE ephemeralreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.QueryContext(ctx, "UPDATE policyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.ExecContext(ctx, "UPDATE policyreports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
-	_, err = db.QueryContext(ctx, "UPDATE reports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
+	_, err = db.ExecContext(ctx, "UPDATE reports SET cluster_id = $1 WHERE cluster_id = '00000000-0000-0000-0000-000000000000'", clusterUID)
 	if err != nil {
 		return err
 	}
