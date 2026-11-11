@@ -8,6 +8,7 @@ import (
 
 	reportsv1 "github.com/kyverno/kyverno/api/reports/v1"
 	"github.com/kyverno/reports-server/pkg/storage/api"
+	"github.com/kyverno/reports-server/pkg/utils"
 	_ "github.com/lib/pq"
 	"k8s.io/klog/v2"
 	openreportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
@@ -67,12 +68,12 @@ func New(config *PostgresConfig, clusterUID string, clusterName string) (api.Sto
 	klog.Info("successfully setup storage")
 	return &postgresstore{
 		db:                   db,
-		polrstore:            newGenericGetter[v1alpha2.PolicyReport, *v1alpha2.PolicyReport]("policyreport", "policyreports", clusterUID, db),
-		cpolrstore:           newGenericClusterGetter[v1alpha2.ClusterPolicyReport, *v1alpha2.ClusterPolicyReport]("clusterpolicyreport", "clusterpolicyreports", clusterUID, db),
-		ephrstore:            newGenericGetter[reportsv1.EphemeralReport, *reportsv1.EphemeralReport]("ephemeralreport", "ephemeralreports", clusterUID, db),
-		cephrstore:           newGenericClusterGetter[reportsv1.ClusterEphemeralReport, *reportsv1.ClusterEphemeralReport]("clusterephemeralreport", "clusterephemeralreports", clusterUID, db),
-		orreportstore:        newGenericGetter[openreportsv1alpha1.Report, *openreportsv1alpha1.Report]("report", "reports", clusterUID, db),
-		orclusterreportstore: newGenericClusterGetter[openreportsv1alpha1.ClusterReport, *openreportsv1alpha1.ClusterReport]("clusterreport", "clusterreports", clusterUID, db),
+		polrstore:            newGenericGetter[v1alpha2.PolicyReport, *v1alpha2.PolicyReport]("policyreport", utils.PolicyReportsGR, "policyreports", clusterUID, db),
+		cpolrstore:           newGenericClusterGetter[v1alpha2.ClusterPolicyReport, *v1alpha2.ClusterPolicyReport]("clusterpolicyreport", utils.ClusterPolicyReportsGR, "clusterpolicyreports", clusterUID, db),
+		ephrstore:            newGenericGetter[reportsv1.EphemeralReport, *reportsv1.EphemeralReport]("ephemeralreport", utils.EphemeralReportsGR, "ephemeralreports", clusterUID, db),
+		cephrstore:           newGenericClusterGetter[reportsv1.ClusterEphemeralReport, *reportsv1.ClusterEphemeralReport]("clusterephemeralreport", utils.ClusterEphemeralReportsGR, "clusterephemeralreports", clusterUID, db),
+		orreportstore:        newGenericGetter[openreportsv1alpha1.Report, *openreportsv1alpha1.Report]("report", utils.OpenreportsReportGR, "reports", clusterUID, db),
+		orclusterreportstore: newGenericClusterGetter[openreportsv1alpha1.ClusterReport, *openreportsv1alpha1.ClusterReport]("clusterreport", utils.OpenreportsClusterReportGR, "clusterreports", clusterUID, db),
 	}, nil
 }
 
