@@ -257,11 +257,14 @@ func (c *clusterReportStore) DeleteCollection(ctx context.Context, deleteValidat
 
 func (c *clusterReportStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
 	klog.Infof("watching cluster reports rv=%s", options.ResourceVersion)
-	switch options.ResourceVersion {
-	case "", "0":
-		return c.broadcaster.Watch()
-	default:
-		break
+	watchList := sendInitialEvents(options)
+	if !watchList {
+		switch options.ResourceVersion {
+		case "", "0":
+			return c.broadcaster.Watch()
+		default:
+			break
+		}
 	}
 	items, err := c.List(ctx, options)
 	if err != nil {
@@ -278,6 +281,9 @@ func (c *clusterReportStore) Watch(ctx context.Context, options *metainternalver
 			Type:   watch.Added,
 			Object: report,
 		}
+	}
+	if watchList {
+		events = append(events, initialEventsEndBookmark(events, list.ResourceVersion, &openreportsv1alpha1.ClusterReport{}))
 	}
 	return c.broadcaster.WatchWithPrefix(events)
 }

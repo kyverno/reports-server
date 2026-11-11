@@ -277,11 +277,14 @@ func (s *reportStore) DeleteCollection(ctx context.Context, deleteValidation res
 
 func (s *reportStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
 	klog.Infof("watching reports rv=%s", options.ResourceVersion)
-	switch options.ResourceVersion {
-	case "", "0":
-		return s.broadcaster.Watch()
-	default:
-		break
+	watchList := sendInitialEvents(options)
+	if !watchList {
+		switch options.ResourceVersion {
+		case "", "0":
+			return s.broadcaster.Watch()
+		default:
+			break
+		}
 	}
 	items, err := s.List(ctx, options)
 	if err != nil {
@@ -298,6 +301,9 @@ func (s *reportStore) Watch(ctx context.Context, options *metainternalversion.Li
 			Type:   watch.Added,
 			Object: report,
 		}
+	}
+	if watchList {
+		events = append(events, initialEventsEndBookmark(events, list.ResourceVersion, &openreportsv1alpha1.Report{}))
 	}
 	return s.broadcaster.WatchWithPrefix(events)
 }
