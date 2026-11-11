@@ -3,7 +3,14 @@ package server
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiregistrationv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
+	"k8s.io/utils/ptr"
 )
+
+// apiServicePort is the port the apiserver defaults spec.service.port to when
+// it is left unset. BuildApiServices sets it explicitly so the desired spec is
+// equal to the in-cluster spec and the reconciler does not issue a no-op
+// update on every tick.
+const apiServicePort int32 = 443
 
 type APIServices struct {
 	wgpolicyApiService    apiregistrationv1.APIService
@@ -35,6 +42,7 @@ func BuildApiServices(serviceName string, serviceNamespace string, ownerRef *met
 				Service: &apiregistrationv1.ServiceReference{
 					Name:      serviceName,
 					Namespace: serviceNamespace,
+					Port:      ptr.To(apiServicePort),
 				},
 				Version:         "v1alpha2",
 				VersionPriority: 100,
@@ -55,6 +63,7 @@ func BuildApiServices(serviceName string, serviceNamespace string, ownerRef *met
 				Service: &apiregistrationv1.ServiceReference{
 					Name:      serviceName,
 					Namespace: serviceNamespace,
+					Port:      ptr.To(apiServicePort),
 				},
 				Version:         "v1alpha1",
 				VersionPriority: 100,
@@ -75,6 +84,7 @@ func BuildApiServices(serviceName string, serviceNamespace string, ownerRef *met
 				Service: &apiregistrationv1.ServiceReference{
 					Name:      serviceName,
 					Namespace: serviceNamespace,
+					Port:      ptr.To(apiServicePort),
 				},
 				Version:         "v1",
 				VersionPriority: 100,

@@ -19,6 +19,7 @@ require (
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/kube-aggregator v0.29.2
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340
+	k8s.io/utils v0.0.0-20240310230437-4693a0247e57
 	openreports.io v0.0.0-00010101000000-000000000000
 	sigs.k8s.io/wg-policy-prototypes v0.0.0-20231226153523-db3ef51d230f
 )
@@ -291,7 +292,6 @@ require (
 	k8s.io/kms v0.29.2 // indirect
 	k8s.io/kubectl v0.29.2 // indirect
 	k8s.io/pod-security-admission v0.29.2 // indirect
-	k8s.io/utils v0.0.0-20240310230437-4693a0247e57 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.29.0 // indirect
 	sigs.k8s.io/controller-runtime v0.17.1 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
