@@ -151,6 +151,9 @@ func (c *cpolrStore) Update(ctx context.Context, name string, objInfo rest.Updat
 
 	oldObj, err := c.getCpolr(ctx, name)
 	if err != nil && !forceAllowCreate {
+		if errors.IsNotFound(err) {
+			return nil, false, errors.NewNotFound(utils.ClusterPolicyReportsGR, name)
+		}
 		return nil, false, err
 	}
 
