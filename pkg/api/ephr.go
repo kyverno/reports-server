@@ -162,6 +162,9 @@ func (p *ephrStore) Update(ctx context.Context, name string, objInfo rest.Update
 
 	oldObj, err := p.getEphr(ctx, name, namespace)
 	if err != nil && !forceAllowCreate {
+		if errors.IsNotFound(err) {
+			return nil, false, errors.NewNotFound(utils.EphemeralReportsGR, name)
+		}
 		return nil, false, err
 	}
 

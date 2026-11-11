@@ -162,6 +162,9 @@ func (p *polrStore) Update(ctx context.Context, name string, objInfo rest.Update
 
 	oldObj, err := p.getPolr(ctx, name, namespace)
 	if err != nil && !forceAllowCreate {
+		if errors.IsNotFound(err) {
+			return nil, false, errors.NewNotFound(utils.PolicyReportsGR, name)
+		}
 		return nil, false, err
 	}
 
