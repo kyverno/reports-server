@@ -62,6 +62,10 @@ type Options struct {
 	// reconciler config
 	APIServiceReconcileInterval time.Duration
 
+	// memory limit config
+	AutoMemoryLimitEnabled bool
+	AutoMemoryLimitRatio   float64
+
 	// Only to be used to for testing
 	DisableAuthForTesting bool
 }
@@ -77,6 +81,9 @@ func (o *Options) Validate() []error {
 
 func (o *Options) validate() []error {
 	errors := []error{}
+	if o.AutoMemoryLimitEnabled && (o.AutoMemoryLimitRatio <= 0 || o.AutoMemoryLimitRatio > 1) {
+		errors = append(errors, fmt.Errorf("invalid auto-memory-ratio %v: must be greater than 0 and less than or equal to 1", o.AutoMemoryLimitRatio))
+	}
 	return errors
 }
 
@@ -100,6 +107,8 @@ func (o *Options) Flags() (fs flag.NamedFlagSets) {
 	msfs.BoolVar(&o.StoreEphemeralReports, "storeephemeralreports", true, "Whether or not to store and manage Ephemeral Reports.")
 	msfs.BoolVar(&o.SkipMigration, "skipmigration", false, "Skip database migration on startup.")
 	msfs.DurationVar(&o.APIServiceReconcileInterval, "apiservicereconcileinterval", 10*time.Second, "Interval between APIService reconciliation runs.")
+	msfs.BoolVar(&o.AutoMemoryLimitEnabled, "auto-memory-enabled", true, "Set GOMEMLIMIT automatically from the container (cgroup) or system memory limit. Ignored when the GOMEMLIMIT environment variable is set.")
+	msfs.Float64Var(&o.AutoMemoryLimitRatio, "auto-memory-ratio", 0.9, "Fraction of the detected memory limit used for GOMEMLIMIT. Must be greater than 0 and less than or equal to 1.")
 
 	o.SecureServing.AddFlags(fs.FlagSet("apiserver secure serving"))
 	o.Authentication.AddFlags(fs.FlagSet("apiserver authentication"))

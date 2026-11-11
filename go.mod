@@ -3,6 +3,7 @@ module github.com/kyverno/reports-server
 go 1.25.0
 
 require (
+	github.com/KimMachineGun/automemlimit v1.0.1
 	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/kyverno/kyverno v1.12.0-rc.4
@@ -192,6 +193,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
+	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect

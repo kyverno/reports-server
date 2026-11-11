@@ -69,6 +69,12 @@ podSecurityContext:
 # -- Provide additional environment variables to the pods. Map with the same format as kubernetes deployment spec's env.
 podEnv: {}
 
+autoMemoryLimit:
+  # -- Set GOMEMLIMIT automatically from the container memory limit (or the system memory when the container has no limit). Set an explicit `GOMEMLIMIT` in `podEnv` to override it.
+  enabled: true
+  # -- Fraction of the detected memory limit used for GOMEMLIMIT. Must be greater than 0 and less than or equal to 1.
+  ratio: 0.9
+
 logging:
   # -- Logging format. Permitted formats: `text`, `json`.
   format: text
