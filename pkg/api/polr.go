@@ -278,11 +278,14 @@ func (p *polrStore) DeleteCollection(ctx context.Context, deleteValidation rest.
 
 func (p *polrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
 	klog.Infof("watching policy reports rv=%s", options.ResourceVersion)
-	switch options.ResourceVersion {
-	case "", "0":
-		return p.broadcaster.Watch()
-	default:
-		break
+	watchList := sendInitialEvents(options)
+	if !watchList {
+		switch options.ResourceVersion {
+		case "", "0":
+			return p.broadcaster.Watch()
+		default:
+			break
+		}
 	}
 	items, err := p.List(ctx, options)
 	if err != nil {
@@ -299,6 +302,9 @@ func (p *polrStore) Watch(ctx context.Context, options *metainternalversion.List
 			Type:   watch.Added,
 			Object: report,
 		}
+	}
+	if watchList {
+		events = append(events, initialEventsEndBookmark(events, list.ResourceVersion, &v1alpha2.PolicyReport{}))
 	}
 	return p.broadcaster.WatchWithPrefix(events)
 }

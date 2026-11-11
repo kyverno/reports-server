@@ -258,11 +258,14 @@ func (c *cephrStore) DeleteCollection(ctx context.Context, deleteValidation rest
 
 func (c *cephrStore) Watch(ctx context.Context, options *metainternalversion.ListOptions) (watch.Interface, error) {
 	klog.Infof("watching cluster ephemeral reports rv=%s", options.ResourceVersion)
-	switch options.ResourceVersion {
-	case "", "0":
-		return c.broadcaster.Watch()
-	default:
-		break
+	watchList := sendInitialEvents(options)
+	if !watchList {
+		switch options.ResourceVersion {
+		case "", "0":
+			return c.broadcaster.Watch()
+		default:
+			break
+		}
 	}
 	items, err := c.List(ctx, options)
 	if err != nil {
@@ -279,6 +282,9 @@ func (c *cephrStore) Watch(ctx context.Context, options *metainternalversion.Lis
 			Type:   watch.Added,
 			Object: report,
 		}
+	}
+	if watchList {
+		events = append(events, initialEventsEndBookmark(events, list.ResourceVersion, &reportsv1.ClusterEphemeralReport{}))
 	}
 	return c.broadcaster.WatchWithPrefix(events)
 }
