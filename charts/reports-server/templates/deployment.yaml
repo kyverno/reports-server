@@ -65,6 +65,8 @@ spec:
             - --authorization-always-allow-paths=/metrics
             {{- end }}
             - --clustername={{ .Values.clusterName }}
+            - --auto-memory-enabled={{ .Values.autoMemoryLimit.enabled }}
+            - --auto-memory-ratio={{ .Values.autoMemoryLimit.ratio }}
             - --v={{ .Values.logging.verbosity | default 0 }}
             {{- with .Values.logging.format }}
             - --logging-format={{ . }}
@@ -75,11 +77,6 @@ spec:
             {{- end }}
             {{- end }}
           env:
-            - name: GOMEMLIMIT
-              valueFrom:
-                resourceFieldRef:
-                  resource: limits.memory
-                  divisor: '1'
             - name: DB_HOST
               {{- include "reports-server.dbHost" . | nindent 14 }}
             - name: DB_PORT

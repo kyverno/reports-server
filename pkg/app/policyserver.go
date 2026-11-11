@@ -68,6 +68,9 @@ func runCommand(o *opts.Options, stopCh <-chan struct{}) error {
 	if len(errors) > 0 {
 		return errors[0]
 	}
+	if err := setupMemLimit(o); err != nil {
+		return err
+	}
 
 	podIp := os.Getenv("POD_IP")
 	if podIp == "" {

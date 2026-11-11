@@ -409,14 +409,11 @@ spec:
             - --secure-port=4443
             - --authorization-always-allow-paths=/metrics
             - --clustername=
+            - --auto-memory-enabled=true
+            - --auto-memory-ratio=0.9
             - --v=0
             - --logging-format=text
           env:
-            - name: GOMEMLIMIT
-              valueFrom:
-                resourceFieldRef:
-                  resource: limits.memory
-                  divisor: '1'
             - name: DB_HOST
               value: "reports-server-postgresql.reports-server"
             - name: DB_PORT

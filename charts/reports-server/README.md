@@ -46,6 +46,8 @@ helm install reports-server --namespace reports-server --create-namespace report
 | commonLabels | object | `{}` | Labels to add to resources managed by the chart |
 | podSecurityContext | object | `{"fsGroup":2000}` | Pod security context |
 | podEnv | object | `{}` | Provide additional environment variables to the pods. Map with the same format as kubernetes deployment spec's env. |
+| autoMemoryLimit.enabled | bool | `true` | Set GOMEMLIMIT automatically from the container memory limit (or the system memory when the container has no limit). Set an explicit `GOMEMLIMIT` in `podEnv` to override it. |
+| autoMemoryLimit.ratio | float | `0.9` | Fraction of the detected memory limit used for GOMEMLIMIT. Must be greater than 0 and less than or equal to 1. |
 | logging.format | string | `"text"` | Logging format. Permitted formats: `text`, `json`. |
 | logging.verbosity | int | `0` | Logging verbosity, passed to the container as `--v`. `0` keeps startup, lifecycle and error messages only. Raise to `4` to restore the per-request storage trace logs (high volume - one or more lines per report read/write). |
 | extraArgs | object | `{}` | Extra arguments passed to the container on the command line, as a map of flag name to value. Rendered as `--<key>=<value>`; entries with an empty value are skipped. |
