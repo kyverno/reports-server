@@ -150,6 +150,9 @@ func (c *clusterReportStore) Update(ctx context.Context, name string, objInfo re
 
 	oldObj, err := c.getClusterReport(ctx, name)
 	if err != nil && !forceAllowCreate {
+		if errors.IsNotFound(err) {
+			return nil, false, errors.NewNotFound(utils.OpenreportsClusterReportGR, name)
+		}
 		return nil, false, err
 	}
 

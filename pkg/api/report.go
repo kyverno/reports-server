@@ -161,6 +161,9 @@ func (s *reportStore) Update(ctx context.Context, name string, objInfo rest.Upda
 
 	oldObj, err := s.getRep(ctx, name, namespace)
 	if err != nil && !forceAllowCreate {
+		if errors.IsNotFound(err) {
+			return nil, false, errors.NewNotFound(utils.OpenreportsReportGR, name)
+		}
 		return nil, false, err
 	}
 

@@ -7,7 +7,9 @@ import (
 	"fmt"
 
 	"github.com/kyverno/reports-server/pkg/storage/versioning"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
 )
 
@@ -17,6 +19,7 @@ type genericClusterGetter[T any, PT interface {
 }] struct {
 	*versioning.ResourceVersion
 	typeName   string
+	gr         schema.GroupResource
 	tableName  string
 	clusterUID string
 	db         *sql.DB
@@ -25,10 +28,11 @@ type genericClusterGetter[T any, PT interface {
 func newGenericClusterGetter[T any, PT interface {
 	*T
 	metav1.Object
-}](typeName, tableName, clusterUID string, db *sql.DB) *genericClusterGetter[T, PT] {
+}](typeName string, gr schema.GroupResource, tableName, clusterUID string, db *sql.DB) *genericClusterGetter[T, PT] {
 	return &genericClusterGetter[T, PT]{
 		ResourceVersion: versioning.NewVersioning(),
 		typeName:        typeName,
+		gr:              gr,
 		tableName:       tableName,
 		clusterUID:      clusterUID,
 		db:              db,
@@ -70,7 +74,7 @@ func (c *genericClusterGetter[T, PT]) Get(ctx context.Context, name string) (PT,
 	if err := row.Scan(&jsonb); err != nil {
 		klog.ErrorS(err, fmt.Sprintf("%s not found name=%s", c.typeName, name))
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("%s get %s: no such report", c.typeName, name)
+			return nil, errors.NewNotFound(c.gr, name)
 		}
 		return nil, fmt.Errorf("%s get %s: %v", c.typeName, name, err)
 	}
