@@ -49,3 +49,60 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: echo "Required jobs success!"
+
+  dependabot-automerge:
+    # Dependabot PRs opened in this repository only, not in forks. Runs after
+    # the build and unit tests passed.
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'kyverno/reports-server'
+    needs:
+    - required
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: read
+      statuses: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+    - name: Fetch Dependabot metadata
+      id: metadata
+      uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+
+    - name: Wait for the other workflows
+      if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+      env:
+        WORKFLOW_NAME: ${{ github.workflow }}
+      run: |
+        set -euo pipefail
+        # main has no required checks, so wait here until the checks of the
+        # other workflows (e2e, lint, codegen, ...) have finished, and stop if
+        # one of them failed. Codecov statuses are informational and ignored.
+        while true; do
+          checks=$(gh pr checks "$PR_NUMBER" --json name,bucket,workflow \
+            --jq "[.[] | select(.workflow != \"$WORKFLOW_NAME\" and (.name | startswith(\"codecov/\") | not))]" || true)
+          if [ -z "$checks" ] || [ "$checks" = "[]" ]; then
+            echo "No checks registered yet"
+          else
+            failed=$(jq -r '[.[] | select(.bucket == "fail" or .bucket == "cancel") | .name] | join(", ")' <<< "$checks")
+            if [ -n "$failed" ]; then
+              echo "::error::Checks failed: $failed"
+              exit 1
+            fi
+            pending=$(jq '[.[] | select(.bucket == "pending")] | length' <<< "$checks")
+            if [ "$pending" = 0 ]; then
+              echo "All other checks passed"
+              break
+            fi
+            echo "Waiting for $pending checks"
+          fi
+          sleep 60
+        done
+
+    - name: Merge patch and minor updates
+      if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+      run: gh pr merge "$PR_NUMBER" --squash --match-head-commit "$HEAD_SHA"
